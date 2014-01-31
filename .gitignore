@@ -1,13 +1,29 @@
-*.class
-*.log
+# Project files
+.history
+logs/
+stats
+tmp
+.credentials_nexus
 
-# sbt specific
-dist/*
+# MacOS X files
+.DS_Store
+
+# Eclipse 
+.cache
 target/
-lib_managed/
-src_managed/
-project/boot/
-project/plugins/project/
+.classpath
+.project
+.settings/
 
-# Scala-IDE specific
-.scala_dependencies
+# JRebel
+
+#SBT
+build.sbt
+.metadata
+project/target/
+
+# Idea
+.idea/
+.idea_modules/
+*.iml
+atlassian-ide-plugin.xml
