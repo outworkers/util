@@ -2,9 +2,8 @@ package com.newzly.util.finagle
 
 import org.scalatest._
 import org.scalatest.concurrent.{ AsyncAssertions, PatienceConfiguration, ScalaFutures }
-import com.twitter.util.{ Await, Duration, Future, Throw }
-
 import org.scalatest.time.SpanSugar._
+import com.twitter.util.{ Await, Duration, Future, Throw }
 
 object AsyncAssertionsHelper extends ScalaFutures {
 
