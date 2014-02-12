@@ -43,7 +43,7 @@ object util extends Build {
 	val finagleVersion = "6.10.0"
 
 	lazy val newzlyUtil = Project(
-		id = "newzly-util",
+		id = "util",
 		base = file("."),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).aggregate(
@@ -53,19 +53,19 @@ object util extends Build {
 	)
 
 	lazy val newzlyUtilCore = Project(
-		id = "newzly-util-core",
-		base = file("newzly-util-core"),
+		id = "util-core",
+		base = file("util-core"),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).settings(
-		name := "newzly-util-core"
+		name := "util-core"
 	)
 
 	lazy val newzlyUtilFinagle = Project(
-		id = "newzly-util-finagle",
-		base = file("newzly-util-finagle"),
+		id = "util-finagle",
+		base = file("util-finagle"),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).settings(
-		name := "newzly-util-finagle",
+		name := "util-finagle",
 		libraryDependencies ++= Seq(
 			"com.twitter"     %%  "util-core"          % "6.3.6",
 			"org.scalatest"   %% "scalatest"           % scalatestVersion % "provided"  
@@ -73,11 +73,11 @@ object util extends Build {
 	)
 
 	lazy val newzlyUtilTest = Project(
-		id = "newzly-util-test",
-		base = file("newzly-util-test"),
+		id = "util-test",
+		base = file("util-test"),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).settings(
-		name := "newzly-util-test",
+		name := "util-test",
 		libraryDependencies ++= Seq(
 			"org.scalatest"   %% "scalatest"           % scalatestVersion % "provided"  
 		)
