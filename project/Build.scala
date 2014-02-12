@@ -70,8 +70,6 @@ object util extends Build {
 			"com.twitter"     %%  "util-core"          % "6.3.6",
 			"org.scalatest"   %% "scalatest"           % scalatestVersion % "provided"  
 		)
-	).dependsOn(
-		newzlyUtilCore
 	)
 
 	lazy val newzlyUtilTest = Project(
