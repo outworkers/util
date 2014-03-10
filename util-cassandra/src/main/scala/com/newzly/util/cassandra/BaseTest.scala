@@ -23,7 +23,7 @@ trait CassandraTest {
   implicit lazy val context: ExecutionContext = global
 
   private[this] def createKeySpace(spaceName: String) = {
-    session.execute(s"CREATE IF NOT EXISTS KEYSPACE $spaceName WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};")
+    session.execute(s"CREATE KEYSPACE $spaceName WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};")
     session.execute(s"use $spaceName;")
   }
   override def beforeAll() {
