@@ -116,7 +116,7 @@ object util extends Build {
       }
     ).settings(
       libraryDependencies ++= Seq(
-        "org.scalatest"            %% "scalatest"                         % scalatestVersion      % "provided",
+        "org.scalatest"            %% "scalatest"                         % scalatestVersion,
         "org.cassandraunit"        %  "cassandra-unit"                    % "2.0.2.0"
       )
     ).dependsOn(
