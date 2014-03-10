@@ -6,7 +6,7 @@ import javax.crypto.SecretKeyFactory
 import java.security.NoSuchAlgorithmException
 import java.security.spec.InvalidKeySpecException
 
-class PasswordHash {
+object PasswordHash {
   final val PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1"
 
   // The following constants may be changed without breaking existing hashes.
@@ -141,7 +141,7 @@ class PasswordHash {
     val hex = bi.toString(16)
     val paddingLength = (array.length * 2) - hex.length
     if (paddingLength > 0)
-      String.format("%0" + paddingLength + "d", 0) + hex
+      String.format("%0" + paddingLength + "d", 0.asInstanceOf[AnyRef]) + hex
     else
       hex
   }
