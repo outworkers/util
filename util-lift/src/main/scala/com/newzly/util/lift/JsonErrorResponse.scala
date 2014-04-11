@@ -44,6 +44,10 @@ object JsonErrorResponse {
     JsonResponse(json, code)
   }
 
+  def apply(ex: Exception): LiftResponse = {
+    apply(ex.getMessage)
+  }
+
   def apply(ex: Exception, code: Int): LiftResponse = {
     apply(ex.getMessage, code)
   }

@@ -10,6 +10,8 @@ object util extends Build {
 	val scalatestVersion = "2.0.M8"
   val finagleVersion = "6.10.0"
   val liftVersion = "2.6-M2"
+  val newzlyUtilVersion = "0.0.17"
+  val phantomVersion = "0.3.0"
 
   val publishSettings : Seq[sbt.Project.Setting[_]] = Seq(
     publishTo := Some("newzly releases" at "http://maven.newzly.com/repository/internal"),
@@ -56,7 +58,8 @@ object util extends Build {
 		newzlyUtilFinagle,
     newzlyUtilHttp,
     newzlyUtilLift,
-		newzlyUtilTest
+		newzlyUtilTest,
+    newzlyUtilTesting
 	)
 
 	lazy val newzlyUtilCore = Project(
@@ -148,6 +151,23 @@ object util extends Build {
     )
   ).dependsOn(
     newzlyUtilHttp
+  )
+
+  lazy val newzlyUtilTesting = Project(
+    id = "util-testing",
+    base = file("util-testing"),
+    settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
+  ).settings(
+    name := "util-testing",
+    libraryDependencies ++= Seq(
+      "org.scalatest"                    %% "scalatest"                % scalatestVersion      % "provided",
+      "org.scalacheck"                   %% "scalacheck"               % "1.11.3"              % "test",
+      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
+      "com.newzly"                       %% "phantom-test"             % phantomVersion,
+      "com.newzly"                       %% "util-cassandra"           % newzlyUtilVersion,
+      "com.newzly"                       %% "util-http"                % newzlyUtilVersion,
+      "com.newzly"                       %% "util-finagle"             % newzlyUtilVersion
+    )
   )
 
 	lazy val newzlyUtilTest = Project(
