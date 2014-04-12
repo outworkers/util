@@ -23,7 +23,7 @@ object util extends Build {
 
 	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.0.18",
+		version := "0.0.19",
 		scalaVersion := "2.10.3",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
