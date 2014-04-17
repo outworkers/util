@@ -11,7 +11,7 @@ object util extends Build {
   val finagleVersion = "6.10.0"
   val liftVersion = "2.6-M2"
   val newzlyUtilVersion = "0.0.17"
-  val phantomVersion = "0.3.0"
+  val phantomVersion = "0.3.2"
 
   val publishSettings : Seq[sbt.Project.Setting[_]] = Seq(
     publishTo := Some("newzly releases" at "http://maven.newzly.com/repository/internal"),
