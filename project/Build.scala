@@ -6,8 +6,8 @@ import sbtassembly.Plugin.AssemblyKeys._
 
 object util extends Build {
 
-  val nettyVersion = "3.7.0.Final"
-	val scalatestVersion = "2.0.M8"
+  val nettyVersion = "3.9.0.Final"
+	val scalatestVersion = "2.1.0"
   val finagleVersion = "6.10.0"
   val liftVersion = "2.6-M2"
   val newzlyUtilVersion = "0.0.17"
@@ -23,7 +23,7 @@ object util extends Build {
 
 	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.0.20",
+		version := "0.0.21",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
