@@ -1,4 +1,4 @@
-package com.newzly.util.finagle
+package com.newzly.util.testing
 
 import scala.concurrent.{ Await => ScalaAwait, ExecutionContext, Future => ScalaFuture }
 import scala.util.{ Failure, Success }

@@ -1,4 +1,4 @@
-package com.newzly.util.cassandra
+package com.newzly.util.testing.cassandra
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global

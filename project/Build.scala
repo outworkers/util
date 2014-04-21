@@ -1,8 +1,6 @@
 import sbt._
 import Keys._
 import com.twitter.sbt._
-import sbtassembly.Plugin._
-import sbtassembly.Plugin.AssemblyKeys._
 
 object util extends Build {
 
@@ -53,9 +51,7 @@ object util extends Build {
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).aggregate(
     newzlyUtilAws,
-    newzlyUtilCassandra,
 		newzlyUtilCore,
-		newzlyUtilFinagle,
     newzlyUtilHttp,
     newzlyUtilLift,
 		newzlyUtilTest,
@@ -80,52 +76,6 @@ object util extends Build {
       "io.netty"        % "netty"                % nettyVersion
     )
   )
-
-	lazy val newzlyUtilFinagle = Project(
-		id = "util-finagle",
-		base = file("util-finagle"),
-		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
-	).settings(
-		name := "util-finagle",
-		libraryDependencies ++= Seq(
-			"com.twitter"     %% "util-core"           % "6.3.6",
-			"org.scalatest"   %% "scalatest"           % scalatestVersion % "provided"  
-		)
-	)
-
-  lazy val newzlyUtilCassandra = Project(
-    id = "util-cassandra",
-    base = file("util-cassandra"),
-    settings = Project.defaultSettings ++
-      assemblySettings ++
-      VersionManagement.newSettings ++
-      sharedSettings ++ publishSettings
-  ).settings(
-      name := "util-cassandra",
-      jarName in assembly := "cassandra.jar",
-      outputPath in assembly := file("cassandra.jar"),
-      test in assembly := {},
-      fork in run := true,
-      assemblyOption in assembly ~= {  _.copy(includeScala = true) } ,
-      excludedJars in assembly <<= (fullClasspath in assembly) map { cp =>
-        cp filter { x =>
-          x.data.getName.indexOf("specs2_2.") >= 0 ||
-            x.data.getName.indexOf("scalap-2.") >= 0 ||
-            x.data.getName.indexOf("scala-compiler.jar") >= 0 ||
-            x.data.getName.indexOf("scala-json_") >= 0 ||
-            x.data.getName.indexOf("netty-3.2.9") >= 0 ||
-            x.data.getName.indexOf("com.twitter") >= 0
-        }
-      }
-    ).settings(
-      libraryDependencies ++= Seq(
-        "org.scalatest"            %% "scalatest"                         % scalatestVersion,
-        "org.cassandraunit"        %  "cassandra-unit"                    % "2.0.2.1"
-      )
-    ).dependsOn(
-      newzlyUtilFinagle
-    )
-
 
   lazy val newzlyUtilLift = Project(
     id = "util-lift",
@@ -160,6 +110,8 @@ object util extends Build {
   ).settings(
     name := "util-testing",
     libraryDependencies ++= Seq(
+      "com.twitter"                      %% "util-core"                % finagleVersion,
+      "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1",
       "org.scala-lang"                   %  "scala-reflect"            % "2.10.4",
       "org.scalatest"                    %% "scalatest"                % scalatestVersion      % "provided",
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3"              % "test",
@@ -181,8 +133,7 @@ object util extends Build {
 			"org.scalatest"           %% "scalatest"                          % scalatestVersion % "provided"
 		)
 	).dependsOn(
-		newzlyUtilCore,
-		newzlyUtilFinagle
+		newzlyUtilCore
 	)
 
 }
