@@ -1,6 +1,7 @@
 package com.newzly.util.testing
 
 import java.util.UUID
+import org.scalatest.Tag
 
 object Sampler {
 
@@ -13,3 +14,8 @@ object Sampler {
   }
 
 }
+
+object DatabaseTest extends Tag("com.newzly.testing.tags.DatabaseTest")
+object ApiTest extends Tag("com.newzly.testing.tags.ApiTest")
+object RequestParserTest extends Tag("com.newzly.testing.tags.RequestParserTest")
+object UnstableTest extends Tag("com.newzly.testing.tags.UnstableTest")
