@@ -8,7 +8,6 @@ object util extends Build {
 	val scalatestVersion = "2.1.0"
   val finagleVersion = "6.10.0"
   val liftVersion = "2.6-M2"
-  val newzlyUtilVersion = "0.0.17"
   val phantomVersion = "0.3.2"
 
   val publishSettings : Seq[sbt.Project.Setting[_]] = Seq(
@@ -21,7 +20,7 @@ object util extends Build {
 
 	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.0.22",
+		version := "0.0.25",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -112,15 +111,12 @@ object util extends Build {
     libraryDependencies ++= Seq(
       "com.twitter"                      %% "util-core"                % finagleVersion,
       "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1",
-      "org.scala-lang"                   %  "scala-reflect"            % "2.10.4",
-      "org.scalatest"                    %% "scalatest"                % scalatestVersion      % "provided",
+      "org.scalatest"                    %% "scalatest"                % scalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3"              % "test",
-      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8",
-      "com.newzly"                       %% "phantom-test"             % phantomVersion,
-      "com.newzly"                       %% "util-cassandra"           % newzlyUtilVersion,
-      "com.newzly"                       %% "util-http"                % newzlyUtilVersion,
-      "com.newzly"                       %% "util-finagle"             % newzlyUtilVersion
+      "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
     )
+  ).dependsOn(
+    newzlyUtilHttp
   )
 
 	lazy val newzlyUtilTest = Project(
