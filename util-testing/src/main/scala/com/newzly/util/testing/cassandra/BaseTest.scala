@@ -2,7 +2,7 @@ package com.newzly.util.testing.cassandra
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
-import org.scalatest._
+import org.scalatest.{ Assertions, BeforeAndAfterAll, FeatureSpec, FlatSpec, Matchers }
 import org.scalatest.concurrent.{ AsyncAssertions, ScalaFutures }
 import com.datastax.driver.core.{ Cluster, Session }
 
