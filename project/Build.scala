@@ -5,7 +5,7 @@ import com.twitter.sbt._
 object util extends Build {
 
   val nettyVersion = "3.9.0.Final"
-	val scalatestVersion = "2.1.0"
+	val scalatestVersion = "2.2.0-M1"
   val finagleVersion = "6.10.0"
   val liftVersion = "2.6-M2"
   val phantomVersion = "0.3.2"
@@ -20,7 +20,7 @@ object util extends Build {
 
 	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.0.27",
+		version := "0.0.28",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -110,13 +110,25 @@ object util extends Build {
     name := "util-testing",
     libraryDependencies ++= Seq(
       "com.twitter"                      %% "util-core"                % finagleVersion,
-      "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1",
       "org.scalatest"                    %% "scalatest"                % scalatestVersion,
       "org.scalacheck"                   %% "scalacheck"               % "1.11.3"              % "test",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
     )
   ).dependsOn(
     newzlyUtilHttp
+  )
+
+  lazy val newzlyUtilTestingCassandra = Project(
+    id = "util-testing-cassandra",
+    base = file("util-testing-cassandra"),
+    settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
+  ).settings(
+    name := "util-testing",
+    libraryDependencies ++= Seq(
+      "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1"
+    )
+  ).dependsOn(
+    newzlyUtilTesting
   )
 
 	lazy val newzlyUtilTest = Project(
