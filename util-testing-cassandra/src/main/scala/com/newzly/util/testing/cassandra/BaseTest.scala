@@ -7,9 +7,20 @@ import org.scalatest.concurrent.{ AsyncAssertions, ScalaFutures }
 import com.datastax.driver.core.{ Cluster, Session }
 
 object BaseTestHelper {
+
+  private[this] def getPort: Int = {
+    if (System.getenv().containsKey("TRAVIS_JOB_ID")) {
+      Console.println("Using Cassandra as a Travis Service with port 9042")
+      9042
+    } else {
+      Console.println("Using Embedded Cassandra with port 9142")
+      9142
+    }
+   }
+
   val cluster = Cluster.builder()
     .addContactPoint("localhost")
-    .withPort(9142)
+    .withPort(getPort)
     .withoutJMXReporting()
     .withoutMetrics()
     .build()

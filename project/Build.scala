@@ -54,7 +54,8 @@ object util extends Build {
     newzlyUtilHttp,
     newzlyUtilLift,
 		newzlyUtilTest,
-    newzlyUtilTesting
+    newzlyUtilTesting,
+    newzlyUtilTestingCassandra
 	)
 
 	lazy val newzlyUtilCore = Project(
@@ -123,7 +124,7 @@ object util extends Build {
     base = file("util-testing-cassandra"),
     settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
   ).settings(
-    name := "util-testing",
+    name := "util-testing-cassandra",
     libraryDependencies ++= Seq(
       "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1"
     )
