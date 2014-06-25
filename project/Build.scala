@@ -6,7 +6,7 @@ object util extends Build {
 
   val nettyVersion = "3.9.0.Final"
 	val scalatestVersion = "2.2.0-M1"
-  val finagleVersion = "6.10.0"
+  val finagleVersion = "6.17.0"
   val liftVersion = "2.6-M2"
   val phantomVersion = "0.3.2"
 
@@ -20,7 +20,7 @@ object util extends Build {
 
 	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.1.0",
+		version := "0.1.3",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -126,6 +126,7 @@ object util extends Build {
   ).settings(
     name := "util-testing-cassandra",
     libraryDependencies ++= Seq(
+      "com.twitter"                      %% "finagle-serversets"       % finagleVersion,
       "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1"
     )
   ).dependsOn(

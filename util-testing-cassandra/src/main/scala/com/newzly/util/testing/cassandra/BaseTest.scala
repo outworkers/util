@@ -1,5 +1,7 @@
 package com.newzly.util.testing.cassandra
 
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 import org.scalatest.{ Assertions, BeforeAndAfterAll, FeatureSpec, FlatSpec, Matchers }
@@ -38,6 +40,8 @@ trait CassandraTest {
     session.execute(s"use $spaceName;")
   }
   override def beforeAll() {
+    EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
+    EmbeddedCassandraServerHelper.startEmbeddedCassandra()
     createKeySpace(keySpace)
   }
 
