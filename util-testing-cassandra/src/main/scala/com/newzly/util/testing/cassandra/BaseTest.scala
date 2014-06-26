@@ -22,7 +22,6 @@ object BaseTestHelper {
   private[this] def getPort: Int = {
     if (System.getenv().containsKey("TRAVIS_JOB_ID")) {
       Console.println("Using Cassandra as a Travis Service with port 9042")
-
       9042
     } else {
       Console.println("Using Embedded Cassandra with port 9142")
