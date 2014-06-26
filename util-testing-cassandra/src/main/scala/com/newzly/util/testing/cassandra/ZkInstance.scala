@@ -16,10 +16,6 @@ class ZkInstance {
   var zookeeperServer: ZooKeeperServer = null
   var zookeeperClient: ZooKeeperClient = null
 
-  val serverSet = new ServerSetImpl(zookeeperClient, "/cassandra")
-  val cluster = new ZookeeperServerSetCluster(serverSet)
-
-  cluster.join(zookeeperAddress)
 
   def start() {
 
@@ -39,8 +35,13 @@ class ZkInstance {
       Amount.of(10, Time.MILLISECONDS),
       zookeeperAddress)
 
+    val serverSet = new ServerSetImpl(zookeeperClient, "/cassandra")
+    val cluster = new ZookeeperServerSetCluster(serverSet)
+
+    cluster.join(zookeeperAddress)
+
     // Disable noise from zookeeper logger
-    //    java.util.logging.LogManager.getLogManager().reset();
+    java.util.logging.LogManager.getLogManager.reset()
   }
 
   def stop() {
