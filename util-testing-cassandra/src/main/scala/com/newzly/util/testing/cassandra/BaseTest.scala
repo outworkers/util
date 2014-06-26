@@ -3,24 +3,21 @@ package com.newzly.util.testing.cassandra
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-
-import org.apache.zookeeper.data.Stat
-
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
-
 
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.scalatest.{ Assertions, BeforeAndAfterAll, FeatureSpec, FlatSpec, Matchers }
 import org.scalatest.concurrent.{ AsyncAssertions, ScalaFutures }
 
 import com.datastax.driver.core.{ Cluster, Session }
+import com.twitter.conversions.time._
+import com.twitter.util.Await
 
 object BaseTestHelper {
 
+  ZkInstance.start()
   val embeddedMode = new AtomicBoolean(false)
-
-  val ports = ZkInstance.zookeeperClient.get.getData("/cassandra", false, new Stat)
 
   private[this] def getPort: Int = {
     if (System.getenv().containsKey("TRAVIS_JOB_ID")) {
@@ -34,8 +31,10 @@ object BaseTestHelper {
     }
    }
 
+  val ports = new String(Await.result(ZkInstance.richClient.getData("/cassandra", watch = false), 3.seconds).data)
+
   val cluster = Cluster.builder()
-    .addContactPoint("localhost")
+    .addContactPoint(ports)
     .withPort(getPort)
     .withoutJMXReporting()
     .withoutMetrics()

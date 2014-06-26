@@ -58,5 +58,4 @@ class ZkInstance {
 
 
 object ZkInstance extends ZkInstance {
-  start()
 }
