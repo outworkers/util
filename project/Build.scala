@@ -20,7 +20,7 @@ object util extends Build {
 
 	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.1.3",
+		version := "0.1.4",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -127,7 +127,8 @@ object util extends Build {
     name := "util-testing-cassandra",
     libraryDependencies ++= Seq(
       "com.twitter"                      %% "finagle-serversets"       % finagleVersion,
-      "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1"
+      "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1",
+      "org.scalatest"                    %% "scalatest"                % scalatestVersion       % "test"
     )
   ).dependsOn(
     newzlyUtilTesting

@@ -1,21 +1,32 @@
 package com.newzly.util.testing.cassandra
 
-import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
+
+
+import org.cassandraunit.utils.EmbeddedCassandraServerHelper
 import org.scalatest.{ Assertions, BeforeAndAfterAll, FeatureSpec, FlatSpec, Matchers }
 import org.scalatest.concurrent.{ AsyncAssertions, ScalaFutures }
+
 import com.datastax.driver.core.{ Cluster, Session }
 
 object BaseTestHelper {
 
+
+  val embeddedMode = new AtomicBoolean(false)
+
+  private[this] val ports = ZkInstance.zookeeperClient.get().getChildren("/cassandra", false)
+
   private[this] def getPort: Int = {
     if (System.getenv().containsKey("TRAVIS_JOB_ID")) {
       Console.println("Using Cassandra as a Travis Service with port 9042")
+
       9042
     } else {
       Console.println("Using Embedded Cassandra with port 9142")
+      embeddedMode.compareAndSet(false, true)
       9142
     }
    }
@@ -40,8 +51,10 @@ trait CassandraTest {
     session.execute(s"use $spaceName;")
   }
   override def beforeAll() {
-    EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
-    EmbeddedCassandraServerHelper.startEmbeddedCassandra()
+    if (BaseTestHelper.embeddedMode.get()) {
+      EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
+      EmbeddedCassandraServerHelper.startEmbeddedCassandra()
+    }
     createKeySpace(keySpace)
   }
 
