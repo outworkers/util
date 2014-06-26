@@ -62,8 +62,7 @@ trait CassandraTest {
 
   override def beforeAll() {
     if (BaseTestHelper.embeddedMode.get()) {
-      EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
-      EmbeddedCassandraServerHelper.startEmbeddedCassandra("/embedded-cassandra.yaml")
+      EmbeddedCassandraServerHelper.startEmbeddedCassandra("embedded-cassandra.yaml")
     }
     createKeySpace(keySpace)
   }
