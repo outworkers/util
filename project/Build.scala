@@ -127,6 +127,7 @@ object util extends Build {
     name := "util-testing-cassandra",
     libraryDependencies ++= Seq(
       "com.twitter"                      %% "finagle-serversets"       % finagleVersion,
+      "com.twitter"                      %% "finagle-zookeeper"        % finagleVersion,
       "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1",
       "org.scalatest"                    %% "scalatest"                % scalatestVersion       % "test"
     )
