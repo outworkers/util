@@ -2,6 +2,10 @@ package com.newzly.util.testing.cassandra
 
 
 import java.util.concurrent.atomic.AtomicBoolean
+
+
+import org.apache.zookeeper.data.Stat
+
 import scala.concurrent.ExecutionContext
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -14,10 +18,9 @@ import com.datastax.driver.core.{ Cluster, Session }
 
 object BaseTestHelper {
 
-
   val embeddedMode = new AtomicBoolean(false)
 
-  private[this] val ports = ZkInstance.zookeeperClient.get().getChildren("/cassandra", false)
+  val ports = ZkInstance.zookeeperClient.get.getData("/cassandra", false, new Stat)
 
   private[this] def getPort: Int = {
     if (System.getenv().containsKey("TRAVIS_JOB_ID")) {

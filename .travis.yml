@@ -1,0 +1,18 @@
+# Travis CI credentials
+
+language: scala
+
+scala:
+ - "2.10.4"
+
+# Emails to notify
+notifications:
+  email:
+    - dev@newzly.com
+
+# Branches to build.
+branches:
+  only:
+    - master
+    - develop
+
