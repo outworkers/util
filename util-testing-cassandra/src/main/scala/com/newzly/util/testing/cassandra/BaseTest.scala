@@ -3,7 +3,7 @@ package com.newzly.util.testing.cassandra
 
 import java.util.concurrent.atomic.AtomicBoolean
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ blocking, ExecutionContext }
 import scala.concurrent.ExecutionContext.Implicits.global
 
 import org.cassandraunit.utils.EmbeddedCassandraServerHelper
@@ -38,19 +38,28 @@ object BaseTestHelper {
     .withoutJMXReporting()
     .withoutMetrics()
     .build()
+
+  lazy val session = blocking {
+    cluster.connect()
+  }
 }
 
 trait CassandraTest {
   self: BeforeAndAfterAll =>
+
   val keySpace: String
+
   val cluster = BaseTestHelper.cluster
-  implicit lazy val session: Session = cluster.connect()
+  implicit lazy val session: Session = BaseTestHelper.session
   implicit lazy val context: ExecutionContext = global
 
   private[this] def createKeySpace(spaceName: String) = {
-    session.execute(s"CREATE KEYSPACE IF NOT EXISTS $spaceName WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};")
-    session.execute(s"use $spaceName;")
+    blocking {
+      session.execute(s"CREATE KEYSPACE IF NOT EXISTS $spaceName WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};")
+      session.execute(s"use $spaceName;")
+    }
   }
+
   override def beforeAll() {
     if (BaseTestHelper.embeddedMode.get()) {
       EmbeddedCassandraServerHelper.cleanEmbeddedCassandra()
@@ -60,7 +69,9 @@ trait CassandraTest {
   }
 
   override def afterAll() {
-    session.execute(s"DROP KEYSPACE $keySpace;")
+    blocking {
+      session.execute(s"DROP KEYSPACE $keySpace;")
+    }
   }
 
 }
