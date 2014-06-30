@@ -22,7 +22,7 @@ object BaseTestHelper {
   private[this] def getPort: Int = {
     if (System.getenv().containsKey("TRAVIS_JOB_ID")) {
       Console.println("Using Cassandra as a Travis Service with port 9042")
-      9042
+      9142
     } else {
       Console.println("Using Embedded Cassandra with port 9142")
       embeddedMode.compareAndSet(false, true)
@@ -62,6 +62,7 @@ trait CassandraTest {
 
   override def beforeAll() {
     if (BaseTestHelper.embeddedMode.get()) {
+      EmbeddedCassandraServerHelper.mkdirs()
       EmbeddedCassandraServerHelper.startEmbeddedCassandra("embedded-cassandra.yaml")
     }
     createKeySpace(keySpace)
