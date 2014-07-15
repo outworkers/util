@@ -19,6 +19,9 @@ class ZkInstance {
   var zookeeperClient: ZooKeeperClient = null
   lazy val richClient = ZooKeeper.newRichClient(zookeeperConnectString)
 
+  protected[this] val envString = "TEST_ZOOKEEPER_CONNECTOR"
+
+  System.setProperty(envString, zookeeperConnectString)
 
   def start() {
 
@@ -57,5 +60,4 @@ class ZkInstance {
 }
 
 
-object ZkInstance extends ZkInstance {
-}
+object ZkInstance extends ZkInstance {}
