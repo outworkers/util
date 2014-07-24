@@ -10,17 +10,26 @@ object util extends Build {
   val liftVersion = "2.6-M2"
   val phantomVersion = "0.3.2"
 
+  val publishUrl = "http://newzly-artifactory.elasticbeanstalk.com"
+
   val publishSettings : Seq[sbt.Project.Setting[_]] = Seq(
-    publishTo := Some("newzly releases" at "http://maven.newzly.com/repository/internal"),
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+    publishTo <<= version { (v: String) => {
+      if (v.trim.endsWith("SNAPSHOT"))
+        Some("snapshots" at publishUrl + "/ext-snapshot-local")
+      else
+        Some("releases"  at publishUrl + "/ext-release-local")
+    }
+    },
     publishMavenStyle := true,
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true }
   )
 
-	val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
+
+  val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.newzly",
-		version := "0.1.17",
+		version := "0.1.18",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -29,8 +38,10 @@ object util extends Build {
 		"Sonatype staging"                 at "http://oss.sonatype.org/content/repositories/staging",
 		"Java.net Maven2 Repository"       at "http://download.java.net/maven/2/",
 		"Twitter Repository"               at "http://maven.twttr.com",
-    "newzly snapshots"                 at "http://maven.newzly.com/repository/snapshots",
-    "newzly repository"                at "http://maven.newzly.com/repository/internal"
+    "newzly Libs snapshots"            at "http://newzly-artifactory.elasticbeanstalk.com/libs-release-local",
+    "newzly Libs"                      at "http://newzly-artifactory.elasticbeanstalk.com/libs-snapshot-local",
+    "newzly External snapshots"        at "http://newzly-artifactory.elasticbeanstalk.com/ext-release-local",
+    "newzly External"                  at "http://newzly-artifactory.elasticbeanstalk.com/ext-snapshot-local"
 		),
 		scalacOptions ++= Seq(
       "-language:postfixOps",
@@ -54,8 +65,7 @@ object util extends Build {
     newzlyUtilHttp,
     newzlyUtilLift,
 		newzlyUtilTest,
-    newzlyUtilTesting,
-    newzlyUtilTestingCassandra
+    newzlyUtilTesting
 	)
 
 	lazy val newzlyUtilCore = Project(
@@ -119,21 +129,6 @@ object util extends Build {
     newzlyUtilHttp
   )
 
-  lazy val newzlyUtilTestingCassandra = Project(
-    id = "util-testing-cassandra",
-    base = file("util-testing-cassandra"),
-    settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
-  ).settings(
-    name := "util-testing-cassandra",
-    libraryDependencies ++= Seq(
-      "com.twitter"                      %% "finagle-serversets"       % finagleVersion,
-      "com.twitter"                      %% "finagle-zookeeper"        % finagleVersion,
-      "org.cassandraunit"                %  "cassandra-unit"           % "2.0.2.1"  exclude("log4j", "log4j"),
-      "org.scalatest"                    %% "scalatest"                % scalatestVersion       % "test"
-    )
-  ).dependsOn(
-    newzlyUtilTesting
-  )
 
 	lazy val newzlyUtilTest = Project(
 		id = "util-test",
