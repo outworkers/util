@@ -6,11 +6,11 @@ object util extends Build {
 
   val nettyVersion = "3.9.0.Final"
 	val scalatestVersion = "2.2.0-M1"
-  val finagleVersion = "6.17.0"
-  val liftVersion = "2.6-M2"
-  val phantomVersion = "0.3.2"
+  val finagleVersion = "6.20.0"
+  val liftVersion = "2.6-M3"
+  val phantomVersion = "1.2.8"
 
-  val publishUrl = "http://newzly-artifactory.elasticbeanstalk.com"
+  val publishUrl = "http://maven.websudos.co.uk"
 
   val publishSettings : Seq[sbt.Project.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
@@ -28,8 +28,8 @@ object util extends Build {
 
 
   val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
-		organization := "com.newzly",
-		version := "0.1.18",
+		organization := "com.websudos",
+		version := "0.1.20",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -38,8 +38,6 @@ object util extends Build {
 		"Sonatype staging"                 at "http://oss.sonatype.org/content/repositories/staging",
 		"Java.net Maven2 Repository"       at "http://download.java.net/maven/2/",
 		"Twitter Repository"               at "http://maven.twttr.com",
-    "newzly Libs snapshots"            at "http://newzly-artifactory.elasticbeanstalk.com/libs-release-local",
-    "newzly Libs"                      at "http://newzly-artifactory.elasticbeanstalk.com/libs-snapshot-local",
     "newzly External snapshots"        at "http://newzly-artifactory.elasticbeanstalk.com/ext-release-local",
     "newzly External"                  at "http://newzly-artifactory.elasticbeanstalk.com/ext-snapshot-local"
 		),
@@ -51,32 +49,37 @@ object util extends Build {
       "-deprecation",
       "-feature",
       "-unchecked"
-		)
+		),
+    libraryDependencies ++= Seq(
+      "org.scalatest"           %% "scalatest"                          % scalatestVersion % "test, provided"
+    )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 
-	lazy val newzlyUtil = Project(
+	lazy val websudosUtil = Project(
 		id = "util",
 		base = file("."),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).aggregate(
-    newzlyUtilAws,
-		newzlyUtilCore,
-    newzlyUtilHttp,
-    newzlyUtilLift,
-		newzlyUtilTest,
-    newzlyUtilTesting
+    websudosUtilAws,
+		websudosUtilCore,
+    websudosUtilHttp,
+    websudosUtilLift,
+    websudosUtilTesting
 	)
 
-	lazy val newzlyUtilCore = Project(
+	lazy val websudosUtilCore = Project(
 		id = "util-core",
 		base = file("util-core"),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).settings(
-		name := "util-core"
+		name := "util-core",
+    libraryDependencies ++= Seq(
+      "org.scalatest"                    %% "scalatest"                % scalatestVersion % "test, provided"
+    )
 	)
 
-  lazy val newzlyUtilHttp = Project(
+  lazy val websudosUtilHttp = Project(
     id = "util-http",
     base = file("util-http"),
     settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
@@ -87,7 +90,7 @@ object util extends Build {
     )
   )
 
-  lazy val newzlyUtilLift = Project(
+  lazy val websudosUtilLift = Project(
     id = "util-lift",
     base = file("util-lift"),
     settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
@@ -98,7 +101,7 @@ object util extends Build {
     )
   )
 
-  lazy val newzlyUtilAws = Project(
+  lazy val websudosUtilAws = Project(
     id = "util-aws",
     base = file("util-aws"),
     settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
@@ -110,10 +113,10 @@ object util extends Build {
       "com.twitter"             %% "finagle-http"                      % finagleVersion
     )
   ).dependsOn(
-    newzlyUtilHttp
+    websudosUtilHttp
   )
 
-  lazy val newzlyUtilTesting = Project(
+  lazy val websudosUtilTesting = Project(
     id = "util-testing",
     base = file("util-testing"),
     settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
@@ -126,21 +129,6 @@ object util extends Build {
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
     )
   ).dependsOn(
-    newzlyUtilHttp
+    websudosUtilHttp
   )
-
-
-	lazy val newzlyUtilTest = Project(
-		id = "util-test",
-		base = file("util-test"),
-		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
-	).settings(
-		name := "util-test",
-		libraryDependencies ++= Seq(
-			"org.scalatest"           %% "scalatest"                          % scalatestVersion % "provided"
-		)
-	).dependsOn(
-		newzlyUtilCore
-	)
-
 }

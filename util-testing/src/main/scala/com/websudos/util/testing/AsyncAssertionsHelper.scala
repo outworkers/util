@@ -1,11 +1,13 @@
-package com.newzly.util.testing
+package com.websudos.util.testing
 
-import scala.concurrent.{ Await => ScalaAwait, ExecutionContext, Future => ScalaFuture }
-import scala.util.{ Failure, Success }
+import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
+import scala.util.{Failure, Success}
+
 import org.scalatest._
-import org.scalatest.concurrent.{ AsyncAssertions, PatienceConfiguration, ScalaFutures }
+import org.scalatest.concurrent.{AsyncAssertions, PatienceConfiguration, ScalaFutures}
 import org.scalatest.time.SpanSugar._
-import com.twitter.util.{ Await, Duration, Future, Return, Throw }
+
+import com.twitter.util.{Await, Duration, Future, Return, Throw}
 
 object AsyncAssertionsHelper extends ScalaFutures {
 
