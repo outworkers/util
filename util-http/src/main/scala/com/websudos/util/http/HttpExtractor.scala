@@ -1,4 +1,4 @@
-package com.newzly.util.http
+package com.websudos.util.http
 
 object HttpExtractor {
 

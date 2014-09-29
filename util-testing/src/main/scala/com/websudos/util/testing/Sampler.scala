@@ -1,7 +1,9 @@
-package com.newzly.util.testing
+package com.websudos.util.testing
 
 import java.util.UUID
+
 import scala.util.Random
+
 import org.scalatest.Tag
 
 object Sampler {
@@ -49,7 +51,11 @@ object Sampler {
   }
 }
 
-object DatabaseTest extends Tag("com.newzly.testing.tags.DatabaseTest")
-object ApiTest extends Tag("com.newzly.testing.tags.ApiTest")
-object RequestParserTest extends Tag("com.newzly.testing.tags.RequestParserTest")
-object UnstableTest extends Tag("com.newzly.testing.tags.UnstableTest")
+object DefaultTags {
+  object DatabaseTest extends Tag("com.websudos.testing.tags.DatabaseTest")
+  object ApiTest extends Tag("com.websudos.testing.tags.ApiTest")
+  object RequestParserTest extends Tag("com.websudos.testing.tags.RequestParserTest")
+  object UnstableTest extends Tag("com.websudos.testing.tags.UnstableTest")
+
+}
+

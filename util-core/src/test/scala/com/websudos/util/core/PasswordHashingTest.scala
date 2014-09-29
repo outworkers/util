@@ -1,8 +1,8 @@
-package com.newzly.core
+package com.websudos.util.core
 
 import java.util.UUID
-import org.scalatest.{ FlatSpec, Matchers }
-import com.newzly.util.core.PasswordHash
+
+import com.websudos.core.PasswordHash
 
 class PasswordHashingTest extends FlatSpec with Matchers {
 

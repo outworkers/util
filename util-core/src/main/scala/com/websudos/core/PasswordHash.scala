@@ -1,10 +1,9 @@
-package com.newzly.util.core
+package com.websudos.core
 
-import java.security.SecureRandom
-import javax.crypto.spec.PBEKeySpec
-import javax.crypto.SecretKeyFactory
-import java.security.NoSuchAlgorithmException
+import java.security.{NoSuchAlgorithmException, SecureRandom}
 import java.security.spec.InvalidKeySpecException
+import javax.crypto.SecretKeyFactory
+import javax.crypto.spec.PBEKeySpec
 
 object PasswordHash {
   final val PBKDF2_ALGORITHM = "PBKDF2WithHmacSHA1"

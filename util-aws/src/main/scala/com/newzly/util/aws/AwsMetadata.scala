@@ -3,7 +3,8 @@ package com.newzly.util.aws
 import java.net.InetSocketAddress
 import scala.annotation.switch
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
-import com.newzly.util.http.URLHelpers._
+import com.websudos.util.http.URLHelpers
+import URLHelpers._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.{ Http, RequestBuilder }
 import com.twitter.util.{Try, Duration, Future}

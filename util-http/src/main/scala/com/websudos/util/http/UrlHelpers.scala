@@ -1,7 +1,8 @@
-package com.newzly.util.http
+package com.websudos.util.http
 
-import java.net.{URLDecoder, URL, URLEncoder}
+import java.net.{URL, URLDecoder, URLEncoder}
 import java.util.UUID
+
 import scala.collection.breakOut
 
 import org.jboss.netty.handler.codec.http.HttpResponse

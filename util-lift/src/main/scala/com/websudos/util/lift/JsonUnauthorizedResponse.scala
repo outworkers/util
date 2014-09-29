@@ -1,30 +1,30 @@
-package com.newzly.util.lift
+package com.websudos.util.lift
 
+import net.liftweb.http.LiftRulesMocker.toLiftRules
 import net.liftweb.http.js.JsExp
 import net.liftweb.http.provider.HTTPCookie
+import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
 import net.liftweb.json.Extraction._
 import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonDSL._
-import net.liftweb.http.{ InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S }
 
-case class ApiErrorResponse(
- message: String,
- code: Int
-)
-
-case class JsonErrorResponse(
-  json: JsExp,
-  headers: List[(String, String)],
-  cookies: List[HTTPCookie] = Nil) {
+case class JsonUnauthorizedResponse(
+ json: JsExp,
+ headers: List[(String, String)],
+ cookies: List[HTTPCookie] = Nil) {
   def toResponse = {
     val bytes = json.toJsCmd.getBytes("UTF-8")
     InMemoryResponse(bytes, ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers, cookies, 401)
   }
 }
 
-object JsonErrorResponse {
+object JsonUnauthorizedResponse {
 
   implicit val formats = net.liftweb.json.DefaultFormats
+
+  implicit def jsonUnauthorizedToLiftResponse(resp: JsonUnauthorizedResponse): LiftResponse = {
+    resp.toResponse
+  }
 
   def headers: List[(String, String)] = S.getResponseHeaders(Nil)
   def cookies: List[HTTPCookie] = S.responseCookies
@@ -32,24 +32,16 @@ object JsonErrorResponse {
   def apply(json: JsExp): LiftResponse =
     JsonResponse(json, headers, cookies, 401)
 
+  def apply(): LiftResponse = {
+    val resp = ApiErrorResponse("Unauthorized request", 401)
+    val json = "error" -> decompose(resp)
+    JsonResponse(json, 401)
+  }
+
   def apply(msg: String): LiftResponse = {
-    val resp = ApiErrorResponse(msg, 406)
+    val resp = ApiErrorResponse(msg, 401)
     val json = "error" -> decompose(resp)
-    JsonResponse(json, 406)
-  }
-
-  def apply(msg: String, code: Int): LiftResponse = {
-    val resp = ApiErrorResponse(msg, code)
-    val json = "error" -> decompose(resp)
-    JsonResponse(json, code)
-  }
-
-  def apply(ex: Exception): LiftResponse = {
-    apply(ex.getMessage)
-  }
-
-  def apply(ex: Exception, code: Int): LiftResponse = {
-    apply(ex.getMessage, code)
+    JsonResponse(json, 401)
   }
 
   def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
@@ -61,3 +53,4 @@ object JsonErrorResponse {
   lazy val jsonPrinter: scala.text.Document => String =
     LiftRules.jsonOutputConverter.vend
 }
+
