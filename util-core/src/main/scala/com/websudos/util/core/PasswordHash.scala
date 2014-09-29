@@ -1,7 +1,7 @@
-package com.websudos.core
+package com.websudos.util.core
 
-import java.security.{NoSuchAlgorithmException, SecureRandom}
 import java.security.spec.InvalidKeySpecException
+import java.security.{NoSuchAlgorithmException, SecureRandom}
 import javax.crypto.SecretKeyFactory
 import javax.crypto.spec.PBEKeySpec
 

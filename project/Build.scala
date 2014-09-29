@@ -49,7 +49,10 @@ object util extends Build {
       "-deprecation",
       "-feature",
       "-unchecked"
-		)
+		),
+    libraryDependencies ++= Seq(
+      "org.scalatest"           %% "scalatest"                          % scalatestVersion % "test, provided"
+    )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings
 
 
@@ -70,7 +73,10 @@ object util extends Build {
 		base = file("util-core"),
 		settings = Project.defaultSettings ++ VersionManagement.newSettings ++ sharedSettings ++ publishSettings
 	).settings(
-		name := "util-core"
+		name := "util-core",
+    libraryDependencies ++= Seq(
+      "org.scalatest"                    %% "scalatest"                % scalatestVersion % "test, provided"
+    )
 	)
 
   lazy val websudosUtilHttp = Project(
