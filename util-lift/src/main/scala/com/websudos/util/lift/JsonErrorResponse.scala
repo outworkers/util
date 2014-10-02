@@ -7,11 +7,6 @@ import net.liftweb.json.Extraction._
 import net.liftweb.json.JsonAST
 import net.liftweb.json.JsonDSL._
 
-case class ApiErrorResponse(
- message: String,
- code: Int
-)
-
 case class JsonErrorResponse(
   json: JsExp,
   headers: List[(String, String)],
@@ -33,13 +28,13 @@ object JsonErrorResponse {
     JsonResponse(json, headers, cookies, 401)
 
   def apply(msg: String): LiftResponse = {
-    val resp = ApiErrorResponse(msg, 406)
+    val resp = ApiErrorResponse(406, List(msg))
     val json = "error" -> decompose(resp)
     JsonResponse(json, 406)
   }
 
   def apply(msg: String, code: Int): LiftResponse = {
-    val resp = ApiErrorResponse(msg, code)
+    val resp = ApiErrorResponse(406, List(msg))
     val json = "error" -> decompose(resp)
     JsonResponse(json, code)
   }

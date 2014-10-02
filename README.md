@@ -1,3 +1,1 @@
-util[![Build Status](https://magnum.travis-ci.com/websudos/util.png?token=tyRTmBk14WrDycpepg9c&branch=develop)](https://magnum.travis-ci
-.com/websudos/util)
-===========
+# util[![Build Status](https://travis-ci.org/websudos/util.svg?branch=develop)](https://travis-ci.org/websudos/util)
