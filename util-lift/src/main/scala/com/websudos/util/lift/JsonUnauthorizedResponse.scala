@@ -1,11 +1,13 @@
 package com.websudos.util.lift
 
+import scalaz.NonEmptyList
+
 import net.liftweb.http.LiftRulesMocker.toLiftRules
 import net.liftweb.http.js.JsExp
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
 import net.liftweb.json.Extraction._
-import net.liftweb.json.JsonAST
+import net.liftweb.json.{DefaultFormats, Extraction, JsonAST}
 import net.liftweb.json.JsonDSL._
 
 case class JsonUnauthorizedResponse(
@@ -33,13 +35,13 @@ object JsonUnauthorizedResponse {
     JsonResponse(json, headers, cookies, 401)
 
   def apply(): LiftResponse = {
-    val resp = ApiErrorResponse("Unauthorized request", 401)
+    val resp = ApiErrorResponse(401, List("Unauthorized request"))
     val json = "error" -> decompose(resp)
     JsonResponse(json, 401)
   }
 
   def apply(msg: String): LiftResponse = {
-    val resp = ApiErrorResponse(msg, 401)
+    val resp = ApiErrorResponse(401, List(msg))
     val json = "error" -> decompose(resp)
     JsonResponse(json, 401)
   }
@@ -54,3 +56,28 @@ object JsonUnauthorizedResponse {
     LiftRules.jsonOutputConverter.vend
 }
 
+
+
+case class ApiErrorResponse(
+  code: Int,
+  messages: List[String]
+)
+
+case class ApiError(error: ApiErrorResponse)
+
+object ApiErrorHelpers {
+
+  implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
+
+    def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, resp.list))
+
+    def toJson(code: Int = 406): LiftResponse = JsonResponse(Extraction.decompose(toError(code))(DefaultFormats), code)
+  }
+
+  implicit class ErrorConverter(val err: Throwable) extends AnyVal {
+
+    def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, List(err.getMessage)))
+
+    def toJson(code: Int): LiftResponse = JsonResponse(Extraction.decompose(toError(code))(DefaultFormats))
+  }
+}
