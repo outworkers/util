@@ -31,7 +31,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.websudos",
-		version := "0.1.22",
+		version := "0.2.3",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -55,7 +55,7 @@ object UtilBuild extends Build {
     libraryDependencies ++= Seq(
       "org.scalatest"           %% "scalatest"                          % ScalaTestVersion % "test, provided"
     )
-	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ publishSettings ++ VersionManagement.newSettings
+	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ VersionManagement.newSettings ++ publishSettings
 
 
 	lazy val websudosUtil = Project(
@@ -100,6 +100,7 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-parsers",
     libraryDependencies ++= Seq(
+      "commons-validator"       % "commons-validator"               % "1.4.0",
       "joda-time"               %  "joda-time"                      % JodaTimeVersion,
       "org.scalaz"              %% "scalaz-core"                    % ScalazVersion,
       "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % "test, provided"
