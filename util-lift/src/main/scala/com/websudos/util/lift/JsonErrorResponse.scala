@@ -24,33 +24,23 @@ object JsonErrorResponse {
   def headers: List[(String, String)] = S.getResponseHeaders(Nil)
   def cookies: List[HTTPCookie] = S.responseCookies
 
-  def apply(json: JsExp): LiftResponse =
-    JsonResponse(json, headers, cookies, 401)
-
-  def apply(msg: String): LiftResponse = {
-    val resp = ApiErrorResponse(406, List(msg))
-    val json = "error" -> decompose(resp)
-    JsonResponse(json, 406)
-  }
+  def apply(json: JsExp, code: Int): LiftResponse =
+    JsonResponse(json, headers, cookies, code)
 
   def apply(msg: String, code: Int): LiftResponse = {
-    val resp = ApiErrorResponse(406, List(msg))
+    val resp = ApiErrorResponse(code, List(msg))
     val json = "error" -> decompose(resp)
     JsonResponse(json, code)
-  }
-
-  def apply(ex: Exception): LiftResponse = {
-    apply(ex.getMessage)
   }
 
   def apply(ex: Exception, code: Int): LiftResponse = {
     apply(ex.getMessage, code)
   }
 
-  def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
+  def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie], _code: Int): LiftResponse = {
     new JsonResponse(new JsExp {
       lazy val toJsCmd = jsonPrinter(JsonAST.render(_json))
-    }, _headers, _cookies, 401)
+    }, _headers, _cookies, _code)
   }
 
   lazy val jsonPrinter: scala.text.Document => String =
