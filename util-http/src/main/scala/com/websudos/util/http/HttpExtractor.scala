@@ -1,6 +1,6 @@
 package com.websudos.util.http
 
-object HttpExtractor {
+trait HttpExtractor {
 
   def extractTokenResponse(response: String): Map[String, String] = {
     val params = (for {
@@ -10,3 +10,5 @@ object HttpExtractor {
     params
   }
 }
+
+object HttpExtractor extends HttpExtractor
