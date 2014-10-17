@@ -57,7 +57,7 @@ class MyTests extends FlatSuite with Matchers {
     val f: Future[Unit] = ..
     
     // You don't even need to do anything more than failure at this stage.
-    // If the Future fails, the test will fail.
+    // If the Future fails, the test will succeed, as this method is used when you "expect a failure".
     // You can however perform assertions on the error returned.
     f.failing {
       err => {
