@@ -31,7 +31,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[sbt.Project.Setting[_]] = Seq(
 		organization := "com.websudos",
-		version := "0.2.3",
+		version := "0.2.4",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -68,6 +68,7 @@ object UtilBuild extends Build {
     websudosUtilHttp,
     websudosUtilLift,
     websudosUtilParsers,
+    websudosZooKeeper,
     websudosUtilTesting
 	)
 
@@ -135,6 +136,18 @@ object UtilBuild extends Build {
     )
   ).dependsOn(
     websudosUtilHttp
+  )
+
+  lazy val websudosZooKeeper = Project(
+    id = "util-zookeeper",
+    base = file("util-zookeeper"),
+    settings = Project.defaultSettings ++ sharedSettings
+  ).settings(
+    name := "util-zookeeper",
+    libraryDependencies ++= Seq(
+      "com.twitter"                      %% "finagle-zookeeper"        % FinagleVersion,
+      "com.twitter"                      %% "finagle-serversets"       % FinagleVersion
+    )
   )
 
   lazy val websudosUtilTesting = Project(
