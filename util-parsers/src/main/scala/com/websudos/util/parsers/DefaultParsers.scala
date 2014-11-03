@@ -12,14 +12,19 @@ import org.joda.time.format.DateTimeFormatter
 
 trait DefaultParsers extends LowPriorityImplicits {
 
-  final def parseOption[T](str:Option[String])(f: String => ValidationNel[String, T]) = {
+  final def optional[T](str: Option[String])(f: String => ValidationNel[String, T]) = {
     str.fold(Option.empty[T].successNel[String]) { s =>
       f(s).map(Some(_))
     }
   }
 
-  final def parseRequired[T](str: Option[String])(f: String => ValidationNel[String, T]) = {
+
+  private[util] final def parseRequired[T](str: Option[String])(f: String => ValidationNel[String, T]) = {
     str.fold(s"Couldn't parse $str from None".failureNel[T])(f)
+  }
+
+  final def required[T](opt: Option[T]): ValidationNel[String, T] = {
+    opt.fold("Required parameter is empty".failureNel[T])(_.successNel[String])
   }
 
   final def uuidOpt(str: String): Option[UUID] = {
@@ -132,5 +137,21 @@ trait DefaultParsers extends LowPriorityImplicits {
 
   final def email(str: Option[String]): ValidationNel[String, String] = {
     parseRequired(str)(email)
+  }
+
+  final def present(str: String, name: String): ValidationNel[String, String] = {
+    if (str.trim.length == 0) {
+      s"$name is empty".failureNel[String]
+    } else {
+      str.successNel[String]
+    }
+  }
+
+  final def confirm(first: String, second: String): ValidationNel[String, String] = {
+    if (first != second) {
+      s"Strings $first and $second don't match".failureNel[String]
+    } else {
+      first.successNel[String]
+    }
   }
 }

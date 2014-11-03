@@ -4,8 +4,10 @@ import scalaz._
 import scalaz.Scalaz._
 import scala.util.control.NonFatal
 import com.websudos.util.parsers.DefaultParsers
+import net.liftweb.common.Box
 import net.liftweb.json.JsonAST.JValue
-import net.liftweb.json.{DefaultFormats, JsonParser}
+import net.liftweb.json.{compactRender, Formats, Extraction, DefaultFormats, JsonParser}
+
 
 trait LiftParsers extends DefaultParsers {
 
@@ -19,6 +21,15 @@ trait LiftParsers extends DefaultParsers {
     }
   }
 
+  final def json[T: Manifest](str: Option[String]): ValidationNel[String, T] = {
+    try {
+      str.map(JsonParser.parse(_).extract[T].successNel[String]).getOrElse("Missing required parameter".failureNel[T])
+    } catch {
+      case NonFatal(e) => e.getMessage.failureNel[T]
+    }
+  }
+
+
   final def json[T : Manifest](str: JValue): ValidationNel[String, T] = {
     try {
       str.extract[T].successNel[String]
@@ -27,4 +38,15 @@ trait LiftParsers extends DefaultParsers {
     }
   }
 
+  final def required[T](box: Box[T]): ValidationNel[String, T] = {
+    box.map(_.successNel[String])
+      .getOrElse("Required parameter is missing or empty".failureNel[T])
+  }
+}
+
+trait JsonHelpers extends LowPriorityImplicits {
+
+  def toJson[T <: Product with Serializable](obj: T)(implicit formats: Formats): String = {
+    compactRender(Extraction.decompose(obj))
+  }
 }

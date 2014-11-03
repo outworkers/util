@@ -8,8 +8,12 @@ resolvers ++= Seq(
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.5.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.6.2")
 
-addSbtPlugin("com.twitter" % "sbt-package-dist" % "1.1.0")
+addSbtPlugin("com.typesafe.sbt" % "sbt-pgp" % "0.8.3")
 
-addSbtPlugin("com.eed3si9n" % "sbt-assembly" % "0.9.2")
+addSbtPlugin("org.scoverage" %% "sbt-scoverage" % "0.99.5.1")
+
+addSbtPlugin("org.scoverage" %% "sbt-coveralls" % "0.98.0")
+
+addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.5.0")

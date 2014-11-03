@@ -1,32 +1,28 @@
-package com.websudos.util.http
+package com.websudos.util
 
 import java.net.{URL, URLDecoder, URLEncoder}
-import java.util.UUID
-
 import scala.collection.breakOut
-
 import org.jboss.netty.handler.codec.http.HttpResponse
 
-object URLHelpers {
+import com.twitter.finagle.http.RequestBuilder
+import com.twitter.io.Charsets.Utf8
+
+
+package object http extends HttpExtractor {
+
+  implicit class RichResponseBuilder[X, Y](val builder: RequestBuilder[X, Y]) extends AnyVal {
+    def asJson(): RequestBuilder[X, Y] = {
+      builder.setHeader("Content-Type", "application/json")
+    }
+  }
 
   /**
    * Implicit value class used to simplify extracting responses from a Netty HTTP response.
    * @param response The Http response to augment.
    */
   implicit class RichHttpResponse(val response: HttpResponse) extends AnyVal {
-
     def body: String = {
       new String(response.getContent.array)
-    }
-  }
-
-  implicit class UUIDExtractor(val id: String) extends AnyVal {
-    final def extractUUID: Option[UUID] = {
-      try {
-        Some(UUID.fromString(id))
-      } catch {
-        case e: IllegalArgumentException => None
-      }
     }
   }
 
@@ -48,9 +44,9 @@ object URLHelpers {
 
     final def asUri: URL = new URL(url)
 
-    final def utf8: String = URLEncoder.encode(url, UTF_8)
+    final def utf8: String = URLEncoder.encode(url, Utf8.displayName())
 
-    final def fromUtf8: String = URLDecoder.decode(url, UTF_8)
+    final def fromUtf8: String = URLDecoder.decode(url, Utf8.displayName())
 
   }
 
@@ -67,9 +63,6 @@ object URLHelpers {
     }
   }
 
-  final val UTF_8 = "UTF-8"
-
   def :/(uri: String): String = if (uri.indexOf("http") == -1) "https://" + uri else uri
   def ::/(uri: String): String = if (uri.indexOf("http") == -1) "http://" + uri else uri
 }
-
