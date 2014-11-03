@@ -26,10 +26,7 @@ sealed trait Generators {
 
   def genList[T : Sample](limit: Int = 5): List[T] = List.range(1, limit) map(_ => gen[T])
 
-  def getSet[T : Sample](limit: Int = 5): List[T] = List.range(1, limit) map(_ => gen[T]).toSet[T]
-
   def genMap[T: Sample](limit: Int = 5): Map[String, T] = genList[T]().map(x => {x.toString -> x}).toMap
-
 }
 
 trait DefaultSamplers extends Generators {
