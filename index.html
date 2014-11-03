@@ -1,0 +1,393 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Util by websudos</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Util</h1>
+        <p>The util project, packed with common goodies.</p>
+
+        <p class="view"><a href="https://github.com/websudos/util">View the Project on GitHub <small>websudos/util</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/websudos/util/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/websudos/util/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/websudos/util">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>
+<a name="util" class="anchor" href="#util"><span class="octicon octicon-link"></span></a>util<a href="https://travis-ci.org/websudos/util"><img src="https://travis-ci.org/websudos/util.svg?branch=develop" alt="Build Status"></a>
+</h1>
+
+<p>The latest available version of the util library is <code>val UtilVersion = 0.3.12</code>. This library is only deployed to our managed Maven repository,
+available at <code>http://maven.websudos.co.uk</code>. It is publicly available.</p>
+
+<p><img src="http://websudos.com/images/work/util.png" alt="Util" title="Websudos Util"></p>
+
+<h3>
+<a name="table-of-contents" class="anchor" href="#table-of-contents"><span class="octicon octicon-link"></span></a>Table of contents</h3>
+
+<ol>
+  <li><a href="#integrating-the-util-library">Integrating the util library</a></li>
+  <li>
+    <p><a href="#util-testing">util-testing</a></p>
+    <ul>
+      <li><a href="#asynchronous-assertions">Asynchronous assertions</a></li>
+    </ul>
+  </li>
+  <li>
+    <p><a href="#util-parsers">util-parsers</a></p>
+    <ul>
+      <li><a href="#option-parsers">Option parsers</a></li>
+      <li><a href="#applicative-parsers">Applicative parsers</a></li>
+    </ul>
+  </li>
+  <li><a href="#contributors">Copyright</a></li>
+  <li><a href="#style-guidelines">Scala Style Guidelines</a></li>
+  <li><a href="#git-flow">Git Flow</a></li>
+  <li><a href="#contributing">Contributing</a></li>
+  <li><a href="#copyright">Copyright</a></li>
+</ol>
+
+<h3>
+<a name="integrating-the-util-library" class="anchor" href="#integrating-the-util-library"><span class="octicon octicon-link"></span></a>Integrating the util library</h3>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>The util library is designed to wrap common functionality in all our frameworks and offer it at the convenience of a dependency. Anything that will be useful
+ long term to a great number of people belongs in these modules, to avoid duplication and help make our devs aware they can simply use what already exists.</p>
+
+<p>The full list of available modules is:</p>
+
+<div class="highlight highlight-scala"><pre>
+<span class="n">libraryDependencies</span> <span class="o">++=</span> <span class="nc">Seq</span><span class="o">(</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-aws"</span> <span class="o">%</span> <span class="nc">UtilVersion</span><span class="o">,</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-core"</span> <span class="o">%</span> <span class="nc">UtilVersion</span><span class="o">,</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-http"</span> <span class="o">%</span> <span class="nc">UtilVersion</span><span class="o">,</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-lift"</span> <span class="o">%</span> <span class="nc">UtilVersion</span><span class="o">,</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-parsers"</span> <span class="o">%</span> <span class="nc">UtilVersion</span><span class="o">,</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-testing"</span> <span class="o">%</span> <span class="nc">UtilVersion</span><span class="o">,</span>
+  <span class="s">"com.websudos"</span> <span class="o">%%</span> <span class="s">"util-zookeeper"</span> <span class="o">%</span> <span class="nc">UtilVersion</span>
+<span class="o">)</span>
+</pre></div>
+
+<h3>
+<a name="util-testing" class="anchor" href="#util-testing"><span class="octicon octicon-link"></span></a>util-testing</h3>
+
+<p><a href="#table-of-contents&gt;Back%20to%20top&lt;/a&gt;&lt;/p&gt;%0A%0A&lt;p&gt;The%20testing%20module%20features%20the%20&lt;code&gt;AsyncAssertionsHelper&lt;/code&gt;,%20which%20builds%20on%20top%20of%20ScalaTest%20to%20offer%20simple%20asynchronous%20assertions.%20We%20use%20this%20pattern%20%0Aheavily%20throughout%20the%20Websudos%20ecosystem%20of%20projects,%20from%20internal%20to%20DSL%20modules%20and%20so%20forth.%20Asynchronous%20testing%20generally%20offers%20a%20considerable%20%0Aperformance%20gain%20in%20code.&lt;/p&gt;%0A%0A&lt;h3&gt;Asynchronous%20assertions&lt;/h3&gt;%0A%0A&lt;p&gt;&lt;a%20href=">Back to top</a></p>
+
+<p>The async assertions module features a dual API, so you can call the same methods on both <code>scala.concurrent.Future</code> and <code>com.twitter.util.Future</code>. 
+The underlying mechanism will create an async <code>Waiter</code>, that will wait for the future to complete within the given <code>PatienceConfiguration</code>. The 
+awaiting is done asynchronously and the assertions are invoked and evaluated once the future in question has returned a result.</p>
+
+<div class="highlight highlight-scala"><pre><span class="k">import</span> <span class="nn">com.websudos.util.testing.AsyncAssertionsHelper._</span>
+
+<span class="k">class</span> <span class="nc">MyTests</span> <span class="k">extends</span> <span class="nc">FlatSuite</span> <span class="k">with</span> <span class="nc">Matchers</span> <span class="o">{</span>
+
+  <span class="s">"The async computation"</span> <span class="n">should</span> <span class="s">"return 0 on completion"</span> <span class="n">in</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Int</span><span class="o">]</span> <span class="k">=</span> <span class="o">..</span> <span class="c1">// Pretend this is a Future just like any other future.</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">successful</span> <span class="o">{</span>
+      <span class="n">res</span> <span class="k">=&gt;</span> <span class="o">{</span>
+        <span class="n">res</span> <span class="n">shouldEqual</span> <span class="mi">0</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+
+  <span class="s">"This async computation"</span> <span class="n">should</span> <span class="s">"fail by design"</span> <span class="n">in</span> <span class="o">{</span>
+    <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="o">..</span>
+
+    <span class="c1">// You don't even need to do anything more than failure at this stage.</span>
+    <span class="c1">// If the Future fails, the test will succeed, as this method is used when you "expect a failure".</span>
+    <span class="c1">// You can however perform assertions on the error returned.</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">failing</span> <span class="o">{</span>
+      <span class="n">err</span> <span class="k">=&gt;</span> <span class="o">{</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+
+  <span class="s">"This async computation"</span> <span class="n">should</span> <span class="s">"fail with a specific error"</span> <span class="n">in</span> <span class="o">{</span>
+      <span class="k">val</span> <span class="n">f</span><span class="k">:</span> <span class="kt">Future</span><span class="o">[</span><span class="kt">Unit</span><span class="o">]</span> <span class="k">=</span> <span class="o">..</span>
+      <span class="n">f</span><span class="o">.</span><span class="n">failingWith</span><span class="o">[</span><span class="kt">NumberFormatException</span><span class="o">]</span> <span class="o">{</span>
+        <span class="n">err</span> <span class="k">=&gt;</span> <span class="o">{</span>
+        <span class="o">}</span>
+      <span class="o">}</span>
+    <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<p>You can directly customise the <code>timeout</code> of all <code>Waiters</code> using the ScalaTest specific time span implementations and interval configurations.</p>
+
+<div class="highlight highlight-scala"><pre><span class="k">import</span> <span class="nn">org.scalatest.concurrent.PatienceConfiguration</span>
+<span class="k">import</span> <span class="nn">org.scalatest.time.SpanSugar._</span>
+
+<span class="k">implicit</span> <span class="k">val</span> <span class="n">timeout</span><span class="k">:</span> <span class="kt">PatienceConfiguration.Timeout</span> <span class="o">=</span> <span class="n">timeout</span><span class="o">(</span><span class="mi">20</span> <span class="n">seconds</span><span class="o">)</span>
+
+</pre></div>
+
+<p>Summary:</p>
+
+<ul>
+<li>The dependency you need is <code>"com.websudos" %% "util-testing" % UtilVersion</code>.</li>
+<li>You have to import <code>com.websudos.util.testing.AsyncAssertionsHelper._</code>.</li>
+<li>You have three main assertion methods, <code>successful</code>, <code>failing</code>, and <code>failingWith</code>.</li>
+<li>You can configure the timeout of waiters with <code>implicit val timeout: PatienceConfiguration.Timeout = timeout(20 seconds)</code>.</li>
+<li>The default timeout value is <code>1 second</code>.</li>
+</ul>
+
+<h3>
+<a name="util-parsers" class="anchor" href="#util-parsers"><span class="octicon octicon-link"></span></a>util-parsers</h3>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>The parser module features an easy to use and integrate set of ScalaZ Applicative based parsers, with an <code>Option</code> based parser variant. It allows us to 
+seamlessly deal with validation chains at REST API level or whenever validation is involved. Whether it's monadic composition of options or chaining of 
+applicative functors to obtain a "correct" chain, the parser module is designed to offer an all-you-can-eat buffet of mini parsers that can be easily 
+composed to suit any validation needs. </p>
+
+<p>Each parser comes in three distinct flavours, a <code>ValidationNel</code> parser that parsers the end type from a <code>String</code> and returns the type itself, 
+a parser that parses an end result from an <code>Option[String]</code> and parserOpt variant that returns an <code>Option[T]</code> instead of a <code>ValidationNel[String, 
+T]</code>, which allows for Monadic composition, where you need to "short-circuit" evaluation and validation, instead of computing the full chain by chaining 
+applicatives.</p>
+
+<p>To illustrate the above, the <code>int</code> parser, designed to parse a <code>scala.Int</code> value from a <code>String</code>, packages the following three signatures:</p>
+
+<div class="highlight highlight-scala"><pre>  <span class="k">final</span> <span class="k">def</span> <span class="n">intOpt</span><span class="o">(</span><span class="n">str</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span>
+
+  <span class="k">final</span> <span class="k">def</span> <span class="n">int</span><span class="o">(</span><span class="n">str</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">ValidationNel</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Int</span><span class="o">]</span>
+
+  <span class="k">final</span> <span class="k">def</span> <span class="n">int</span><span class="o">(</span><span class="n">str</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">String</span><span class="o">])</span><span class="k">:</span> <span class="kt">ValidationNel</span><span class="o">[</span><span class="kt">String</span>, <span class="kt">Int</span><span class="o">]</span>
+</pre></div>
+
+<p>The full list of available parsers is:</p>
+
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Input type</th>
+<th>Output type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>int</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>intOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>long</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>longOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>double</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>doubleOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>float</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>floatOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>uuid</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>uuidOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>email</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>emailOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>timestamp</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>timestampOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>date</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+<tr>
+<td>dateOpt</td>
+<td>String</td>
+<td>Option[String]</td>
+</tr>
+</tbody>
+</table>
+
+<h3>
+<a name="option-parsers" class="anchor" href="#option-parsers"><span class="octicon octicon-link"></span></a>Option parsers</h3>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>Option parsers are designed for chains where you want to short-circuit and exit to result as soon a parser fails. This short-circuit behaviour is the default
+ <code>flatMap</code> behaviour of an <code>Option</code>, as soon as an <code>Option</code> is <code>None</code> the chain breaks. Unlike applicatives, 
+ the evaluation sequence of options will be escaped and you cannot for instance return an error for every parser that couldn't validate. Instead, 
+ you will only get the first error in the sequence.</p>
+
+<p>An example of how to use <code>Option</code> parsers might be:</p>
+
+<div class="highlight highlight-scala"><pre>
+<span class="k">import</span> <span class="nn">com.websudos.util.parsers._</span>
+
+<span class="k">object</span> <span class="nc">Test</span> <span class="o">{</span>
+  <span class="k">def</span> <span class="n">optionalParsing</span><span class="o">(</span><span class="n">email</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="k">for</span> <span class="o">{</span>
+      <span class="n">validEmail</span> <span class="k">&lt;-</span> <span class="n">emailOpt</span><span class="o">(</span><span class="n">email</span><span class="o">)</span>
+      <span class="n">validAge</span> <span class="k">&lt;-</span> <span class="n">intOpt</span><span class="o">(</span><span class="n">age</span><span class="o">)</span>
+    <span class="o">}</span> <span class="k">yield</span> <span class="n">s</span><span class="s">"This person can be reached at $validEmail and is $validAge years old"</span>
+  <span class="o">}</span>
+<span class="o">}</span>
+
+</pre></div>
+
+<h3>
+<a name="applicative-parsers" class="anchor" href="#applicative-parsers"><span class="octicon octicon-link"></span></a>Applicative parsers</h3>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>To illustrate the basic usage of applicative parsers and how to chain them, have a look below.</p>
+
+<div class="highlight highlight-scala"><pre>
+<span class="k">import</span> <span class="nn">scalaz._</span>
+<span class="k">import</span> <span class="nn">scalaz.Scalaz._</span>
+<span class="k">import</span> <span class="nn">com.websudos.util.parsers._</span>
+
+<span class="k">object</span> <span class="nc">Test</span> <span class="o">{</span>
+
+  <span class="k">def</span> <span class="n">registerUser</span><span class="o">(</span><span class="n">str</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">age</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span><span class="k">:</span> <span class="kt">Unit</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="o">(</span><span class="n">email</span><span class="o">(</span><span class="n">str</span><span class="o">)</span> <span class="o">|@|</span> <span class="n">int</span><span class="o">(</span><span class="n">age</span><span class="o">))</span> <span class="o">{</span>
+      <span class="o">(</span><span class="n">validEmail</span><span class="o">,</span> <span class="n">validAge</span><span class="o">)</span> <span class="k">=&gt;</span> <span class="o">{</span>
+      <span class="o">}</span>
+    <span class="o">}.</span><span class="n">fold</span> <span class="o">{</span>
+      <span class="c1">// .. </span>
+    <span class="o">}</span>
+  <span class="o">}</span>
+
+<span class="o">}</span>
+</pre></div>
+
+<h3>
+<a name="contributors" class="anchor" href="#contributors"><span class="octicon octicon-link"></span></a>Contributors</h3>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<ul>
+<li>Flavian Alexandru <a href="https://github.com/alexflav23" class="user-mention">@alexflav23</a>
+</li>
+<li>Jens Halm <a href="https://github.com/jenshalm" class="user-mention">@jenshalm</a>
+</li>
+<li>Bartosz Jankiewicz <a href="https://github.com/bjankie1" class="user-mention">@bjankie1</a>
+</li>
+</ul>
+
+<h1>
+<a name="copyright" class="anchor" href="#copyright"><span class="octicon octicon-link"></span></a>Copyright</h1>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>Copyright (c) 2014 websudos.</p>
+
+<h1>
+<a name="contributing-to-util" class="anchor" href="#contributing-to-util"><span class="octicon octicon-link"></span></a>Contributing to util</h1>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>Contributions are most welcome! Don't forget to add your name and GitHub handle to the list of contributors.</p>
+
+<h1>
+<a name="using-gitflow" class="anchor" href="#using-gitflow"><span class="octicon octicon-link"></span></a>Using GitFlow</h1>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>To contribute, simply submit a "Pull request" via GitHub.</p>
+
+<p>We use GitFlow as a branching model and SemVer for versioning.</p>
+
+<ul>
+<li>When you submit a "Pull request" we require all changes to be squashed.</li>
+<li>We never merge more than one commit at a time. All the n commits on your feature branch must be squashed.</li>
+<li>We won't look at the pull request until Travis CI says the tests pass, make sure tests go well.</li>
+</ul>
+
+<h1>
+<a name="scala-style-guidelines" class="anchor" href="#scala-style-guidelines"><span class="octicon octicon-link"></span></a>Scala Style Guidelines</h1>
+
+<p><a href="#table-of-contents">Back to top</a></p>
+
+<p>In spirit, we follow the <a href="http://twitter.github.io/effectivescala/">Twitter Scala Style Guidelines</a>.
+We will reject your pull request if it doesn't meet code standards, but we'll happily give you a hand to get it right. Morpheus is even using ScalaStyle to 
+build, which means your build will also fail if your code doesn't comply with the style rules.</p>
+
+<p>Some of the things that will make us seriously frown:</p>
+
+<ul>
+<li>Blocking when you don't have to. It just makes our eyes hurt when we see useless blocking.</li>
+<li>Testing should be thread safe and fully async, use <code>ParallelTestExecution</code> if you want to show off.</li>
+<li>Writing tests should use the pre-existing tools.</li>
+<li>Use the common patterns you already see here, we've done a lot of work to make it easy.</li>
+<li>Don't randomly import stuff. We are very big on alphabetized clean imports.</li>
+<li>Morpheus uses ScalaStyle during Travis CI runs to guarantee you are complying with our guidelines. Since breaking the rules will result in a failed build, 
+please take the time to read through the guidelines beforehand.</li>
+</ul>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/websudos">websudos</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
