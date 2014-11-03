@@ -5,7 +5,7 @@ import scalaz.NonEmptyList
 import net.liftweb.http.{JsonResponse, LiftResponse}
 import net.liftweb.json.{DefaultFormats, Extraction}
 
-package object lift extends LiftParsers {
+package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 

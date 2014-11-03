@@ -8,12 +8,8 @@ import org.scalatest.Tag
 
 object Sampler {
 
-  def uuid(str: String) : UUID = UUID.fromString(str)
-
-  final val universalPassword = "77fe656a9fa329d8711f438b074c73bb2c215d0af347efc0bcdd7f901e463f44"
-
-  def getAUniqueEmailAddress: String = {
-    s"${getARandomString.substring(0, 8)}@newzlytest.com"
+  def email(domain: String = "test"): String = {
+    s"${string.substring(0, 8)}@$domain.com"
   }
 
   /**
@@ -21,7 +17,7 @@ object Sampler {
    * This uses the default java GUID implementation.
    * @return A random string with 64 bits of randomness.
    */
-  def getARandomString: String = {
+  def string: String = {
     UUID.randomUUID().toString
   }
 
@@ -35,27 +31,18 @@ object Sampler {
    * @return Integer between min and max, inclusive.
    * @see java.util.Random#nextInt(int)
    */
-  def getARandomInteger(min: Int = 1, max: Int = Int.MaxValue): Int = {
+  def int(min: Int = 1, max: Int = Int.MaxValue): Int = {
     val rand = new Random()
     rand.nextInt((max - min) + 1) + min
   }
-
-  /**
-   * Get a unique random generated string.
-   * This uses the default java GUID implementation.
-   * @return A random string with 64 bits of randomness.
-   */
-  @deprecated(message = "Use getARandomString instead", "0.0.27")
-  def getAUniqueString: String = {
-    UUID.randomUUID().toString
-  }
 }
 
-object DefaultTags {
+trait DefaultTags {
   object DatabaseTest extends Tag("com.websudos.testing.tags.DatabaseTest")
   object ApiTest extends Tag("com.websudos.testing.tags.ApiTest")
   object RequestParserTest extends Tag("com.websudos.testing.tags.RequestParserTest")
   object UnstableTest extends Tag("com.websudos.testing.tags.UnstableTest")
 
 }
+
 

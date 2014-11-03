@@ -1,8 +1,10 @@
 # util[![Build Status](https://travis-ci.org/websudos/util.svg?branch=develop)](https://travis-ci.org/websudos/util)
 
-The latest available version of the util library is ```val UtilVersion = 0.2.4```. This library is only deployed to our managed Maven repository, 
+The latest available version of the util library is ```val UtilVersion = 0.3.12```. This library is only deployed to our managed Maven repository,
 available at ```http://maven.websudos.co.uk```. It is publicly available.
 
+ 
+![Util](http://websudos.com/images/work/util.png "Websudos Util")
  
 ### Table of contents ###
 
