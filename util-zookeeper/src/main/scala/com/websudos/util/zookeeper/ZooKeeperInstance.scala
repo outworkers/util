@@ -1,5 +1,4 @@
 package com.websudos.util.zookeeper
-
 /*
  *
  *  * Copyright 2014 websudos ltd.
@@ -18,10 +17,9 @@ package com.websudos.util.zookeeper
  *
  */
 import java.net.InetSocketAddress
-import java.util.concurrent.atomic.AtomicBoolean
 
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.apache.zookeeper.server.{NIOServerCnxn, ZKDatabase, ZooKeeperServer}
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 
 import com.twitter.common.io.FileUtils.createTempDir
 import com.twitter.common.quantity.{Amount, Time}
@@ -31,21 +29,21 @@ import com.twitter.finagle.exp.zookeeper.ZooKeeper
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Future, RandomSocket, Try}
 
-class ZooKeeperInstance(val address: InetSocketAddress = RandomSocket.nextAddress()) {
 
-  private[this] val status = new AtomicBoolean(false)
+private[this] object ZooKeeperInitLock
 
-  def isStarted: Boolean = status.get()
+class ZooKeeperInstance(zkPath: String, val address: InetSocketAddress = RandomSocket.nextAddress()) {
 
-  val zookeeperAddress = address
-  val zookeeperConnectString  = zookeeperAddress.getHostName + ":" + zookeeperAddress.getPort
+  private[this] var status = false
+
+  def isStarted: Boolean = status
+
+  val zookeeperConnectString  = address.getHostName + ":" + address.getPort
   val defaultZookeeperConnectorString = "localhost:2181"
 
   protected[this] val envString = "TEST_ZOOKEEPER_CONNECTOR"
 
-  val zkPath = "/cassandra"
-
-  lazy val connectionFactory: NIOServerCnxn.Factory = new NIOServerCnxn.Factory(zookeeperAddress)
+  lazy val connectionFactory: NIOServerCnxn.Factory = new NIOServerCnxn.Factory(address)
   lazy val txn = new FileTxnSnapLog(createTempDir(), createTempDir())
   lazy val zkdb = new ZKDatabase(txn)
 
@@ -59,44 +57,45 @@ class ZooKeeperInstance(val address: InetSocketAddress = RandomSocket.nextAddres
   )
   var zookeeperClient: ZooKeeperClient = null
 
-  lazy val richClient = ZooKeeper.newRichClient(zookeeperConnectString)
+  lazy val client = ZooKeeper.newRichClient(zookeeperConnectString)
 
   def resetEnvironment(cn: String = zookeeperConnectString): Unit = {
     System.setProperty(envString, cn)
   }
 
-  def start()(f: => Unit) {
-    if (status.compareAndSet(false, true)) {
+  def start(): Unit = Lock.synchronized {
+    if (!status) {
       resetEnvironment()
       connectionFactory.startup(zookeeperServer)
 
       zookeeperClient = new ZooKeeperClient(
         Amount.of(10, Time.MILLISECONDS),
-        zookeeperAddress)
+        address)
 
       val serverSet = new ServerSetImpl(zookeeperClient, zkPath)
       val cluster: ZookeeperServerSetCluster = new ZookeeperServerSetCluster(serverSet)
 
-      cluster.join(zookeeperAddress)
+      cluster.join(address)
 
-      Await.ready(richClient.connect(2.seconds), 2.seconds)
-      f
+      Await.ready(client.connect(2.seconds), 2.seconds)
       // Disable noise from zookeeper logger
       java.util.logging.LogManager.getLogManager.reset()
+      status = true
     } else {
       resetEnvironment(defaultZookeeperConnectorString)
     }
   }
 
   def stop() {
-    if (status.compareAndSet(true, false)) {
+    if (status) {
       connectionFactory.shutdown()
       zookeeperClient.close()
-      Await.ready(richClient.close(), 2.seconds)
+      Await.ready(client.close(), 2.seconds)
+      status = false
     }
   }
 
-  def hostnamePortPairs: Future[Seq[InetSocketAddress]] = richClient.getData(zkPath, watch = false) map {
+  def hostnamePortPairs: Future[Seq[InetSocketAddress]] = client.getData(zkPath, watch = false) map {
     res => Try {
       val data = new String(res.data)
       data.split("\\s*,\\s*").map(_.split(":")).map {

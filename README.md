@@ -1,6 +1,6 @@
 # util[![Build Status](https://travis-ci.org/websudos/util.svg?branch=develop)](https://travis-ci.org/websudos/util)
 
-The latest available version of the util library is ```val UtilVersion = 0.3.12```. This library is only deployed to our managed Maven repository,
+The latest available version of the util library is ```val UtilVersion = 0.4.0```. This library is only deployed to our managed Maven repository,
 available at ```http://maven.websudos.co.uk```. It is publicly available.
 
  
@@ -149,32 +149,24 @@ To illustrate the above, the ```int``` parser, designed to parse a ```scala.Int`
   final def int(str: Option[String]): ValidationNel[String, Int]
 ```
 
-The full list of available parsers is:
+
+### Option parsers ###
+<a href="#table-of-contents">Back to top</a>
+
+The full list of optional parsers is:
 
 
 | Name            | Input type                | Output type                       |
 | --------------- |---------------------------| --------------------------------- |
-| int             | String|Option[String]     | ValidationNel[String, Int]        |
 | intOpt          | String|Option[String]     | Option[Int]                       |
-| long            | String|Option[String]     | ValidationNel[String, Long]       |
 | longOpt         | String|Option[String]     | Option[Long]                      |
-| double          | String|Option[String]     | ValidationNel[String, Double]     |
 | doubleOpt       | String|Option[String]     | Option[Double]                    |
-| float           | String|Option[String]     | ValidationNel[String, Float]      |
 | floatOpt        | String|Option[String]     | Option[Float]                     |
-| uuid            | String|Option[String]     | ValidationNel[String, UUID]       |
 | uuidOpt         | String|Option[String]     | Option[java.util.UUID]            |
-| email           | String|Option[String]     | ValidationNel[String, String]     |
 | emailOpt        | String|Option[String]     | Option[String]                    |
-| timestamp       | String|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
-| timestampOpt    | String|Option[String]     | Option[org.joda.time.DateTime]                  |
-| date            | String|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
-| dateOpt         | String|Option[String]     | Option[org.joda.time.DateTime]                  |
+| timestampOpt    | String|Option[String]     | Option[org.joda.time.DateTime]    |
+| dateOpt         | String|Option[String]     | Option[org.joda.time.DateTime]    |
 
-
-
-### Option parsers ###
-<a href="#table-of-contents">Back to top</a>
 
 Option parsers are designed for chains where you want to short-circuit and exit to result as soon a parser fails. This short-circuit behaviour is the default
  ```flatMap``` behaviour of an ```Option```, as soon as an ```Option``` is ```None``` the chain breaks. Unlike applicatives, 
@@ -201,6 +193,19 @@ object Test {
 
 ### Applicative parsers ###
 <a href="#table-of-contents">Back to top</a>
+
+The full list of ScalaZ Validation based applicative parsers is:
+
+| Name            | Input type                | Output type                       |
+| --------------- |---------------------------| --------------------------------- |
+| int             | String|Option[String]     | ValidationNel[String, Int]        |
+| long            | String|Option[String]     | ValidationNel[String, Long]       |
+| double          | String|Option[String]     | ValidationNel[String, Double]     |
+| float           | String|Option[String]     | ValidationNel[String, Float]      |
+| uuid            | String|Option[String]     | ValidationNel[String, UUID]       |
+| email           | String|Option[String]     | ValidationNel[String, String]     |
+| timestamp       | String|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
+| date            | String|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
 
 To illustrate the basic usage of applicative parsers and how to chain them, have a look below.
 
@@ -238,43 +243,3 @@ object Test {
 <a href="#table-of-contents">Back to top</a>
 
 Copyright (c) 2014 websudos.
-
-
-<a id="contributing">Contributing to util</a>
-==============================================
-<a href="#table-of-contents">Back to top</a>
-
-Contributions are most welcome! Don't forget to add your name and GitHub handle to the list of contributors.
-
-
-<a id="git-flow">Using GitFlow</a>
-==================================
-<a href="#table-of-contents">Back to top</a>
-
-To contribute, simply submit a "Pull request" via GitHub.
-
-We use GitFlow as a branching model and SemVer for versioning.
-
-- When you submit a "Pull request" we require all changes to be squashed.
-- We never merge more than one commit at a time. All the n commits on your feature branch must be squashed.
-- We won't look at the pull request until Travis CI says the tests pass, make sure tests go well.
-
-<a id="style-guidelines">Scala Style Guidelines</a>
-===================================================
-<a href="#table-of-contents">Back to top</a>
-
-In spirit, we follow the [Twitter Scala Style Guidelines](http://twitter.github.io/effectivescala/).
-We will reject your pull request if it doesn't meet code standards, but we'll happily give you a hand to get it right. Morpheus is even using ScalaStyle to 
-build, which means your build will also fail if your code doesn't comply with the style rules.
-
-Some of the things that will make us seriously frown:
-
-- Blocking when you don't have to. It just makes our eyes hurt when we see useless blocking.
-- Testing should be thread safe and fully async, use ```ParallelTestExecution``` if you want to show off.
-- Writing tests should use the pre-existing tools.
-- Use the common patterns you already see here, we've done a lot of work to make it easy.
-- Don't randomly import stuff. We are very big on alphabetized clean imports.
-- Morpheus uses ScalaStyle during Travis CI runs to guarantee you are complying with our guidelines. Since breaking the rules will result in a failed build, 
-please take the time to read through the guidelines beforehand.
-
-

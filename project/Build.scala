@@ -68,7 +68,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-		version := "0.3.12",
+		version := "0.4.0",
 		scalaVersion := "2.10.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
@@ -186,6 +186,8 @@ object UtilBuild extends Build {
       "com.twitter"                      %% "finagle-zookeeper"        % FinagleVersion,
       "com.twitter"                      %% "finagle-serversets"       % FinagleVersion
     )
+  ).dependsOn(
+      websudosUtilTesting % "test"
   )
 
   lazy val websudosUtilTesting = Project(
