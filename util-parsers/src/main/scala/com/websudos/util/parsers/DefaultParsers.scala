@@ -10,7 +10,7 @@ import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormatter
 
 
-trait DefaultParsers extends LowPriorityImplicits {
+trait DefaultParsers {
 
   final def optional[T](str: Option[String])(f: String => ValidationNel[String, T]) = {
     str.fold(Option.empty[T].successNel[String]) { s =>
