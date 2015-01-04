@@ -159,8 +159,11 @@ package object testing extends ScalaFutures with DefaultTags with DefaultSampler
 
   implicit def sampleToArbitrary[T](sample: Sample[T]): Arbitrary[T] = Arbitrary(sample.sample)
 
-  implicit def arbitraryToSample[T](arbitrary: Arbitrary[T]): Sample[T] = new Sample[T] {
-    override def sample: T = arbitrary[T]
-  }
+  /*
+    implicit def arbitraryToSample[T](arbitrary: Arbitrary[T]): Sample[T] = new Sample[T] {
+      override def sample: T = arbitrary.arbitrary.sample.get
+    }
+  */
+
 
 }

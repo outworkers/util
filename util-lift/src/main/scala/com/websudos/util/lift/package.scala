@@ -46,9 +46,6 @@ package object lift extends LiftParsers with JsonHelpers {
     }
   }
 
-
-
-
   implicit class FutureResponseHelper(val responseFuture: Future[LiftResponse]) extends AnyVal {
 
     def async(failureCode: Int = 500)(implicit context: ExecutionContext): LiftResponse = {
