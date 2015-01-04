@@ -207,7 +207,7 @@ object UtilBuild extends Build {
       "org.scalatest"                    %% "scalatest"                % ScalaTestVersion,
       "joda-time"                        %  "joda-time"                % JodaTimeVersion,
       "org.joda"                         %  "joda-convert"             % "1.6",
-      "org.scalacheck"                   %% "scalacheck"               % "1.11.3"              % "test",
+      "org.scalacheck"                   %% "scalacheck"               % "1.11.4",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
     )
   ).dependsOn(

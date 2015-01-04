@@ -1,5 +1,7 @@
 package com.websudos.util
 
+import org.scalacheck.{Gen, Arbitrary}
+
 import scala.concurrent.duration._
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.{Failure, Success}
@@ -153,5 +155,15 @@ package object testing extends ScalaFutures with DefaultTags with DefaultSampler
       w.await(timeout, dismissals(1))
     }
   }
+
+
+  implicit def sampleToArbitrary[T](sample: Sample[T]): Arbitrary[T] = Arbitrary(sample.sample)
+
+  /*
+    implicit def arbitraryToSample[T](arbitrary: Arbitrary[T]): Sample[T] = new Sample[T] {
+      override def sample: T = arbitrary.arbitrary.sample.get
+    }
+  */
+
 
 }

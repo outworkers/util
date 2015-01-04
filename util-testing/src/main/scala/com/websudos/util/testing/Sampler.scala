@@ -6,7 +6,7 @@ import scala.util.Random
 
 import org.scalatest.Tag
 
-object Sampler {
+private[testing] object Sampler {
 
   def email(domain: String = "test"): String = {
     s"${string.substring(0, 8)}@$domain.com"
