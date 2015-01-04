@@ -9,15 +9,23 @@ object UtilBuild extends Build {
 
   val NettyVersion = "3.9.0.Final"
 	val ScalaTestVersion = "2.2.0-M1"
-  val FinagleVersion = "6.20.0"
+  val FinagleVersion = "6.24.0"
   val LiftVersion = "2.6-M3"
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
+
+  def liftVersion(scalaVersion: String) = {
+    (scalaVersion match {
+      case "2.10.4" => "net.liftweb" % "lift-webkit_2.10" % "3.0-M1"
+      case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M2"
+    }) % "compile"
+  }
 
   val publishUrl = "http://maven.websudos.co.uk"
 
   val publishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
+    crossScalaVersions := Seq("2.10.4", "2.11.4"),
     publishTo <<= version { (v: String) => {
       if (v.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at publishUrl + "/ext-snapshot-local")
@@ -68,8 +76,8 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-		version := "0.4.0",
-		scalaVersion := "2.10.4",
+    version := "0.5.0",
+    scalaVersion := "2.11.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
 		"Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
@@ -155,9 +163,7 @@ object UtilBuild extends Build {
     settings = Defaults.coreDefaultSettings ++ sharedSettings
   ).settings(
     name := "util-lift",
-    libraryDependencies ++= Seq(
-      "net.liftweb"             %% "lift-webkit"                    % LiftVersion % "compile"
-    )
+    libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
   ).dependsOn(
     websudosUtilParsers
   )
@@ -169,7 +175,6 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-aws",
     libraryDependencies ++= Seq(
-      "com.twitter"             %% "finagle"                           % FinagleVersion,
       "com.twitter"             %% "finagle-http"                      % FinagleVersion
     )
   ).dependsOn(
@@ -197,7 +202,7 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-testing",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "util-core"                % FinagleVersion,
+      "com.twitter"                      %% "util-core"                % "6.23.0",
       "org.scalatest"                    %% "scalatest"                % ScalaTestVersion,
       "joda-time"                        %  "joda-time"                % JodaTimeVersion,
       "org.joda"                         %  "joda-convert"             % "1.6",

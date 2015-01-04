@@ -44,7 +44,7 @@ trait LiftParsers extends DefaultParsers {
   }
 }
 
-trait JsonHelpers extends LowPriorityImplicits {
+trait JsonHelpers {
 
   def toJson[T <: Product with Serializable](obj: T)(implicit formats: Formats): String = {
     compactRender(Extraction.decompose(obj))
