@@ -39,6 +39,10 @@ import scalaz.NonEmptyList
 
 package object lift extends LiftParsers with JsonHelpers {
 
+  implicit class ResponseToFuture(val response: LiftResponse) extends AnyVal {
+    def toFuture()(implicit context: ExecutionContext): Future[LiftResponse] = Future(response)
+  }
+
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
     def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, resp.list))
@@ -64,6 +68,15 @@ package object lift extends LiftParsers with JsonHelpers {
     }
   }
 
+  implicit class JsonSeqHelper[T <: Product with Serializable](val list: Seq[T]) extends AnyVal {
+    def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+      compactRender(Extraction.decompose(list))
+    }
+
+    def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
+      Extraction.decompose(list)
+    }
+  }
 
   implicit class JsonListHelper[T <: Product with Serializable](val list: List[T]) extends AnyVal {
     def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {

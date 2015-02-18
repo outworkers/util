@@ -52,7 +52,7 @@ object UtilBuild extends Build {
 
   val publishUrl = "http://maven.websudos.co.uk"
 
-  val publishSettings : Seq[Def.Setting[_]] = Seq(
+  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     crossScalaVersions := Seq("2.10.4", "2.11.4"),
     publishTo <<= version { (v: String) => {
@@ -67,7 +67,7 @@ object UtilBuild extends Build {
     pomIncludeRepository := { _ => true }
   )
 
-  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
+  val publishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     publishTo <<= version.apply {
@@ -105,7 +105,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.5.0",
+    version := "0.6.0",
     scalaVersion := "2.11.4",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
