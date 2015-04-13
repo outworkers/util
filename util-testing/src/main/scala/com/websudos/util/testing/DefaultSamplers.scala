@@ -29,18 +29,29 @@
  */
 package com.websudos.util.testing
 
-import java.util.{Date, UUID}
+import java.util.{Locale, Date, UUID}
 
 import org.joda.time.{LocalDate, DateTime}
+import org.scalacheck.Gen
 
 trait Sample[T] {
   def sample: T
 }
 
 case class EmailAddress(address: String)
+case class FirstName(name: String)
+case class LastName(name: String)
+case class FullName(name: String)
+case class CountryCode(code: String)
 
+case class Country(country: String)
+case class City(city: String)
+case class ProgrammingLanguage(language: String)
+case class LoremIpsum(word: String)
 
 sealed trait Generators {
+
+  private[this] def defaultProducer[T](obj: T): String = obj.toString
 
   /**
    * Uses the type class available in implicit scope to mock a certain custom object.
@@ -55,7 +66,9 @@ sealed trait Generators {
 
   def genList[T : Sample](limit: Int = 5): List[T] = List.range(1, limit) map(_ => gen[T])
 
-  def genMap[T: Sample](limit: Int = 5): Map[String, T] = genList[T]().map(x => {x.toString -> x}).toMap
+  def genMap[T: Sample, Y](limit: Int = 5)(producer: (T => Y) = defaultProducer[T] _): Map[Y, T] = {
+    genList[T]().map(x => {producer(x) -> x}).toMap
+  }
 }
 
 trait DefaultSamplers extends Generators {
@@ -75,7 +88,6 @@ trait DefaultSamplers extends Generators {
   implicit object FloatSample extends Sample[Float] {
     def sample: Float = gen[Int].toFloat
   }
-
 
   implicit object LongSample extends Sample[Long] {
     def sample: Long = gen[Int].toLong
@@ -107,6 +119,38 @@ trait DefaultSamplers extends Generators {
 
   implicit object EmailSample extends Sample[EmailAddress] {
     def sample: EmailAddress = EmailAddress(Sampler.email())
+  }
+
+  implicit object FirstNameSampler extends Sample[FirstName] {
+    def sample: FirstName = FirstName(Sampler.factory.getFirstName)
+  }
+
+  implicit object LastNameSampler extends Sample[LastName] {
+    def sample: LastName = LastName(Sampler.factory.getLastName)
+  }
+
+  implicit object FullNameSampler extends Sample[FullName] {
+    def sample: FullName = FullName(s"${Sampler.factory.getFirstName} ${Sampler.factory.getLastName}")
+  }
+
+  implicit object CountryCodeSampler extends Sample[CountryCode] {
+    def sample: CountryCode = CountryCode(Gen.oneOf(Locale.getISOCountries).sample.get)
+  }
+
+  implicit object CountrySampler extends Sample[Country] {
+    def sample: Country = Country(Gen.oneOf(CommonDataSamplers.Countries).sample.get)
+  }
+
+  implicit object CitySampler extends Sample[City] {
+    def sample: City = City(Gen.oneOf(CommonDataSamplers.Cities).sample.get)
+  }
+
+  implicit object ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
+    def sample: ProgrammingLanguage = ProgrammingLanguage(Gen.oneOf(CommonDataSamplers.PrgrammingLanguages).sample.get)
+  }
+
+  implicit object LoremIpsumSampler extends Sample[LoremIpsum] {
+    def sample: LoremIpsum = LoremIpsum(Gen.oneOf(CommonDataSamplers.LoremIpsum).sample.get)
   }
 }
 

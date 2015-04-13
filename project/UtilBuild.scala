@@ -27,34 +27,30 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-import org.scalastyle.sbt.ScalastylePlugin
-import org.scoverage.coveralls.CoverallsPlugin.coverallsSettings
-
 import sbt.Keys._
 import sbt._
-import scoverage.ScoverageSbtPlugin.instrumentSettings
 
 object UtilBuild extends Build {
 
   val NettyVersion = "3.9.0.Final"
 	val ScalaTestVersion = "2.2.0-M1"
   val FinagleVersion = "6.24.0"
-  val LiftVersion = "2.6-M3"
+  val LiftVersion = "2.6-M4"
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
 
   def liftVersion(scalaVersion: String) = {
     (scalaVersion match {
-      case "2.10.4" => "net.liftweb" % "lift-webkit_2.10" % "3.0-M1"
+      case "2.10.4" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
       case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M2"
     }) % "compile"
   }
 
   val publishUrl = "http://maven.websudos.co.uk"
 
-  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
+  val publishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    crossScalaVersions := Seq("2.10.4", "2.11.4"),
+    crossScalaVersions := Seq("2.10.4", "2.11.5"),
     publishTo <<= version { (v: String) => {
       if (v.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at publishUrl + "/ext-snapshot-local")
@@ -67,7 +63,7 @@ object UtilBuild extends Build {
     pomIncludeRepository := { _ => true }
   )
 
-  val publishSettings : Seq[Def.Setting[_]] = Seq(
+  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     publishTo <<= version.apply {
@@ -81,7 +77,7 @@ object UtilBuild extends Build {
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
     pomExtra :=
-      <url>https://github.com/websudosuk/morpheus</url>
+      <url>https://github.com/websudos/util</url>
         <licenses>
           <license>
             <name>Apache License, Version 2.0</name>
@@ -90,8 +86,8 @@ object UtilBuild extends Build {
           </license>
         </licenses>
         <scm>
-          <url>git@github.com:websudosuk/morpheus.git</url>
-          <connection>scm:git:git@github.com:websudosuk/morpheus.git</connection>
+          <url>git@github.com:websudos/util.git</url>
+          <connection>scm:git:git@github.com:websudos/util.git</connection>
         </scm>
         <developers>
           <developer>
@@ -102,11 +98,10 @@ object UtilBuild extends Build {
         </developers>
   )
 
-
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.6.0",
-    scalaVersion := "2.11.4",
+    version := "0.7.0",
+    scalaVersion := "2.11.5",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
 		"Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
@@ -127,15 +122,15 @@ object UtilBuild extends Build {
       "-unchecked"
 		),
     libraryDependencies ++= Seq(
-      "org.scalatest"           %% "scalatest"                          % ScalaTestVersion % "test, provided"
+      "org.scalatest"           %% "scalatest" % ScalaTestVersion % "test, provided"
     )
-	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ instrumentSettings ++ publishSettings ++ ScalastylePlugin.Settings
+	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ publishSettings
 
 
 	lazy val websudosUtil = Project(
 		id = "util",
 		base = file("."),
-		settings = Defaults.coreDefaultSettings ++ sharedSettings ++ coverallsSettings
+		settings = Defaults.coreDefaultSettings ++ sharedSettings
 	).aggregate(
     websudosUtilAws,
 		websudosUtilCore,
@@ -183,7 +178,8 @@ object UtilBuild extends Build {
       "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % "test, provided"
     )
   ).dependsOn(
-    websudosUtilHttp
+    websudosUtilHttp,
+    websudosUtilTesting % "test, provided"
   )
 
   lazy val websudosUtilLift = Project(
@@ -194,7 +190,8 @@ object UtilBuild extends Build {
     name := "util-lift",
     libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
   ).dependsOn(
-    websudosUtilParsers
+    websudosUtilParsers,
+    websudosUtilTesting % "test, provided"
   )
 
   lazy val websudosUtilAws = Project(
@@ -207,7 +204,8 @@ object UtilBuild extends Build {
       "com.twitter"             %% "finagle-http"                      % FinagleVersion
     )
   ).dependsOn(
-    websudosUtilHttp
+    websudosUtilHttp,
+      websudosUtilTesting % "test, provided"
   )
 
   lazy val websudosZooKeeper = Project(
@@ -238,7 +236,5 @@ object UtilBuild extends Build {
       "org.scalacheck"                   %% "scalacheck"               % "1.11.4",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
     )
-  ).dependsOn(
-    websudosUtilHttp
   )
 }
