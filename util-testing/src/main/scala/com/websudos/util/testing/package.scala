@@ -29,7 +29,7 @@
  */
 package com.websudos.util
 
-import com.twitter.util.{Await, Duration, Future, Return, Throw}
+import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalacheck.Arbitrary
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{AsyncAssertions, PatienceConfiguration, ScalaFutures}
@@ -38,34 +38,23 @@ import scala.concurrent.duration._
 import scala.concurrent.{Await => ScalaAwait, ExecutionContext, Future => ScalaFuture}
 import scala.util.{Failure, Success}
 
-package object testing extends ScalaFutures with DefaultTags with DefaultSamplers {
+package object testing extends ScalaFutures with DefaultTags with DefaultSamplers with ScalaTestHelpers {
   /**
    * The default timeout of the asynchronous assertions.
    * To override this, simply define another implicit timeout in the desired scope.
    */
   implicit val s: PatienceConfiguration.Timeout = timeout(1 second)
 
-  /**
-   * A simple augmentation adding a .sync() method to a @code {com.twitter.util.Future}.
-   * This is a blocking computation.
-   * @param future The future to execute.
-   * @tparam T The underlying return type of the computation.
-   */
-  implicit class SyncFuture[T](future: Future[T]) {
-    def sync(): T = {
-      Await.result(future, Duration.fromSeconds(10))
+
+  implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
+    def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {
+      ScalaAwait.result(future, duration)
     }
   }
 
-  /**
-   * A simple augmentation adding a .sync() method to a @code {com.twitter.util.Future}.
-   * This is a blocking computation.
-   * @param future The future to execute.
-   * @tparam T The underlying return type of the computation.
-   */
-  implicit class ScalaSyncFuture[T](future: ScalaFuture[T])(implicit ec: ExecutionContext) {
-    def sync(): T = {
-      ScalaAwait.result(future, 5000 millis)
+  implicit class TwitterBlockHelper[T](val f: Future[T]) extends AnyVal {
+    def block(duration: com.twitter.util.Duration): T = {
+      Await.result(f, duration)
     }
   }
 
@@ -160,7 +149,6 @@ package object testing extends ScalaFutures with DefaultTags with DefaultSampler
       fs foreach (_ onComplete {
         case Failure(er) =>
           w(intercept[T](er))
-          println(s"Bad success $er")
           w.dismiss()
         case Success(data) => w.dismiss()
       })
@@ -184,13 +172,11 @@ package object testing extends ScalaFutures with DefaultTags with DefaultSampler
   }
 
 
-  implicit def sampleToArbitrary[T](sample: Sample[T]): Arbitrary[T] = Arbitrary(sample.sample)
+  implicit def sampleToArbitrary[T](gen: Sample[T]): Arbitrary[T] = Arbitrary(gen.sample)
 
-  /*
-    implicit def arbitraryToSample[T](arbitrary: Arbitrary[T]): Sample[T] = new Sample[T] {
-      override def sample: T = arbitrary.arbitrary.sample.get
-    }
-  */
+  implicit def arbitraryToSample[T](arbitrary: Arbitrary[T]): Sample[T] = new Sample[T] {
+    override def sample: T = arbitrary.arbitrary.sample.get
+  }
 
 
 }

@@ -33,14 +33,14 @@ import net.liftweb.http.rest.RestContinuation
 import net.liftweb.http.{JsonResponse, LiftResponse}
 import net.liftweb.json._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
-import scalaz.NonEmptyList
+import scalaz.{NonEmptyList, ValidationNel}
 
 package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ResponseToFuture(val response: LiftResponse) extends AnyVal {
-    def toFuture()(implicit context: ExecutionContext): Future[LiftResponse] = Future(response)
+    def toFuture(): Future[LiftResponse] = Promise.successful(response).future
   }
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
@@ -54,9 +54,8 @@ package object lift extends LiftParsers with JsonHelpers {
 
     def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, List(err.getMessage)))
 
-    def toJson(code: Int): LiftResponse = JsonResponse(Extraction.decompose(toError(code))(DefaultFormats))
+    def toJson(code: Int)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
   }
-
 
   implicit class JsonHelper[T <: Product with Serializable](val clz: T) extends AnyVal {
     def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
@@ -99,6 +98,24 @@ package object lift extends LiftParsers with JsonHelpers {
           }
         }
       }
+    }
+  }
+
+  implicit class ValidationResponseHelper[+A](val eval: ValidationNel[String, A]) extends AnyVal {
+    def respond(pf: A => LiftResponse)(code: Int = 400): LiftResponse = {
+      eval.fold(_.toJson(code), pf)
+    }
+
+    def async(pf: A => Future[LiftResponse])(code: Int = 400): Future[LiftResponse] = {
+      eval.fold(_.toJson(code).toFuture(), pf)
+    }
+
+    def respond(pf: A => LiftResponse): LiftResponse = {
+      eval.fold(_.toJson(), pf)
+    }
+
+    def async(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
+      eval.fold(_.toJson().toFuture(), pf)
     }
   }
 
