@@ -31,16 +31,15 @@ package com.websudos.util.zookeeper
 
 import java.net.InetSocketAddress
 
-import org.apache.zookeeper.server.{NIOServerCnxn, ZKDatabase, ZooKeeperServer}
-import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-
 import com.twitter.common.io.FileUtils.createTempDir
 import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.exp.zookeeper.ZooKeeper
-import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
+import com.twitter.finagle.zookeeper.ZkResolver
 import com.twitter.util.{Await, Future, RandomSocket, Try}
+import org.apache.zookeeper.server.persistence.FileTxnSnapLog
+import org.apache.zookeeper.server.{NIOServerCnxn, ZKDatabase, ZooKeeperServer}
 
 
 private[this] object ZooKeeperInitLock
@@ -81,16 +80,15 @@ class ZooKeeperInstance(zkPath: String, val address: InetSocketAddress = RandomS
       resetEnvironment()
       connectionFactory.startup(zookeeperServer)
 
-      zookeeperClient = new ZooKeeperClient(
-        Amount.of(10, Time.MILLISECONDS),
-        address)
+      zookeeperClient = new ZooKeeperClient(Amount.of(10, Time.MILLISECONDS), address)
 
       val serverSet = new ServerSetImpl(zookeeperClient, zkPath)
-      val cluster: ZookeeperServerSetCluster = new ZookeeperServerSetCluster(serverSet)
+      val cluster: ZkResolver = new ZkResolver()
 
-      cluster.join(address)
+      cluster.bind(zookeeperConnectString)
 
       Await.ready(client.connect(2.seconds), 2.seconds)
+
       // Disable noise from zookeeper logger
       java.util.logging.LogManager.getLogManager.reset()
       status = true

@@ -183,4 +183,16 @@ trait DefaultParsers {
       first.successNel[String]
     }
   }
+
+
+  final def enumOpt[T <: Enumeration](obj: String, enum: T): ValidationNel[String, T#Value] = {
+    Try(enum.withName(obj)).toOption
+      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(item => item.successNel[String])
+  }
+
+  final def enum[T <: Enumeration](obj: String, enum: T): ValidationNel[String, T#Value] = {
+    enumOpt(obj, enum)
+      .fold(_ => s"Value $obj is not part of the enumeration".failureNel[T#Value], _.successNel[String])
+  }
+
 }

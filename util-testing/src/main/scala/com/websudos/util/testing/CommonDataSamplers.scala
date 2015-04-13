@@ -29,8 +29,8 @@
  */
 package com.websudos.util.testing
 
-trait CommonDataSamplers {
-  private[this] val Names = List(
+private[testing] trait CommonDataSamplers {
+  val Names = List(
     "Aleksandar", "Alexander", "Ali", "Amar", "Andrei", "Aron", "Artem", "Artyom", "Ben", "Bence", "Charlie",
     "Davit ", "Dylan", "Emil", "Filip", "Francesco", "Gabriel", "Georgi ", "Georgios", "Giorgi", "Hugo",
     "Jack", "Jakub", "James", "João", "Jon", "Jonas", "Jónas", "Luca", "Lucas", "Luka", "Lukas", "Luke",
@@ -39,14 +39,14 @@ trait CommonDataSamplers {
     "William", "Yanis", "Yerasyl ", "Yusif", "Yusuf"
   )
 
-  private[this] val Surnames = List(
+  val Surnames = List(
     "Smith", "Jones", "Taylor", "Brown", "Williams", "Wilson", "Johnson", "Davies", "Robinson", "Wright",
     "Thompson", "Evans", "Walker", "White", "Roberts", "Green", "Hall", "Wood", "Jackson", "Clarke"
   )
 
-  private[this] val Environments = List("Linux", "Unix", "FreeBSD", "Windows", "Android", "Mac OS X")
+  val Environments = List("Linux", "Unix", "FreeBSD", "Windows", "Android", "Mac OS X")
 
-  private[this] val Cities = List(
+  val Cities = List(
     "Berlin", "Madrid", "Rome", "Paris", "Hamburg", "Budapest", "Vienna", "Warsaw", "Bucharest", "Barcelona",
     "Stockholm", "Munich", "Milan", "Prague", "Sofia", "Copenhagen", "Birmingham", "Cologne", "Brussels",
     "Naples", "Turin", "Marseille", "Valencia", "Amsterdam", "Zagreb", "Kraków", "Riga", "Łódź", "Athens",
@@ -76,73 +76,24 @@ trait CommonDataSamplers {
     "sint", "sit", "sunt", "tempor", "ullamco", "ut", "velit", "veniam", "voluptate"
   )
 
-  private[this] val Languages = List(
+  val PrgrammingLanguages = List(
     "C", "Java", "Objective-C", "C++", "Basic", "C#", "Python", "PHP", "Perl", "JavaScript", "Visual Basic",
     "Visual Basic .NET", "Ruby", "F#", "Pascal", "Transact-SQL", "ActionScript", "Delphi/Object Pascal",
     "Lisp", "PL/SQL", "MATLAB", "SAS", "Swift", "Assembly", "ML", "Logo", "PostScript", "D", "COBOL", "R",
     "OpenEdge ABL", "ABAP", "Ada", "Fortran", "Lua", "C shell", "Scratch", "Go", "Scala", "Haskell",
     "Z shell", "cT", "PL/I", "Scheme", "Erlang", "Prolog", "Tcl", "Hack", "Groovy", "LabVIEW")
 
-  private[this] val Libraries = List("JQuery", "Kafka")
+  val Libraries = List("JQuery", "Kafka")
 
-  private[this] val Tools = List("GitHub", "Git", "Ansible", "Mercurial", "SVN", "Fossil")
+  val Tools = List("GitHub", "Git", "Ansible", "Mercurial", "SVN", "Fossil")
 
-  private[this] val Paradigms = List("MVC", "TTD", "BDD", "Asynchronous Programming", "OOP")
+  val Paradigms = List("MVC", "TTD", "BDD", "Asynchronous Programming", "OOP")
 
-  private[this] val Platforms = List("Linux", "Windows", "IOS")
+  val Platforms = List("Linux", "Windows", "IOS")
 
-  private[this] val Storage = List("Memcache", "MongoDb", "Cassandra")
+  val Storage = List("Memcache", "MongoDb", "Cassandra")
 
-  /*
-  val date: Gen[DateTime] = for {
-    year <- choose(2010, 2014)
-    month <- oneOf(1, 12)
-    day <- oneOf(1, 28)
-  } yield new DateTime(year, month, day)
-
-  def sentence(words: Int = 5): Gen[String] = for {
-    ws <- listOfN(words, oneOf(LoremIpsum))
-  } yield {
-    val s = ws.mkString("")
-    s.head.toUpper + s.tail + "."
-  }
-    
-  def sentences(n: Int = 5, words: Int = 5): Gen[String] = for {
-    s <- listOfN(n, sentence(words))
-  } yield s.mkString(" ")
-  */
-
-
-  /*
-    val developerWithAttribute: Gen[(Developer, Attribute)] = for {
-      name        <- oneOf(Names)
-      surname     <- oneOf(Surnames)
-      active      <- arbitrary[Boolean]
-      startTime   <- date
-      city        <- oneOf(Cities)
-      country     <- oneOf(Countries)
-      description <- sentences(5)
-      availability <- sentences(3)
-      preferedEnvironment <- oneOf(Environments)
-      amazing <- sentences(1)
-    } yield {
-      val fullName = name + " " + surname
-      val uid = MockUid(fullName)
-  
-      val developer = Developer(uid, active, name, fullName, -1)
-      val atribute = Attribute(
-        id = -1L,
-        photo = s"http://example.com/photos/$uid.png",
-        startTime = startTime,
-        city = city,
-        country = country,
-        description = description,
-        availability = availability,
-        preferedEnvironment = preferedEnvironment,
-        amazing = amazing,
-        devUid = "")
-  
-      (developer, atribute)
-    }
-    */
 }
+
+
+private[testing] object CommonDataSamplers extends CommonDataSamplers
