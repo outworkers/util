@@ -48,9 +48,9 @@ object UtilBuild extends Build {
 
   val publishUrl = "http://maven.websudos.co.uk"
 
-  val publishSettings : Seq[Def.Setting[_]] = Seq(
+  val mvnpublishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    crossScalaVersions := Seq("2.10.4", "2.11.5"),
+    crossScalaVersions := Seq("2.10.5", "2.11.5"),
     publishTo <<= version { (v: String) => {
       if (v.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at publishUrl + "/ext-snapshot-local")
@@ -63,7 +63,7 @@ object UtilBuild extends Build {
     pomIncludeRepository := { _ => true }
   )
 
-  val mavenPublishSettings : Seq[Def.Setting[_]] = Seq(
+  val publishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     publishTo <<= version.apply {
@@ -91,7 +91,7 @@ object UtilBuild extends Build {
         </scm>
         <developers>
           <developer>
-            <id>alexflav</id>
+            <id>alexflav23</id>
             <name>Flavian Alexandru</name>
             <url>http://github.com/alexflav23</url>
           </developer>
@@ -100,8 +100,8 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.7.0",
-    scalaVersion := "2.11.5",
+    version := "0.7.1",
+    scalaVersion := "2.11.6",
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
 		"Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",

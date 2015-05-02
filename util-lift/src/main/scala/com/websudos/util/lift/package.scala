@@ -35,6 +35,7 @@ import net.liftweb.json._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
+import scalaz.syntax.ApplicativeBuilder
 import scalaz.{NonEmptyList, ValidationNel}
 
 package object lift extends LiftParsers with JsonHelpers {
@@ -118,5 +119,4 @@ package object lift extends LiftParsers with JsonHelpers {
       eval.fold(_.toJson().toFuture(), pf)
     }
   }
-
 }
