@@ -35,13 +35,13 @@ object UtilBuild extends Build {
   val NettyVersion = "3.9.0.Final"
 	val ScalaTestVersion = "2.2.0-M1"
   val FinagleVersion = "6.24.0"
-  val LiftVersion = "2.6-M4"
+  val LiftVersion = "3.0-M1"
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
 
   def liftVersion(scalaVersion: String) = {
     (scalaVersion match {
-      case "2.10.4" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
+      case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
       case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M2"
     }) % "compile"
   }
@@ -50,7 +50,6 @@ object UtilBuild extends Build {
 
   val mvnpublishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    crossScalaVersions := Seq("2.10.5", "2.11.5"),
     publishTo <<= version { (v: String) => {
       if (v.trim.endsWith("SNAPSHOT"))
         Some("snapshots" at publishUrl + "/ext-snapshot-local")
@@ -100,8 +99,9 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.7.1",
+    version := "0.7.5",
     scalaVersion := "2.11.6",
+    crossScalaVersions := Seq("2.10.5", "2.11.6"),
 		resolvers ++= Seq(
 		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
 		"Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
