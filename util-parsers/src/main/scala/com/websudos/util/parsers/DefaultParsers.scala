@@ -69,6 +69,24 @@ trait DefaultParsers {
     parseRequired(str)(uuid)
   }
 
+  final def booleanOpt(str: String): Option[Boolean] = {
+    str match {
+      case "true" => Some(true)
+      case "false" => Some(false)
+      case _ => None
+    }
+  }
+
+
+  final def boolean(str: String): ValidationNel[String, Boolean] = {
+    booleanOpt(str)
+      .fold(s"Couldn't parse boolean from value $str".failureNel[Boolean])(_.successNel[String])
+  }
+
+  final def boolean(str: Option[String]): ValidationNel[String, DateTime] = {
+    parseRequired(str)(_ => boolean(str))
+  }
+
   final def timestampOpt(str: String): Option[DateTime] = {
     Try(new DateTime(str.toLong)).toOption
   }
@@ -183,7 +201,6 @@ trait DefaultParsers {
       first.successNel[String]
     }
   }
-
 
   final def enumOpt[T <: Enumeration](obj: String, enum: T): ValidationNel[String, T#Value] = {
     Try(enum.withName(obj)).toOption

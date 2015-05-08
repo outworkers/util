@@ -51,8 +51,6 @@ case class LoremIpsum(word: String)
 
 sealed trait Generators {
 
-  private[this] def defaultProducer[T](obj: T): String = obj.toString
-
   /**
    * Uses the type class available in implicit scope to mock a certain custom object.
    * @tparam T The parameter to mock.
@@ -64,10 +62,40 @@ sealed trait Generators {
 
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
 
-  def genList[T : Sample](limit: Int = 5): List[T] = List.range(1, limit) map(_ => gen[T])
+  def genList[T : Sample](size: Int = 5): List[T] = List.tabulate(size)(i => gen[T])
 
-  def genMap[T: Sample, Y](limit: Int = 5)(producer: (T => Y) = defaultProducer[T] _): Map[Y, T] = {
-    genList[T]().map(x => {producer(x) -> x}).toMap
+  def genMap[T: Sample](size: Int = 5): Map[String, T] = {
+    genList[T](size).map(item => (item.toString, item)).toMap
+  }
+
+  /**
+   * Generates a map of known key -> value types using implicit samplers.
+   * @param size The number of elements to generate in the map.
+   * @tparam Key The type of the key the generated map should have. Needs a Sample[Key] in scope.
+   * @tparam Value The type of the value the generated map should have. Needs a Sample[Value] in scope.
+   * @return A key -> value map generated using the pre-defined samples for Key and Value.
+   */
+  def genMap[Key : Sample, Value : Sample](size: Int): Map[Key, Value] = {
+    List.tabulate(size)(i => (gen[Key], gen[Value])).toMap
+  }
+
+  /**
+   * Generates a map using a Sampler for the key and a function Key -> Value for the value.
+   * Useful when the value of a key can be inferred by knowing the key itself.
+   *
+   * The implementation uses the value during mapping as the genMap function called with
+   * a single type argument will generate a Map[String, Type].
+   *
+   * @param size The size of the map to generate.
+   * @param producer The function used to generate the value from a key.
+   * @tparam Key The type of the Key to generate, needs to have a Sample available in scope.
+   * @tparam Value The type of the Value to generate.
+   * @return A map of the given size with sampled keys and values inferred by the producer function.
+   */
+  def genMap[Key : Sample, Value](size: Int, producer: Key => Value): Map[Key, Value] = {
+    genMap[Key](size) map {
+      case (k, v) => (v, producer(v))
+    }
   }
 }
 

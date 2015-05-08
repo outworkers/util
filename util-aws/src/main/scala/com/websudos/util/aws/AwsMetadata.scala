@@ -31,15 +31,12 @@ package com.websudos.util.aws
 
 import java.net.InetSocketAddress
 
-import scala.annotation.switch
-
-import org.jboss.netty.handler.codec.http.HttpResponseStatus
-
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.{Http, RequestBuilder}
 import com.twitter.util.Future
 import com.websudos.util.http._
+import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 
 object AwsMetadata {
@@ -67,9 +64,10 @@ object AwsMetadata {
 
     client(req) map  {
       response => {
-        (response.getStatus: @switch) match {
-          case HttpResponseStatus.OK => Some(response.body)
-          case _ => None
+        if (response.getStatus == HttpResponseStatus.OK) {
+          Some(response.body)
+        } else {
+          None
         }
       }
     }

@@ -118,5 +118,4 @@ package object lift extends LiftParsers with JsonHelpers {
       eval.fold(_.toJson().toFuture(), pf)
     }
   }
-
 }

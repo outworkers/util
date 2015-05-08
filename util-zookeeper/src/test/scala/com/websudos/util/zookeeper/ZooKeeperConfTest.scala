@@ -30,13 +30,20 @@
 package com.websudos.util.zookeeper
 
 import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
 
 import com.twitter.util.RandomSocket
+import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.{BeforeAndAfterAll, Matchers, FlatSpec}
 import com.twitter.conversions.time._
 import com.websudos.util.testing._
 
+import scala.concurrent.duration.Duration
+
 class ZooKeeperConfTest extends FlatSpec with Matchers with BeforeAndAfterAll {
+
+
+  implicit val patience: PatienceConfiguration.Timeout = timeout(Duration(3L, TimeUnit.SECONDS))
 
   val testPath = "/" + gen[String]
   val instance = new ZooKeeperInstance(testPath)

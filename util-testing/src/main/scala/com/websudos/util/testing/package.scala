@@ -30,21 +30,13 @@
 package com.websudos.util
 
 import com.twitter.util.{Await, Future, Return, Throw}
-import org.scalacheck.Arbitrary
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{AsyncAssertions, PatienceConfiguration, ScalaFutures}
 
-import scala.concurrent.duration._
 import scala.concurrent.{Await => ScalaAwait, ExecutionContext, Future => ScalaFuture}
 import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures with DefaultTags with DefaultSamplers with ScalaTestHelpers {
-  /**
-   * The default timeout of the asynchronous assertions.
-   * To override this, simply define another implicit timeout in the desired scope.
-   */
-  implicit val s: PatienceConfiguration.Timeout = timeout(1 second)
-
 
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {
@@ -170,13 +162,4 @@ package object testing extends ScalaFutures with DefaultTags with DefaultSampler
       w.await(timeout, dismissals(1))
     }
   }
-
-
-  implicit def sampleToArbitrary[T](gen: Sample[T]): Arbitrary[T] = Arbitrary(gen.sample)
-
-  implicit def arbitraryToSample[T](arbitrary: Arbitrary[T]): Sample[T] = new Sample[T] {
-    override def sample: T = arbitrary.arbitrary.sample.get
-  }
-
-
 }

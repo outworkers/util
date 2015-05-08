@@ -30,12 +30,19 @@
 package com.websudos.util.zookeeper
 
 import java.net.{InetAddress, InetSocketAddress}
+import java.util.concurrent.TimeUnit
 
+import org.scalatest.concurrent.PatienceConfiguration
 import org.scalatest.{BeforeAndAfterAll, Matchers, FlatSpec}
 import com.websudos.util.testing._
 
+import scala.concurrent.duration.Duration
+
 
 class ZooKeeperInstanceTest extends FlatSpec with Matchers with BeforeAndAfterAll {
+
+  implicit val patience: PatienceConfiguration.Timeout = timeout(Duration(3L, TimeUnit.SECONDS))
+
   val path = "/" + gen[String]
   val instance = new ZooKeeperInstance(path)
 

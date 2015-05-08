@@ -36,7 +36,7 @@ import com.twitter.common.quantity.{Amount, Time}
 import com.twitter.common.zookeeper.{ServerSetImpl, ZooKeeperClient}
 import com.twitter.conversions.time._
 import com.twitter.finagle.exp.zookeeper.ZooKeeper
-import com.twitter.finagle.zookeeper.ZkResolver
+import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Future, RandomSocket, Try}
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
 import org.apache.zookeeper.server.{NIOServerCnxn, ZKDatabase, ZooKeeperServer}
@@ -67,7 +67,11 @@ class ZooKeeperInstance(zkPath: String, val address: InetSocketAddress = RandomS
     new ZooKeeperServer.BasicDataTreeBuilder,
     zkdb
   )
-  var zookeeperClient: ZooKeeperClient = null
+
+  lazy val zookeeperClient: ZooKeeperClient = new ZooKeeperClient(
+    Amount.of(10, Time.MILLISECONDS),
+    address
+  )
 
   lazy val client = ZooKeeper.newRichClient(zookeeperConnectString)
 
@@ -78,26 +82,29 @@ class ZooKeeperInstance(zkPath: String, val address: InetSocketAddress = RandomS
   def start(): Unit = Lock.synchronized {
     if (!status) {
       resetEnvironment()
+
       connectionFactory.startup(zookeeperServer)
 
-      zookeeperClient = new ZooKeeperClient(Amount.of(10, Time.MILLISECONDS), address)
-
       val serverSet = new ServerSetImpl(zookeeperClient, zkPath)
-      val cluster: ZkResolver = new ZkResolver()
 
-      cluster.bind(zookeeperConnectString)
+      new ZookeeperServerSetCluster(serverSet).join(address)
 
-      Await.ready(client.connect(2.seconds), 2.seconds)
+      Await.ready(client.connect(2.seconds), 5.seconds)
 
       // Disable noise from zookeeper logger
       java.util.logging.LogManager.getLogManager.reset()
+
       status = true
     } else {
       resetEnvironment(defaultZookeeperConnectorString)
     }
   }
 
-  def stop() {
+  private[this] def appendPath(str: String): String = {
+    if (str.startsWith("/")) str else "/" + str
+  }
+
+  def stop(): Unit = Lock.synchronized {
     if (status) {
       connectionFactory.shutdown()
       zookeeperClient.close()
@@ -107,11 +114,13 @@ class ZooKeeperInstance(zkPath: String, val address: InetSocketAddress = RandomS
   }
 
   def hostnamePortPairs: Future[Seq[InetSocketAddress]] = client.getData(zkPath, watch = false) map {
-    res => Try {
-      val data = new String(res.data)
-      data.split("\\s*,\\s*").map(_.split(":")).map {
-        case Array(hostname, port) => new InetSocketAddress(hostname, port.toInt)
-      }.toSeq
-    } getOrElse Seq.empty[InetSocketAddress]
+    res => {
+      Try {
+        val data = new String(res.data)
+        data.split("\\s*,\\s*").map(_.split(":")).map {
+          case Array(hostname, port) => new InetSocketAddress(hostname, port.toInt)
+        }.toSeq
+      } getOrElse Seq.empty[InetSocketAddress]
+    }
   }
 }
