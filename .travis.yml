@@ -4,18 +4,27 @@ language: scala
 
 scala:
  - "2.10.4"
+ - "2.11.5"
 
 # Emails to notify
 notifications:
   slack:
-    - newzly:nfmIGqhmrfJb6pIH6I50mnCO
     - websudos:P9QNXx1ZGFnDHp3v3jUqtB8k
   email:
     - dev@websudos.co.uk
+jdk:
+  - oraclejdk7
+  - openjdk7
 
-# Branches to build.
-branches:
-  only:
-    - master
-    - develop
+cache:
+  directories:
+    - $HOME/.ivy2/cache
 
+before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
+
+script:
+  - sbt clean coverage test &&
+    sbt coverageAggregate
+
+after_success:
+  - sbt coveralls
