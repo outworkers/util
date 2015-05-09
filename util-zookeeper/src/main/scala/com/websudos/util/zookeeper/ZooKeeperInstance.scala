@@ -39,7 +39,7 @@ import com.twitter.finagle.exp.zookeeper.ZooKeeper
 import com.twitter.finagle.zookeeper.ZookeeperServerSetCluster
 import com.twitter.util.{Await, Future, RandomSocket, Try}
 import org.apache.zookeeper.server.persistence.FileTxnSnapLog
-import org.apache.zookeeper.server.{NIOServerCnxn, ZKDatabase, ZooKeeperServer}
+import org.apache.zookeeper.server.{NIOServerCnxnFactory, ZKDatabase, ZooKeeperServer}
 
 
 private[this] object ZooKeeperInitLock
@@ -55,7 +55,12 @@ class ZooKeeperInstance(zkPath: String, val address: InetSocketAddress = RandomS
 
   protected[this] val envString = "TEST_ZOOKEEPER_CONNECTOR"
 
-  lazy val connectionFactory: NIOServerCnxn.Factory = new NIOServerCnxn.Factory(address)
+  lazy val connectionFactory: NIOServerCnxnFactory = {
+    val factory = new NIOServerCnxnFactory()
+    factory.configure(address, 5)
+    factory
+  }
+
   lazy val txn = new FileTxnSnapLog(createTempDir(), createTempDir())
   lazy val zkdb = new ZKDatabase(txn)
 

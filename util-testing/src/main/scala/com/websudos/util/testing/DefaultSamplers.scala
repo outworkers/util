@@ -54,10 +54,16 @@ sealed trait Generators {
   /**
    * Uses the type class available in implicit scope to mock a certain custom object.
    * @tparam T The parameter to mock.
-   * @return
+   * @return A sample of the given type generated using the implicit sampler.
    */
   def gen[T : Sample]: T = implicitly[Sample[T]].sample
 
+  /**
+   * Generates a tuple of the given type arguments, using the implicit samplers in scope.
+   * @tparam X The first type of the tuple to be sampled.
+   * @tparam Y The second type of the type to be sampled.
+   * @return A Tuple2[X, Y] generated using the implicit samplers.
+   */
   def gen[X: Sample, Y: Sample]: (X, Y) = (gen[X], gen[Y])
 
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)

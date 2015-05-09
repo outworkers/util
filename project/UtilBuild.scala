@@ -29,12 +29,14 @@
  */
 import sbt.Keys._
 import sbt._
+import com.twitter.sbt._
 
 object UtilBuild extends Build {
 
   val NettyVersion = "3.9.0.Final"
-	val ScalaTestVersion = "2.2.0-M1"
+	val ScalaTestVersion = "2.2.4"
   val FinagleVersion = "6.25.0"
+  val FinagleZkVersion = "6.24.0"
   val TwitterUtilVersion = "6.24.0"
   val LiftVersion = "3.0-M1"
   val ScalazVersion = "7.1.0"
@@ -47,20 +49,13 @@ object UtilBuild extends Build {
     }) % "compile"
   }
 
-  val publishUrl = "http://maven.websudos.co.uk"
-
-  val mvnpublishSettings : Seq[Def.Setting[_]] = Seq(
-    credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    publishTo <<= version { (v: String) => {
-      if (v.trim.endsWith("SNAPSHOT"))
-        Some("snapshots" at publishUrl + "/ext-snapshot-local")
-      else
-        Some("releases"  at publishUrl + "/ext-release-local")
-    }
-    },
-    publishMavenStyle := true,
+  val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
+    publishMavenStyle := false,
+    bintray.BintrayKeys.bintrayOrganization := Some("websudos"),
+    bintray.BintrayKeys.bintrayRepository := "oss-releases",
     publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true }
+    pomIncludeRepository := { _ => true},
+    licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
   )
 
   val publishSettings : Seq[Def.Setting[_]] = Seq(
@@ -76,15 +71,9 @@ object UtilBuild extends Build {
     },
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
+    licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0")),
     pomExtra :=
       <url>https://github.com/websudos/util</url>
-        <licenses>
-          <license>
-            <name>Apache License, Version 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-            <distribution>repo</distribution>
-          </license>
-        </licenses>
         <scm>
           <url>git@github.com:websudos/util.git</url>
           <connection>scm:git:git@github.com:websudos/util.git</connection>
@@ -104,14 +93,11 @@ object UtilBuild extends Build {
     scalaVersion := "2.11.6",
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
 		resolvers ++= Seq(
-		"Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
-		"Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
-		"Sonatype snapshots"               at "https://oss.sonatype.org/content/repositories/snapshots",
-		"Sonatype staging"                 at "http://oss.sonatype.org/content/repositories/staging",
-		"Java.net Maven2 Repository"       at "http://download.java.net/maven/2/",
-		"Twitter Repository"               at "http://maven.twttr.com",
-    "newzly External snapshots"        at "http://newzly-artifactory.elasticbeanstalk.com/ext-release-local",
-    "newzly External"                  at "http://newzly-artifactory.elasticbeanstalk.com/ext-snapshot-local"
+      "Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
+      "Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
+      "Java.net Maven2 Repository"       at "http://download.java.net/maven/2/",
+      "Twitter Repository"               at "http://maven.twttr.com",
+      Resolver.bintrayRepo("websudos", "oss-releases")
 		),
 		scalacOptions ++= Seq(
       "-language:postfixOps",
@@ -125,7 +111,10 @@ object UtilBuild extends Build {
     libraryDependencies ++= Seq(
       "org.scalatest"           %% "scalatest" % ScalaTestVersion % "test, provided"
     )
-	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++ publishSettings
+	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++
+    publishSettings ++
+    GitProject.gitSettings++
+    VersionManagement.newSettings
 
 
 	lazy val websudosUtil = Project(
@@ -133,16 +122,16 @@ object UtilBuild extends Build {
 		base = file("."),
 		settings = Defaults.coreDefaultSettings ++ sharedSettings
 	).aggregate(
-    websudosUtilAws,
-		websudosUtilCore,
-    websudosUtilHttp,
-    websudosUtilLift,
-    websudosUtilParsers,
-    websudosZooKeeper,
-    websudosUtilTesting
+    UtilAws,
+		UtilCore,
+    UtilHttp,
+    UtilLift,
+    UtilParsers,
+    UtilZooKeeper,
+    UtilTesting
 	)
 
-	lazy val websudosUtilCore = Project(
+	lazy val UtilCore = Project(
 		id = "util-core",
 		base = file("util-core"),
 		settings = Defaults.coreDefaultSettings ++ sharedSettings
@@ -153,7 +142,7 @@ object UtilBuild extends Build {
     )
 	)
 
-  lazy val websudosUtilHttp = Project(
+  lazy val UtilHttp = Project(
     id = "util-http",
     base = file("util-http"),
     settings = Defaults.coreDefaultSettings ++ sharedSettings
@@ -165,7 +154,7 @@ object UtilBuild extends Build {
     )
   )
 
-  lazy val websudosUtilParsers = Project(
+  lazy val UtilParsers = Project(
     id = "util-parsers",
     base = file("util-parsers"),
     settings = Defaults.coreDefaultSettings ++ sharedSettings
@@ -179,11 +168,11 @@ object UtilBuild extends Build {
       "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % "test, provided"
     )
   ).dependsOn(
-    websudosUtilHttp,
-    websudosUtilTesting % "test, provided"
+    UtilHttp,
+    UtilTesting % "test, provided"
   )
 
-  lazy val websudosUtilLift = Project(
+  lazy val UtilLift = Project(
     id = "util-lift",
     base = file("util-lift"),
     settings = Defaults.coreDefaultSettings ++ sharedSettings
@@ -191,11 +180,11 @@ object UtilBuild extends Build {
     name := "util-lift",
     libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
   ).dependsOn(
-    websudosUtilParsers,
-    websudosUtilTesting % "test, provided"
+    UtilParsers,
+    UtilTesting % "test, provided"
   )
 
-  lazy val websudosUtilAws = Project(
+  lazy val UtilAws = Project(
     id = "util-aws",
     base = file("util-aws"),
     settings = Defaults.coreDefaultSettings ++ sharedSettings
@@ -205,25 +194,25 @@ object UtilBuild extends Build {
       "com.twitter"             %% "finagle-http"                      % FinagleVersion
     )
   ).dependsOn(
-    websudosUtilHttp,
-      websudosUtilTesting % "test, provided"
+    UtilHttp,
+    UtilTesting % "test, provided"
   )
 
-  lazy val websudosZooKeeper = Project(
+  lazy val UtilZooKeeper = Project(
     id = "util-zookeeper",
     base = file("util-zookeeper"),
     settings = Defaults.coreDefaultSettings ++ sharedSettings
   ).settings(
     name := "util-zookeeper",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "finagle-zookeeper"        % FinagleVersion,
+      "com.twitter"                      %% "finagle-zookeeper"        % FinagleZkVersion,
       "com.twitter"                      %% "finagle-serversets"       % FinagleVersion
     )
   ).dependsOn(
-      websudosUtilTesting % "test"
+    UtilTesting % "test"
   )
 
-  lazy val websudosUtilTesting = Project(
+  lazy val UtilTesting = Project(
     id = "util-testing",
     base = file("util-testing"),
     settings = Defaults.coreDefaultSettings ++ sharedSettings

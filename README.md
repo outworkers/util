@@ -1,6 +1,6 @@
 # util[![Build Status](https://travis-ci.org/websudos/util.svg?branch=develop)](https://travis-ci.org/websudos/util) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10)
 
-The latest available version of the util library is ```val UtilVersion = 0.7.0```. This library is only deployed to our managed Maven repository,
+The latest available version of the util library is ```val UtilVersion = 0.7.5```. This library is only deployed to our managed Maven repository,
 available at ```http://maven.websudos.co.uk```. It is publicly available, for both Scala 2.10.x and Scala 2.11.x.
 
 ![Util](https://s3-eu-west-1.amazonaws.com/websudos/oss/logos/util.png "Websudos Util")
