@@ -1,38 +1,29 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en-us">
   <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta charset="UTF-8">
     <title>Util by websudos</title>
-
-    <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <!--[if lt IE 9]>
-    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
   <body>
-    <div class="wrapper">
-      <header>
-        <h1>Util</h1>
-        <p>The util project, packed with common goodies.</p>
+    <section class="page-header">
+      <h1 class="project-name">Util</h1>
+      <h2 class="project-tagline">The util project, packed with common goodies.</h2>
+      <a href="https://github.com/websudos/util" class="btn">View on GitHub</a>
+      <a href="https://github.com/websudos/util/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/websudos/util/tarball/master" class="btn">Download .tar.gz</a>
+    </section>
 
-        <p class="view"><a href="https://github.com/websudos/util">View the Project on GitHub <small>websudos/util</small></a></p>
-
-
-        <ul>
-          <li><a href="https://github.com/websudos/util/zipball/master">Download <strong>ZIP File</strong></a></li>
-          <li><a href="https://github.com/websudos/util/tarball/master">Download <strong>TAR Ball</strong></a></li>
-          <li><a href="https://github.com/websudos/util">View On <strong>GitHub</strong></a></li>
-        </ul>
-      </header>
-      <section>
-        <h1>
-<a id="util" class="anchor" href="#util" aria-hidden="true"><span class="octicon octicon-link"></span></a>util<a href="https://travis-ci.org/websudos/util"><img src="https://travis-ci.org/websudos/util.svg?branch=develop" alt="Build Status"></a>
+    <section class="main-content">
+      <h1>
+<a id="util-" class="anchor" href="#util-" aria-hidden="true"><span class="octicon octicon-link"></span></a>util<a href="https://travis-ci.org/websudos/util"><img src="https://travis-ci.org/websudos/util.svg?branch=develop" alt="Build Status"></a> <a href="https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10"><img src="https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg" alt="Maven Central"></a>
 </h1>
 
-<p>The latest available version of the util library is <code>val UtilVersion = 0.6.0</code>. This library is only deployed to our managed Maven repository,
+<p>The latest available version of the util library is <code>val UtilVersion = 0.7.5</code>. This library is only deployed to our managed Maven repository,
 available at <code>http://maven.websudos.co.uk</code>. It is publicly available, for both Scala 2.10.x and Scala 2.11.x.</p>
 
 <p><img src="https://s3-eu-west-1.amazonaws.com/websudos/oss/logos/util.png" alt="Util" title="Websudos Util"></p>
@@ -92,13 +83,13 @@ available at <code>http://maven.websudos.co.uk</code>. It is publicly available,
 
 <div class="highlight highlight-scala"><pre>
 libraryDependencies <span class="pl-k">++</span><span class="pl-k">=</span> <span class="pl-en">Seq</span>(
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-aws<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-core<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-http<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-lift<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-parsers<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-testing<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
-  <span class="pl-s1"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s1"><span class="pl-pds">"</span>util-zookeeper<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-aws<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-core<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-http<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-lift<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-parsers<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-testing<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>,
+  <span class="pl-s"><span class="pl-pds">"</span>com.websudos<span class="pl-pds">"</span></span> <span class="pl-k">%%</span> <span class="pl-s"><span class="pl-pds">"</span>util-zookeeper<span class="pl-pds">"</span></span> <span class="pl-k">%</span> <span class="pl-en">UtilVersion</span>
 )</pre></div>
 
 <h3>
@@ -123,8 +114,8 @@ awaiting is done asynchronously and the assertions are invoked and evaluated onc
 
 <span class="pl-k">class</span> <span class="pl-en">MyTests</span> <span class="pl-k">extends</span> <span class="pl-e">FlatSuite</span> <span class="pl-k">with</span> <span class="pl-e">Matchers</span> {
 
-  <span class="pl-s1"><span class="pl-pds">"</span>The async computation<span class="pl-pds">"</span></span> should <span class="pl-s1"><span class="pl-pds">"</span>return 0 on completion<span class="pl-pds">"</span></span> in {
-    <span class="pl-k">val</span> <span class="pl-en">f</span><span class="pl-k">:</span> <span class="pl-en">Future</span>[<span class="pl-st">Int</span>] <span class="pl-k">=</span> .. <span class="pl-c">// Pretend this is a Future just like any other future.</span>
+  <span class="pl-s"><span class="pl-pds">"</span>The async computation<span class="pl-pds">"</span></span> should <span class="pl-s"><span class="pl-pds">"</span>return 0 on completion<span class="pl-pds">"</span></span> in {
+    <span class="pl-k">val</span> <span class="pl-en">f</span><span class="pl-k">:</span> <span class="pl-en">Future</span>[<span class="pl-k">Int</span>] <span class="pl-k">=</span> .. <span class="pl-c">// Pretend this is a Future just like any other future.</span>
     f.successful {
       res <span class="pl-k">=&gt;</span> {
         res shouldEqual <span class="pl-c1">0</span>
@@ -132,8 +123,8 @@ awaiting is done asynchronously and the assertions are invoked and evaluated onc
     }
   }
 
-  <span class="pl-s1"><span class="pl-pds">"</span>This async computation<span class="pl-pds">"</span></span> should <span class="pl-s1"><span class="pl-pds">"</span>fail by design<span class="pl-pds">"</span></span> in {
-    <span class="pl-k">val</span> <span class="pl-en">f</span><span class="pl-k">:</span> <span class="pl-en">Future</span>[<span class="pl-st">Unit</span>] <span class="pl-k">=</span> ..
+  <span class="pl-s"><span class="pl-pds">"</span>This async computation<span class="pl-pds">"</span></span> should <span class="pl-s"><span class="pl-pds">"</span>fail by design<span class="pl-pds">"</span></span> in {
+    <span class="pl-k">val</span> <span class="pl-en">f</span><span class="pl-k">:</span> <span class="pl-en">Future</span>[<span class="pl-k">Unit</span>] <span class="pl-k">=</span> ..
 
     <span class="pl-c">// You don't even need to do anything more than failure at this stage.</span>
     <span class="pl-c">// If the Future fails, the test will succeed, as this method is used when you "expect a failure".</span>
@@ -144,8 +135,8 @@ awaiting is done asynchronously and the assertions are invoked and evaluated onc
     }
   }
 
-  <span class="pl-s1"><span class="pl-pds">"</span>This async computation<span class="pl-pds">"</span></span> should <span class="pl-s1"><span class="pl-pds">"</span>fail with a specific error<span class="pl-pds">"</span></span> in {
-      <span class="pl-k">val</span> <span class="pl-en">f</span><span class="pl-k">:</span> <span class="pl-en">Future</span>[<span class="pl-st">Unit</span>] <span class="pl-k">=</span> ..
+  <span class="pl-s"><span class="pl-pds">"</span>This async computation<span class="pl-pds">"</span></span> should <span class="pl-s"><span class="pl-pds">"</span>fail with a specific error<span class="pl-pds">"</span></span> in {
+      <span class="pl-k">val</span> <span class="pl-en">f</span><span class="pl-k">:</span> <span class="pl-en">Future</span>[<span class="pl-k">Unit</span>] <span class="pl-k">=</span> ..
       f.failingWith[<span class="pl-en">NumberFormatException</span>] {
         err <span class="pl-k">=&gt;</span> {
         }
@@ -159,7 +150,7 @@ awaiting is done asynchronously and the assertions are invoked and evaluated onc
 <div class="highlight highlight-scala"><pre><span class="pl-k">import</span> <span class="pl-v">org.scalatest.concurrent.</span><span class="pl-v">PatienceConfiguration</span>
 <span class="pl-k">import</span> <span class="pl-v">org.scalatest.time.SpanSugar.</span><span class="pl-v">_</span>
 
-<span class="pl-s">implicit</span> <span class="pl-k">val</span> <span class="pl-en">timeout</span><span class="pl-k">:</span> <span class="pl-en">PatienceConfiguration</span>.<span class="pl-en">Timeout</span> <span class="pl-k">=</span> timeout(<span class="pl-c1">20</span> seconds)
+<span class="pl-k">implicit</span> <span class="pl-k">val</span> <span class="pl-en">timeout</span><span class="pl-k">:</span> <span class="pl-en">PatienceConfiguration</span>.<span class="pl-en">Timeout</span> <span class="pl-k">=</span> timeout(<span class="pl-c1">20</span> seconds)
 </pre></div>
 
 <p>Summary:</p>
@@ -186,15 +177,15 @@ After you define such a one-time sampling type class instance, you have access t
 <span class="pl-k">import</span> <span class="pl-v">com.websudos.util.testing.</span><span class="pl-v">_</span>
 
 
-<span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">MyAwesomeClass</span>(<span class="pl-v">nane</span>: <span class="pl-st">String</span>, <span class="pl-v">age</span>: <span class="pl-st">Int</span>, <span class="pl-v">email</span>: <span class="pl-st">String</span>)
+<span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">MyAwesomeClass</span>(<span class="pl-v">nane</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">Int</span>, <span class="pl-v">email</span>: <span class="pl-k">String</span>)
 
 <span class="pl-k">package object</span> <span class="pl-en">mytest</span> {
 
-  <span class="pl-s">implicit</span> <span class="pl-k">object</span> <span class="pl-en">MyAwesomeClassSampler</span> <span class="pl-k">extends</span> <span class="pl-e">Sample</span>[<span class="pl-en">MyAwesomeClass</span>] {
+  <span class="pl-k">implicit</span> <span class="pl-k">object</span> <span class="pl-en">MyAwesomeClassSampler</span> <span class="pl-k">extends</span> <span class="pl-e">Sample</span>[<span class="pl-en">MyAwesomeClass</span>] {
     <span class="pl-k">def</span> <span class="pl-en">sample</span><span class="pl-k">:</span> <span class="pl-en">MyAwesomeClass</span> <span class="pl-k">=</span> {
       <span class="pl-en">MyAwesomeClass</span>(
-        gen[<span class="pl-st">String</span>],
-        gen[<span class="pl-st">Int</span>],
+        gen[<span class="pl-k">String</span>],
+        gen[<span class="pl-k">Int</span>],
         gen[<span class="pl-en">EmailAddress</span>].address
       )
     }
@@ -257,11 +248,11 @@ applicatives.</p>
 
 <p>To illustrate the above, the <code>int</code> parser, designed to parse a <code>scala.Int</code> value from a <code>String</code>, packages the following three signatures:</p>
 
-<div class="highlight highlight-scala"><pre>  <span class="pl-s">final</span> <span class="pl-k">def</span> <span class="pl-en">intOpt</span>(<span class="pl-v">str</span>: <span class="pl-st">String</span>)
+<div class="highlight highlight-scala"><pre>  <span class="pl-k">final</span> <span class="pl-k">def</span> <span class="pl-en">intOpt</span>(<span class="pl-v">str</span>: <span class="pl-k">String</span>)
 
-  <span class="pl-s">final</span> <span class="pl-k">def</span> <span class="pl-en">int</span>(<span class="pl-v">str</span>: <span class="pl-st">String</span>)<span class="pl-k">:</span> <span class="pl-en">ValidationNel</span>[<span class="pl-st">String</span>, <span class="pl-st">Int</span>]
+  <span class="pl-k">final</span> <span class="pl-k">def</span> <span class="pl-en">int</span>(<span class="pl-v">str</span>: <span class="pl-k">String</span>)<span class="pl-k">:</span> <span class="pl-en">ValidationNel</span>[<span class="pl-k">String</span>, <span class="pl-k">Int</span>]
 
-  <span class="pl-s">final</span> <span class="pl-k">def</span> <span class="pl-en">int</span>(<span class="pl-v">str</span>: <span class="pl-en">Option</span>[<span class="pl-st">String</span>])<span class="pl-k">:</span> <span class="pl-en">ValidationNel</span>[<span class="pl-st">String</span>, <span class="pl-st">Int</span>]</pre></div>
+  <span class="pl-k">final</span> <span class="pl-k">def</span> <span class="pl-en">int</span>(<span class="pl-v">str</span>: <span class="pl-en">Option</span>[<span class="pl-k">String</span>])<span class="pl-k">:</span> <span class="pl-en">ValidationNel</span>[<span class="pl-k">String</span>, <span class="pl-k">Int</span>]</pre></div>
 
 <h3>
 <a id="option-parsers" class="anchor" href="#option-parsers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Option parsers</h3>
@@ -333,11 +324,11 @@ applicatives.</p>
 <span class="pl-k">import</span> <span class="pl-v">com.websudos.util.parsers.</span><span class="pl-v">_</span>
 
 <span class="pl-k">object</span> <span class="pl-en">Test</span> {
-  <span class="pl-k">def</span> <span class="pl-en">optionalParsing</span>(<span class="pl-v">email</span>: <span class="pl-st">String</span>, <span class="pl-v">age</span>: <span class="pl-st">String</span>)<span class="pl-k">:</span> <span class="pl-st">Unit</span> <span class="pl-k">=</span> {
+  <span class="pl-k">def</span> <span class="pl-en">optionalParsing</span>(<span class="pl-v">email</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">String</span>)<span class="pl-k">:</span> <span class="pl-k">Unit</span> <span class="pl-k">=</span> {
     <span class="pl-k">for</span> {
       validEmail <span class="pl-k">&lt;</span><span class="pl-k">-</span> emailOpt(email)
       validAge <span class="pl-k">&lt;</span><span class="pl-k">-</span> intOpt(age)
-    } <span class="pl-k">yield</span> s<span class="pl-s1"><span class="pl-pds">"</span>This person can be reached at $validEmail and is $validAge years old<span class="pl-pds">"</span></span>
+    } <span class="pl-k">yield</span> s<span class="pl-s"><span class="pl-pds">"</span>This person can be reached at $validEmail and is $validAge years old<span class="pl-pds">"</span></span>
   }
 }
 </pre></div>
@@ -410,7 +401,7 @@ applicatives.</p>
 
 <span class="pl-k">object</span> <span class="pl-en">Test</span> {
 
-  <span class="pl-k">def</span> <span class="pl-en">registerUser</span>(<span class="pl-v">str</span>: <span class="pl-st">String</span>, <span class="pl-v">age</span>: <span class="pl-st">String</span>)<span class="pl-k">:</span> <span class="pl-st">Unit</span> <span class="pl-k">=</span> {
+  <span class="pl-k">def</span> <span class="pl-en">registerUser</span>(<span class="pl-v">str</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">String</span>)<span class="pl-k">:</span> <span class="pl-k">Unit</span> <span class="pl-k">=</span> {
     (email(str) <span class="pl-k">|@|</span> int(age)) {
       (validEmail, validAge) <span class="pl-k">=&gt;</span> {
       }
@@ -468,13 +459,16 @@ Internally, we heavily use the Twitter eco-system for development and we use Fin
 <p><a href="#table-of-contents">Back to top</a></p>
 
 <p>Copyright (c) 2014 websudos.</p>
-      </section>
-      <footer>
-        <p>This project is maintained by <a href="https://github.com/websudos">websudos</a></p>
-        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/websudos/util">Util</a> is maintained by <a href="https://github.com/websudos">websudos</a>.</span>
+
+        <span class="site-footer-credits">This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the <a href="https://github.com/jasonlong/cayman-theme">Cayman theme</a> by <a href="https://twitter.com/jasonlong">Jason Long</a>.</span>
       </footer>
-    </div>
-    <script src="javascripts/scale.fix.js"></script>
-    
+
+    </section>
+
+  
   </body>
 </html>
+
