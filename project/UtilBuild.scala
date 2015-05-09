@@ -34,7 +34,8 @@ object UtilBuild extends Build {
 
   val NettyVersion = "3.9.0.Final"
 	val ScalaTestVersion = "2.2.0-M1"
-  val FinagleVersion = "6.24.0"
+  val FinagleVersion = "6.25.0"
+  val TwitterUtilVersion = "6.24.0"
   val LiftVersion = "3.0-M1"
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
@@ -99,7 +100,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.7.5",
+    version := "0.8.0",
     scalaVersion := "2.11.6",
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
 		resolvers ++= Seq(
@@ -229,7 +230,7 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-testing",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "util-core"                % "6.23.0",
+      "com.twitter"                      %% "util-core"                % TwitterUtilVersion,
       "org.scalatest"                    %% "scalatest"                % ScalaTestVersion,
       "joda-time"                        %  "joda-time"                % JodaTimeVersion,
       "org.joda"                         %  "joda-convert"             % "1.6",
