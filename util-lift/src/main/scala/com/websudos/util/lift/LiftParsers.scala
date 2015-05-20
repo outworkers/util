@@ -42,7 +42,7 @@ trait LiftParsers extends DefaultParsers {
 
   implicit val formats = DefaultFormats
 
-  final def json[T : Manifest](str: String): ValidationNel[String, T] = {
+  final def json[T](str: String)(implicit mf: Manifest[T], formats: Formats): ValidationNel[String, T] = {
     try {
       JsonParser.parse(str).extract[T].successNel[String]
     } catch {
@@ -50,7 +50,7 @@ trait LiftParsers extends DefaultParsers {
     }
   }
 
-  final def json[T: Manifest](str: Option[String]): ValidationNel[String, T] = {
+  final def json[T](str: Option[String])(implicit mf: Manifest[T], formats: Formats): ValidationNel[String, T] = {
     try {
       str.map(JsonParser.parse(_).extract[T].successNel[String]).getOrElse("Missing required parameter".failureNel[T])
     } catch {
@@ -59,12 +59,16 @@ trait LiftParsers extends DefaultParsers {
   }
 
 
-  final def json[T : Manifest](str: JValue): ValidationNel[String, T] = {
+  final def json[T](str: JValue)(implicit mf: Manifest[T], formats: Formats): ValidationNel[String, T] = {
     try {
       str.extract[T].successNel[String]
     } catch {
       case NonFatal(e) => e.getMessage.failureNel[T]
     }
+  }
+
+  final def jsonOpt[T](str: JValue)(implicit mf: Manifest[T], formats: Formats): Option[T] = {
+    str.extractOpt[T]
   }
 
   final def required[T](box: Box[T]): ValidationNel[String, T] = {

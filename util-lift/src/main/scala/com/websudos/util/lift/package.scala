@@ -65,6 +65,10 @@ package object lift extends LiftParsers with JsonHelpers {
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
       Extraction.decompose(clz)
     }
+
+    def asResponse()(implicit mf: Manifest[T], formats: DefaultFormats): LiftResponse = {
+      JsonResponse(clz.asJValue(), 200)
+    }
   }
 
   implicit class JsonSeqHelper[T <: Product with Serializable](val list: Seq[T]) extends AnyVal {
@@ -75,6 +79,14 @@ package object lift extends LiftParsers with JsonHelpers {
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
       Extraction.decompose(list)
     }
+
+    def asResponse()(implicit mf: Manifest[T], formats: DefaultFormats): LiftResponse = {
+      if (list.nonEmpty) {
+        JsonResponse(list.asJValue(), 200)
+      } else {
+        JsonResponse(JArray(Nil), 204)
+      }
+    }
   }
 
   implicit class JsonListHelper[T <: Product with Serializable](val list: List[T]) extends AnyVal {
@@ -84,6 +96,13 @@ package object lift extends LiftParsers with JsonHelpers {
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
       Extraction.decompose(list)
+    }
+
+    def asResponse()(implicit mf: Manifest[T], formats: DefaultFormats): LiftResponse = {
+      list match {
+        case head :: tail => JsonResponse(list.asJValue(), 200)
+        case Nil => JsonResponse(JArray(Nil), 204)
+      }
     }
   }
 
