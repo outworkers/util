@@ -23,8 +23,4 @@ cache:
 before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
 
 script:
-  - sbt clean coverage test &&
-    sbt coverageAggregate
-
-after_success:
-  - sbt coveralls
+  - sbt test
