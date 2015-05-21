@@ -33,7 +33,6 @@ import com.twitter.sbt._
 
 object UtilBuild extends Build {
 
-  val NettyVersion = "3.9.0.Final"
 	val ScalaTestVersion = "2.2.4"
   val FinagleVersion = "6.25.0"
   val FinagleZkVersion = "6.24.0"
@@ -89,7 +88,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.8.0",
+    version := "0.8.8",
     scalaVersion := "2.11.6",
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
 		resolvers ++= Seq(
@@ -149,8 +148,7 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-http",
     libraryDependencies ++= Seq(
-      "com.twitter"             %% "finagle-http"                   % FinagleVersion,
-      "io.netty"                % "netty"                           % NettyVersion
+      "com.twitter"             %% "finagle-http"                   % FinagleVersion
     )
   )
 
@@ -205,7 +203,7 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-zookeeper",
     libraryDependencies ++= Seq(
-      "com.twitter"                      %% "finagle-zookeeper"        % FinagleZkVersion,
+      "com.twitter"                     %% "finagle-zookeeper"        % FinagleZkVersion,
       "com.twitter"                      %% "finagle-serversets"       % FinagleVersion
     )
   ).dependsOn(
