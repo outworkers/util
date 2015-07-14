@@ -49,7 +49,8 @@ object UtilBuild extends Build {
   }
 
   val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
-    publishMavenStyle := false,
+    publishMavenStyle := true,
+    bintray.BintrayKeys.bintrayReleaseOnPublish in ThisBuild := true,
     bintray.BintrayKeys.bintrayOrganization := Some("websudos"),
     bintray.BintrayKeys.bintrayRepository := "oss-releases",
     publishArtifact in Test := false,
@@ -57,7 +58,7 @@ object UtilBuild extends Build {
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
   )
 
-  val publishSettings : Seq[Def.Setting[_]] = Seq(
+  val mpublishSettings : Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     publishTo <<= version.apply {
@@ -88,7 +89,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.8.8",
+    version := "0.9.8",
     scalaVersion := "2.11.6",
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
 		resolvers ++= Seq(
@@ -111,8 +112,8 @@ object UtilBuild extends Build {
       "org.scalatest"           %% "scalatest" % ScalaTestVersion % "test, provided"
     )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++
-    publishSettings ++
-    GitProject.gitSettings++
+    GitProject.gitSettings ++
+    bintrayPublishSettings ++
     VersionManagement.newSettings
 
 
@@ -123,6 +124,7 @@ object UtilBuild extends Build {
 	).aggregate(
     UtilAws,
 		UtilCore,
+    UtilDomain,
     UtilHttp,
     UtilLift,
     UtilParsers,
@@ -159,13 +161,14 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-parsers",
     libraryDependencies ++= Seq(
-      "commons-validator"       % "commons-validator"               % "1.4.0",
+      "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % JodaTimeVersion,
       "org.joda"                %  "joda-convert"                   % "1.6",
       "org.scalaz"              %% "scalaz-core"                    % ScalazVersion,
       "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % "test, provided"
     )
   ).dependsOn(
+    UtilDomain,
     UtilHttp,
     UtilTesting % "test, provided"
   )
@@ -177,6 +180,7 @@ object UtilBuild extends Build {
   ).settings(
     name := "util-lift",
     libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
+
   ).dependsOn(
     UtilParsers,
     UtilTesting % "test, provided"
@@ -210,6 +214,14 @@ object UtilBuild extends Build {
     UtilTesting % "test"
   )
 
+  lazy val UtilDomain = Project(
+    id = "util-domain",
+    base = file("util-domain"),
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
+  ).settings(
+    name := "util-domain"
+  )
+
   lazy val UtilTesting = Project(
     id = "util-testing",
     base = file("util-testing"),
@@ -224,5 +236,7 @@ object UtilBuild extends Build {
       "org.scalacheck"                   %% "scalacheck"               % "1.11.4",
       "org.fluttercode.datafactory"      %  "datafactory"              % "0.8"
     )
+  ).dependsOn(
+    UtilDomain
   )
 }

@@ -30,13 +30,18 @@
 package com.websudos.util
 
 import com.twitter.util.{Await, Future, Return, Throw}
+import com.websudos.util.domain.GenerationDomain
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{AsyncAssertions, PatienceConfiguration, ScalaFutures}
 
 import scala.concurrent.{Await => ScalaAwait, ExecutionContext, Future => ScalaFuture}
 import scala.util.{Failure, Success}
 
-package object testing extends ScalaFutures with DefaultTags with DefaultSamplers with ScalaTestHelpers {
+package object testing extends ScalaFutures
+  with DefaultTags
+  with DefaultSamplers
+  with ScalaTestHelpers
+  with GenerationDomain {
 
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {

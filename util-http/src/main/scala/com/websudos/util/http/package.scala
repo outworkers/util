@@ -18,11 +18,21 @@ package object http extends HttpExtractor {
 
   /**
    * Implicit value class used to simplify extracting responses from a Netty HTTP response.
-   * @param response The Http response to augment.
+   * @param resp The Http response to augment.
    */
-  implicit class RichHttpResponse(val response: HttpResponse) extends AnyVal {
-    def body: String = {
-      new String(response.getContent.array)
+  implicit class RichHttpResponse(val resp: HttpResponse) extends AnyVal {
+
+    def buffer: Array[Byte] = {
+      val channelBuffer = resp.getContent
+
+      val length = channelBuffer.readableBytes()
+      val bytes = new Array[Byte](length)
+      channelBuffer.getBytes(channelBuffer.readerIndex(), bytes, 0, length)
+      bytes
+    }
+
+    def responseBody: String = {
+      new String(buffer)
     }
   }
 

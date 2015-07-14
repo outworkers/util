@@ -1,7 +1,10 @@
-# util[![Build Status](https://travis-ci.org/websudos/util.svg?branch=develop)](https://travis-ci.org/websudos/util) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10)
+# util[![Build Status](https://travis-ci.org/websudos/util.svg?branch=develop)](https://travis-ci.org/websudos/util) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10)   [ ![Bintray](https://api.bintray.com/packages/websudos/oss-releases/util/images/download.svg) ](https://bintray.com/websudos/oss-releases/util/_latestVersion)
 
-The latest available version of the util library is ```val UtilVersion = 0.7.5```. This library is only deployed to our managed Maven repository,
-available at ```http://maven.websudos.co.uk```. It is publicly available, for both Scala 2.10.x and Scala 2.11.x.
+The latest available version of the util library is ```val UtilVersion = 0.9.2```. This library is available on Maven Central and
+on our public Bintray repository, found at: `https://dl.bintray.com/websudos/oss-releases/`.
+
+It is publicly available, for both Scala 2.10.x and Scala 2.11.x. Check the badges at the top of this README for the
+latest version of `util` available. The badges are automatically updated when a new version is out, this readme is not.
 
 ![Util](https://s3-eu-west-1.amazonaws.com/websudos/oss/logos/util.png "Websudos Util")
  
@@ -239,17 +242,15 @@ To illustrate the above, the ```int``` parser, designed to parse a ```scala.Int`
 The full list of optional parsers is:
 
 
-| Name            | Input type                | Output type                       |
+| Type            | Input type                | Parser Output type                |
 | --------------- |---------------------------| --------------------------------- |
-| intOpt          | String\|Option[String]     | Option[Int]                       |
-| longOpt         | String\|Option[String]     | Option[Long]                      |
-| doubleOpt       | String\|Option[String]     | Option[Double]                    |
-| floatOpt        | String\|Option[String]     | Option[Float]                     |
-| uuidOpt         | String\|Option[String]     | Option[java.util.UUID]            |
-| emailOpt        | String\|Option[String]     | Option[String]                    |
-| timestampOpt    | String\|Option[String]     | Option[org.joda.time.DateTime]    |
-| dateOpt         | String\|Option[String]     | Option[org.joda.time.DateTime]    |
-
+| Int             | String\|Option[String]     | ValidationNel[String, Int]        |
+| Long            | String\|Option[String]     | ValidationNel[String, Long]       |
+| Double          | String\|Option[String]     | ValidationNel[String, Double]     |
+| Float           | String\|Option[String]     | ValidationNel[String, Float]      |
+| UUID            | String\|Option[String]     | ValidationNel[String, UUID]       |
+| Email           | String\|Option[String]     | ValidationNel[String, String]     |
+| DateTime        | String\|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
 
 Option parsers are designed for chains where you want to short-circuit and exit to result as soon a parser fails. This short-circuit behaviour is the default
  ```flatMap``` behaviour of an ```Option```, as soon as an ```Option``` is ```None``` the chain breaks. Unlike applicatives, 
@@ -279,16 +280,15 @@ object Test {
 
 The full list of ScalaZ Validation based applicative parsers is:
 
-| Name            | Input type                | Parser Output type                |
+| Type            | Input type                | Parser Output type                |
 | --------------- |---------------------------| --------------------------------- |
-| int             | String\|Option[String]     | ValidationNel[String, Int]        |
-| long            | String\|Option[String]     | ValidationNel[String, Long]       |
-| double          | String\|Option[String]     | ValidationNel[String, Double]     |
-| float           | String\|Option[String]     | ValidationNel[String, Float]      |
-| uuid            | String\|Option[String]     | ValidationNel[String, UUID]       |
-| email           | String\|Option[String]     | ValidationNel[String, String]     |
-| timestamp       | String\|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
-| date            | String\|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
+| Int             | String\|Option[String]     | ValidationNel[String, Int]        |
+| Long            | String\|Option[String]     | ValidationNel[String, Long]       |
+| Double          | String\|Option[String]     | ValidationNel[String, Double]     |
+| Float           | String\|Option[String]     | ValidationNel[String, Float]      |
+| UUID            | String\|Option[String]     | ValidationNel[String, UUID]       |
+| Email           | String\|Option[String]     | ValidationNel[String, String]     |
+| DateTime        | String\|Option[String]     | ValidationNel[String, org.joda.time.DateTime]   |
 
 To illustrate the basic usage of applicative parsers and how to chain them, have a look below.
 

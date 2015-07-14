@@ -29,27 +29,21 @@
  */
 package com.websudos.util.testing
 
-import java.util.{Locale, Date, UUID}
+import java.util.{Date, Locale, UUID}
 
-import org.joda.time.{LocalDate, DateTime}
+import org.joda.time.{DateTime, LocalDate}
 import org.scalacheck.Gen
+
+import com.websudos.util.domain._
 
 trait Sample[T] {
   def sample: T
 }
 
-case class EmailAddress(address: String)
-case class FirstName(name: String)
-case class LastName(name: String)
-case class FullName(name: String)
-case class CountryCode(code: String)
+sealed trait Generators extends GenerationDomain {
 
-case class Country(country: String)
-case class City(city: String)
-case class ProgrammingLanguage(language: String)
-case class LoremIpsum(word: String)
-
-sealed trait Generators {
+  protected[this] val domains = List("net", "com", "org", "io", "biz", "co.uk", "co.za")
+  protected[this] val protocols = List("http", "https")
 
   /**
    * Uses the type class available in implicit scope to mock a certain custom object.
@@ -103,12 +97,24 @@ sealed trait Generators {
       case (k, v) => (v, producer(v))
     }
   }
+
+  def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
+
+  def oneOf[T <: Enumeration](enum: T): T#Value = {
+    oneOf(enum.values.toList)
+  }
 }
 
 trait DefaultSamplers extends Generators {
 
   implicit object StringSample extends Sample[String] {
     def sample: String = Sampler.string
+  }
+
+  implicit object ShortStringSampler extends Sample[ShortString] {
+    def sample: ShortString = {
+      ShortString(java.lang.Long.toHexString(java.lang.Double.doubleToLongBits(Math.random())))
+    }
   }
 
   implicit object IntSample extends Sample[Int] {
@@ -185,6 +191,12 @@ trait DefaultSamplers extends Generators {
 
   implicit object LoremIpsumSampler extends Sample[LoremIpsum] {
     def sample: LoremIpsum = LoremIpsum(Gen.oneOf(CommonDataSamplers.LoremIpsum).sample.get)
+  }
+
+  implicit object UrlSampler extends Sample[Url] {
+    def sample: Url = Url(
+      oneOf(protocols) + "://www." + gen[ShortString].str + "." + oneOf(domains)
+    )
   }
 }
 

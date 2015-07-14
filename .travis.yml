@@ -3,8 +3,10 @@
 language: scala
 
 scala:
- - "2.10.4"
- - "2.11.5"
+ - "2.10.5"
+ - "2.11.6"
+
+sudo: false
 
 # Emails to notify
 notifications:
@@ -21,6 +23,7 @@ cache:
     - $HOME/.ivy2/cache
 
 before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
+
 
 script:
   - sbt test

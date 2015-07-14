@@ -65,7 +65,7 @@ object AwsMetadata {
     client(req) map  {
       response => {
         if (response.getStatus == HttpResponseStatus.OK) {
-          Some(response.body)
+          Some(response.responseBody)
         } else {
           None
         }

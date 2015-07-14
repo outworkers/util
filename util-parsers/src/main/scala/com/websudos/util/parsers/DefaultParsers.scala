@@ -29,162 +29,200 @@
  */
 package com.websudos.util.parsers
 
+import java.net.URL
 import java.util.UUID
 
-import scala.util.Try
-import scalaz.Scalaz._
-import scalaz._
+import com.websudos.util.domain.GenerationDomain
 import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.DateTime
-import org.joda.time.format.DateTimeFormatter
 
+import scala.util.{Failure, Success, Try}
+import scalaz.Scalaz._
+import scalaz.{Success => _, _}
 
-trait DefaultParsers {
+sealed trait BaseParser[X, T] {
 
-  final def optional[T](str: Option[String])(f: String => ValidationNel[String, T]) = {
+  final def optional(str: Option[X])(f: X => ValidationNel[String, T]): ValidationNel[String, Option[T]] = {
     str.fold(Option.empty[T].successNel[String]) { s =>
       f(s).map(Some(_))
     }
   }
 
+  private[util] def missing : ValidationNel[String, T] = {
+    "Required option expected to be Some, found None instead".failureNel[T]
+  }
 
-  private[util] final def parseRequired[T](str: Option[String])(f: String => ValidationNel[String, T]) = {
+  private[util] final def parseRequired(str: Option[X])(f: X => ValidationNel[String, T]) = {
     str.fold(s"Couldn't parse $str from None".failureNel[T])(f)
   }
 
-  final def required[T](opt: Option[T]): ValidationNel[String, T] = {
+  final def required(opt: Option[T]): ValidationNel[String, T] = {
     opt.fold("Required parameter is empty".failureNel[T])(_.successNel[String])
   }
 
-  final def uuidOpt(str: String): Option[UUID] = {
-    Try(UUID.fromString(str)).toOption
+  def tryParse(obj: X): Try[T]
+
+
+  /**
+   * A basic way to parse known types from options.
+   * @param str The string to attempt to parse from.
+   * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+   */
+  def parseOpt(str: X): Option[T] = tryParse(str).toOption
+
+  def parse(str: X): ValidationNel[String, T] = {
+    parseOpt(str).fold(s"Failed to parse from $str".failureNel[T])(_.successNel[String])
   }
 
-  final def uuid(str: String): ValidationNel[String, UUID] = {
-    uuidOpt(str)
-      .fold(s"Couldn't parse an UUID from string $str".failureNel[UUID])(_.successNel[String])
+  def parse(str: Option[X]): ValidationNel[String, T] = {
+    parseRequired(str)(s => parse(s))
   }
 
-  final def uuid(str: Option[String]): ValidationNel[String, UUID] = {
-    parseRequired(str)(uuid)
+  def parseIfExists(str: Option[X]): ValidationNel[String, Option[T]] = {
+    optional(str)(parse)
+  }
+}
+
+trait BiParser[X, T] extends BaseParser[X, T]
+
+sealed trait Parser[T] extends BaseParser[String, T] {
+
+}
+
+private[util] trait DefaultImplicitParsers extends GenerationDomain {
+
+  implicit object UUIDParser extends Parser[UUID] {
+    override def tryParse(str: String): Try[UUID] = Try(UUID.fromString(str))
   }
 
-  final def booleanOpt(str: String): Option[Boolean] = {
-    str match {
-      case "true" => Some(true)
-      case "false" => Some(false)
-      case _ => None
+  implicit object BooleanParser extends Parser[Boolean] {
+
+    override def tryParse(str: String): Try[Boolean] = str match {
+      case "true" => Success(true)
+      case "false" => Success(false)
+      case _ => Failure(new Exception("A booeal parser will only parse true or false"))
     }
   }
 
-
-  final def boolean(str: String): ValidationNel[String, Boolean] = {
-    booleanOpt(str)
-      .fold(s"Couldn't parse boolean from value $str".failureNel[Boolean])(_.successNel[String])
-  }
-
-  final def boolean(str: Option[String]): ValidationNel[String, DateTime] = {
-    parseRequired(str)(_ => boolean(str))
-  }
-
-  final def timestampOpt(str: String): Option[DateTime] = {
-    Try(new DateTime(str.toLong)).toOption
-  }
-
-  final def timestamp(str: String): ValidationNel[String, DateTime] = {
-    timestampOpt(str)
-      .fold(s"Couldn't not parse a timestamp from $str.".failureNel[DateTime])(_.successNel[String])
-  }
-
-  final def timestamp(str: Option[String]): ValidationNel[String, DateTime] = {
-    parseRequired(str)(timestamp)
-  }
-
-  final def dateOpt(str: String, format: DateTimeFormatter): Option[DateTime] = {
-    Try(format.parseDateTime(str)).toOption
-  }
-
-  final def date(str: String, format: DateTimeFormatter): ValidationNel[String, DateTime] = {
-    dateOpt(str, format)
-      .fold(s"Couldn't not parse a date from $str.".failureNel[DateTime])(_.successNel[String])
-  }
-
-  final def date(str: Option[String], format: DateTimeFormatter): ValidationNel[String, DateTime] = {
-    parseRequired(str)(x => date(x, format))
-  }
-
-  final def intOpt(str: String): Option[Int] = {
-    Try(str.toInt).toOption
-  }
-
-  final def int(str: String): ValidationNel[String, Int] = {
-    intOpt(str).fold(
-      s"Couldn't parse an Int from string $str".failureNel[Int]
-    )(_.successNel[String])
-  }
-
-  final def int(str: Option[String]): ValidationNel[String, Int] = {
-    parseRequired(str)(int)
-  }
-
-  final def floatOpt(str: String): Option[Float] = {
-    Try(str.toFloat).toOption
-  }
-
-  final def float(str: String): ValidationNel[String, Float] = {
-    floatOpt(str).fold(
-        s"Couldn't parse a Float from string $str".failureNel[Float]
-      )(_.successNel[String])
-  }
-
-  final def float(str: Option[String]): ValidationNel[String, Float] = {
-    parseRequired(str)(float)
-  }
-
-  final def doubleOpt(str: String): Option[Double] = {
-    Try(str.toDouble).toOption
-  }
-
-  final def double(str: String): ValidationNel[String, Double] = {
-    doubleOpt(str).fold (
-      s"Couldn't parse a Double from string $str".failureNel[Double]
-    )(_.successNel[String])
-  }
-
-  final def double(str: Option[String]): ValidationNel[String, Double] = {
-    parseRequired(str)(double)
-  }
-
-  final def longOpt(str: String): Option[Long] = {
-    Try(str.toLong).toOption
-  }
-
-  final def long(str: String): ValidationNel[String, Long] = {
-    longOpt(str).fold(
-      s"Couldn't parse a Long from string $str".failureNel[Long]
-    )(_.successNel[String])
-  }
-
-  final def long(str: Option[String]): ValidationNel[String, Long] = {
-    parseRequired(str)(long)
-  }
-
-  final def emailOpt(str: String): Option[String] = {
-    if (EmailValidator.getInstance().isValid(str)) {
-      Some(str)
-    } else {
-      None
+  implicit object TimestampParser extends Parser[DateTime] {
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[DateTime] = {
+      Try(new DateTime(str.toLong))
     }
   }
 
-  final def email(str: String): ValidationNel[String, String] = {
-    emailOpt(str)
-      .fold(s"Invalid email address $str".failureNel[String])(_.successNel[String])
+  implicit object IntParser extends Parser[Int] {
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[Int] = {
+      Try(str.toInt)
+    }
   }
 
-  final def email(str: Option[String]): ValidationNel[String, String] = {
-    parseRequired(str)(email)
+  implicit object DoubleParser extends Parser[Double] {
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[Double] = {
+      Try(str.toDouble)
+    }
   }
+
+  implicit object FloatParser extends Parser[Float] {
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[Float] = {
+      Try(str.toFloat)
+    }
+  }
+
+  implicit object LongParser extends Parser[Long] {
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[Long] = {
+      Try(str.toLong)
+    }
+  }
+
+  implicit object URLParser extends Parser[URL] {
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[URL] = {
+      Try(new URL(str))
+    }
+  }
+
+  implicit object EmailParser extends Parser[EmailAddress] {
+    override def tryParse(str: String): Try[EmailAddress] = {
+      if (EmailValidator.getInstance().isValid(str)) {
+        Success(EmailAddress(str))
+      } else {
+        Failure(new Exception(s"The string $str is not a vlaid email address"))
+      }
+    }
+  }
+
+  implicit class EnumParser[T <: Enumeration](enum: T) extends Parser[T#Value] {
+
+    /**
+     * A basic way to parse known types from options.
+     * @param str The string to attempt to parse from.
+     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+     */
+    override def tryParse(str: String): Try[T#Value] = {
+      Try(enum.withName(str))
+    }
+  }
+
+  def tryParse[T : Parser](str: String): Try[T] = implicitly[Parser[T]].tryParse(str)
+
+  def parse[T : Parser](str: String): ValidationNel[String, T] = implicitly[Parser[T]].parse(str)
+
+  def parse[T : Parser](obj: Option[String]): ValidationNel[String, T] = implicitly[Parser[T]].parse(obj)
+
+  def parseOpt[T : Parser](obj: String): Option[T] = implicitly[Parser[T]].parseOpt(obj)
+
+  def parseNonEmpty[T: Parser](obj: Option[String]): ValidationNel[String, Option[T]] = implicitly[Parser[T]].parseIfExists(obj)
+
+
+  def biparse[A, B](obj: A)(implicit p: BiParser[A, B]): ValidationNel[String, B] = {
+    implicitly[BiParser[A, B]].parse(obj)
+  }
+
+  def biparse[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidationNel[String, B] = {
+    implicitly[BiParser[A, B]].parse(obj)
+  }
+
+  def biparseOpt[A, B](obj: A)(implicit p: BiParser[A, B]): Option[B] = {
+    implicitly[BiParser[A, B]].parseOpt(obj)
+  }
+
+  def biparseNonEmpty[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidationNel[String, Option[B]] = {
+    implicitly[BiParser[A, B]].parseIfExists(obj)
+  }
+
+}
+
+
+private[util] trait DefaultParsers extends DefaultImplicitParsers {
 
   final def present(str: String, name: String): ValidationNel[String, String] = {
     if (str.trim.length == 0) {
@@ -202,13 +240,38 @@ trait DefaultParsers {
     }
   }
 
+  def nonEmpty(str: String): ValidationNel[String, Boolean] = {
+    if (str.length > 0) {
+      true.successNel[String]
+    } else {
+      s"String required to be non-empty found empty".failureNel[Boolean]
+    }
+  }
+
+  def nonEmpty[K, V](coll: Map[K, V]): ValidationNel[String, Boolean] = {
+    if (coll.nonEmpty) {
+      true.successNel[String]
+    } else {
+      "This collection is empty".failureNel[Boolean]
+    }
+  }
+
+  def nonEmpty[T](coll: Traversable[T]): ValidationNel[String, Boolean] = {
+    if (coll.nonEmpty) {
+      true.successNel[String]
+    } else {
+      "This collection is empty".failureNel[Boolean]
+    }
+  }
+
+
   final def enumOpt[T <: Enumeration](obj: String, enum: T): Option[T#Value] = {
     Try(enum.withName(obj)).toOption
   }
 
   final def enum[T <: Enumeration](obj: String, enum: T): ValidationNel[String, T#Value] = {
-    enumOpt(obj, enum)
-      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(_.successNel[String])
+    Try(enum.withName(obj)).toOption
+      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(item => item.successNel[String])
   }
 
 }
