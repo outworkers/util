@@ -34,7 +34,7 @@ import org.scalatest.{Matchers, FlatSpec}
 class DefaultParsersTest extends FlatSpec with Matchers {
 
   it should "parse a long as an applicative from a valid string" in {
-    val parser = long("124")
+    val parser = parse[Long]("124")
     parser.isSuccess shouldEqual true
 
     parser.toOption.isDefined shouldEqual true
@@ -42,14 +42,14 @@ class DefaultParsersTest extends FlatSpec with Matchers {
   }
 
   it should "parse a long as an option from a valid string" in {
-    val parser = longOpt("124")
+    val parser = parseOpt[Long]("124")
 
     parser.isDefined shouldEqual true
     parser.get shouldEqual 124L
   }
 
   it should "parse a long as an applicative from an optional string" in {
-    val parser = long(Some("124"))
+    val parser = parse[Long](Some("124"))
     parser.isSuccess shouldEqual true
 
     parser.toOption.isDefined shouldEqual true
@@ -57,7 +57,7 @@ class DefaultParsersTest extends FlatSpec with Matchers {
   }
 
   it should "fail parsing an applicative from an empty option" in {
-    val parser = long(None)
+    val parser = parse[Long](None)
     parser.isSuccess shouldEqual false
     parser.toOption.isDefined shouldEqual false
   }

@@ -29,13 +29,14 @@
  */
 package com.websudos.util.lift
 
-import scalaz._
-import scalaz.Scalaz._
-import scala.util.control.NonFatal
 import com.websudos.util.parsers.DefaultParsers
 import net.liftweb.common.Box
 import net.liftweb.json.JsonAST.JValue
-import net.liftweb.json.{compactRender, Formats, Extraction, DefaultFormats, JsonParser}
+import net.liftweb.json.{DefaultFormats, Extraction, Formats, JsonParser, compactRender}
+
+import scala.util.control.NonFatal
+import scalaz.Scalaz._
+import scalaz._
 
 
 trait LiftParsers extends DefaultParsers {
