@@ -164,7 +164,7 @@ It's useful to define such typeclass instances inside package objects, as they w
 import com.websudos.util.testing._
 
 
-case class MyAwesomeClass(nane: String, age: Int, email: String)
+case class MyAwesomeClass(name: String, age: Int, email: String)
 
 package object mytest {
 
@@ -225,22 +225,10 @@ a parser that parses an end result from an ```Option[String]``` and parserOpt va
 T]```, which allows for Monadic composition, where you need to "short-circuit" evaluation and validation, instead of computing the full chain by chaining 
 applicatives.
 
-To illustrate the above, the ```int``` parser, designed to parse a ```scala.Int``` value from a ```String```, packages the following three signatures:
-
-```scala
-  final def intOpt(str: String)
-
-  final def int(str: String): ValidationNel[String, Int]
-
-  final def int(str: Option[String]): ValidationNel[String, Int]
-```
-
-
 ### Option parsers ###
 <a href="#table-of-contents">Back to top</a>
 
 The full list of optional parsers is:
-
 
 | Type            | Input type                | Parser Output type                |
 | --------------- |---------------------------| --------------------------------- |
@@ -266,8 +254,8 @@ import com.websudos.util.parsers._
 object Test {
   def optionalParsing(email: String, age: String): Unit = {
     for {
-      validEmail <- emailOpt(email)
-      validAge <- intOpt(age)
+      validEmail <- parseOpt[EmailAddress](email)
+      validAge <- parseOpt[Int](age)
     } yield s"This person can be reached at $validEmail and is $validAge years old"
   }
 }
@@ -301,7 +289,7 @@ import com.websudos.util.parsers._
 object Test {
   
   def registerUser(str: String, age: String): Unit = {
-    (email(str) |@| int(age)) {
+    (parse[EmailAddress](str) |@| parse[Int](age)) {
       (validEmail, validAge) => {
       }
     }.fold {

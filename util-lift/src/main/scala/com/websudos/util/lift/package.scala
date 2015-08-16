@@ -39,6 +39,29 @@ import scalaz.{NonEmptyList, ValidationNel}
 
 package object lift extends LiftParsers with JsonHelpers {
 
+
+  implicit class OptionResponseHelper[T](val opt: Option[T]) extends AnyVal {
+
+    /**
+     * When the Option is full, this will continue the transformation flow of an Option to a LiftResponse.
+     * Otherwise, the flow will short-circuit to a an unauthorized response.
+     * @param pf A partial function from a full option of type T to an async LiftResponse.
+     * @return A Future wrapping the obtained LiftResponse.
+     */
+    def required(pf: T => Future[LiftResponse]): Future[LiftResponse] = {
+      opt.fold(Future.successful(JsonUnauthorizedResponse()))(pf)
+    }
+  }
+
+  implicit class FutureOptionTransformer[T <: Product with Serializable](val future: Future[Option[T]]) extends AnyVal {
+
+    def json()(implicit ec: ExecutionContext, formats: Formats, mf: Manifest[T]): Future[LiftResponse] = {
+      future map {
+        item => item.fold(JsonUnauthorizedResponse())(item => JsonResponse(item.asJValue(), 200))
+      }
+    }
+  }
+
   implicit class ResponseToFuture(val response: LiftResponse) extends AnyVal {
     def toFuture(): Future[LiftResponse] = Promise.successful(response).future
   }
@@ -125,7 +148,23 @@ package object lift extends LiftParsers with JsonHelpers {
       eval.fold(_.toJson(code), pf)
     }
 
+
+    /**
+     * Maps a validation to a LiftResponse if the validation is successful.
+     * If the validation is not successful, this method provides a default response mechanism
+     * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+     * and a list of messages corresponding to each individual error in the applicative functor.
+     *
+     * @param pf The partial function that maps the successful result to a LiftResponse.
+     * @param code The error status code to use if the validation is a failure.
+     * @return A future wrapping a Lift Response.
+     */
+    @deprecated("Use mapSuccess instead", "0.9.11")
     def async(pf: A => Future[LiftResponse])(code: Int = 400): Future[LiftResponse] = {
+      eval.fold(_.toJson(code).toFuture(), pf)
+    }
+
+    def mapSuccess(pf: A => Future[LiftResponse])(code: Int = 400): Future[LiftResponse] = {
       eval.fold(_.toJson(code).toFuture(), pf)
     }
 
@@ -133,7 +172,12 @@ package object lift extends LiftParsers with JsonHelpers {
       eval.fold(_.toJson(), pf)
     }
 
+    @deprecated("Use mapSuccess instead", "0.9.11")
     def async(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
+      eval.fold(_.toJson().toFuture(), pf)
+    }
+
+    def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
       eval.fold(_.toJson().toFuture(), pf)
     }
   }
