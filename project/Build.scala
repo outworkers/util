@@ -90,8 +90,8 @@ object Build extends Build {
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
     version := "0.9.11",
-    scalaVersion := "2.11.6",
-    crossScalaVersions := Seq("2.10.5", "2.11.6"),
+    scalaVersion := "2.11.7",
+    crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
       "Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
       "Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
@@ -113,7 +113,7 @@ object Build extends Build {
     )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++
     GitProject.gitSettings ++
-    bintrayPublishSettings ++
+    mpublishSettings ++
     VersionManagement.newSettings
 
 
