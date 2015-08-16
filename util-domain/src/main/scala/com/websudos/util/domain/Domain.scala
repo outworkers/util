@@ -2,21 +2,24 @@ package com.websudos.util.domain
 
 
 private[util] object Definitions {
-  case class EmailAddress(address: String)
-  case class FirstName(name: String)
-  case class LastName(name: String)
-  case class FullName(name: String)
-  case class CountryCode(code: String)
 
-  case class Country(country: String)
-  case class City(city: String)
-  case class ProgrammingLanguage(language: String)
+  abstract class GeneratedValue[T](val value: T)
 
-  case class LoremIpsum(word: String)
-  case class Url(url: String)
-  case class Domain(domain: String)
+  case class EmailAddress(address: String) extends GeneratedValue(address)
+  case class FirstName(name: String) extends GeneratedValue(name)
+  case class LastName(name: String) extends GeneratedValue(name)
+  case class FullName(name: String) extends GeneratedValue(name)
+  case class CountryCode(code: String) extends GeneratedValue(code)
 
-  case class ShortString(str: String)
+  case class Country(country: String) extends GeneratedValue(country)
+  case class City(city: String) extends GeneratedValue(city)
+  case class ProgrammingLanguage(language: String) extends GeneratedValue(language)
+
+  case class LoremIpsum(word: String) extends GeneratedValue(word)
+  case class Url(url: String) extends GeneratedValue(url)
+  case class Domain(domain: String) extends GeneratedValue(domain)
+
+  case class ShortString(str: String) extends GeneratedValue(str)
 }
 
 private[util] trait GenerationDomain {

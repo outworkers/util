@@ -31,7 +31,7 @@ import sbt.Keys._
 import sbt._
 import com.twitter.sbt._
 
-object UtilBuild extends Build {
+object Build extends Build {
 
 	val ScalaTestVersion = "2.2.4"
   val FinagleVersion = "6.25.0"
@@ -89,7 +89,7 @@ object UtilBuild extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.9.8",
+    version := "0.9.11",
     scalaVersion := "2.11.6",
     crossScalaVersions := Seq("2.10.5", "2.11.6"),
 		resolvers ++= Seq(
