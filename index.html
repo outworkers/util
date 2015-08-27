@@ -5,7 +5,7 @@
     <title>Util by websudos</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
     <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
   </head>
@@ -20,11 +20,14 @@
 
     <section class="main-content">
       <h1>
-<a id="util-" class="anchor" href="#util-" aria-hidden="true"><span class="octicon octicon-link"></span></a>util<a href="https://travis-ci.org/websudos/util"><img src="https://travis-ci.org/websudos/util.svg?branch=develop" alt="Build Status"></a> <a href="https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10"><img src="https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg" alt="Maven Central"></a>
+<a id="util------" class="anchor" href="#util------" aria-hidden="true"><span class="octicon octicon-link"></span></a>util<a href="https://travis-ci.org/websudos/util"><img src="https://travis-ci.org/websudos/util.svg?branch=develop" alt="Build Status"></a> <a href="https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10"><img src="https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg" alt="Maven Central"></a>   <a href="https://bintray.com/websudos/oss-releases/util/_latestVersion"> <img src="https://api.bintray.com/packages/websudos/oss-releases/util/images/download.svg" alt="Bintray"> </a>
 </h1>
 
-<p>The latest available version of the util library is <code>val UtilVersion = 0.7.5</code>. This library is only deployed to our managed Maven repository,
-available at <code>http://maven.websudos.co.uk</code>. It is publicly available, for both Scala 2.10.x and Scala 2.11.x.</p>
+<p>The latest available version of the util library is <code>val UtilVersion = 0.9.2</code>. This library is available on Maven Central and
+on our public Bintray repository, found at: <code>https://dl.bintray.com/websudos/oss-releases/</code>.</p>
+
+<p>It is publicly available, for both Scala 2.10.x and Scala 2.11.x. Check the badges at the top of this README for the
+latest version of <code>util</code> available. The badges are automatically updated when a new version is out, this readme is not.</p>
 
 <p><img src="https://s3-eu-west-1.amazonaws.com/websudos/oss/logos/util.png" alt="Util" title="Websudos Util"></p>
 
@@ -177,7 +180,7 @@ After you define such a one-time sampling type class instance, you have access t
 <span class="pl-k">import</span> <span class="pl-v">com.websudos.util.testing.</span><span class="pl-v">_</span>
 
 
-<span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">MyAwesomeClass</span>(<span class="pl-v">nane</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">Int</span>, <span class="pl-v">email</span>: <span class="pl-k">String</span>)
+<span class="pl-k">case</span> <span class="pl-k">class</span> <span class="pl-en">MyAwesomeClass</span>(<span class="pl-v">name</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">Int</span>, <span class="pl-v">email</span>: <span class="pl-k">String</span>)
 
 <span class="pl-k">package object</span> <span class="pl-en">mytest</span> {
 
@@ -246,14 +249,6 @@ a parser that parses an end result from an <code>Option[String]</code> and parse
 T]</code>, which allows for Monadic composition, where you need to "short-circuit" evaluation and validation, instead of computing the full chain by chaining 
 applicatives.</p>
 
-<p>To illustrate the above, the <code>int</code> parser, designed to parse a <code>scala.Int</code> value from a <code>String</code>, packages the following three signatures:</p>
-
-<div class="highlight highlight-scala"><pre>  <span class="pl-k">final</span> <span class="pl-k">def</span> <span class="pl-en">intOpt</span>(<span class="pl-v">str</span>: <span class="pl-k">String</span>)
-
-  <span class="pl-k">final</span> <span class="pl-k">def</span> <span class="pl-en">int</span>(<span class="pl-v">str</span>: <span class="pl-k">String</span>)<span class="pl-k">:</span> <span class="pl-en">ValidationNel</span>[<span class="pl-k">String</span>, <span class="pl-k">Int</span>]
-
-  <span class="pl-k">final</span> <span class="pl-k">def</span> <span class="pl-en">int</span>(<span class="pl-v">str</span>: <span class="pl-en">Option</span>[<span class="pl-k">String</span>])<span class="pl-k">:</span> <span class="pl-en">ValidationNel</span>[<span class="pl-k">String</span>, <span class="pl-k">Int</span>]</pre></div>
-
 <h3>
 <a id="option-parsers" class="anchor" href="#option-parsers" aria-hidden="true"><span class="octicon octicon-link"></span></a>Option parsers</h3>
 
@@ -264,51 +259,46 @@ applicatives.</p>
 <table>
 <thead>
 <tr>
-<th>Name</th>
+<th>Type</th>
 <th>Input type</th>
-<th>Output type</th>
+<th>Parser Output type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>intOpt</td>
+<td>Int</td>
 <td>String|Option[String]</td>
-<td>Option[Int]</td>
+<td>ValidationNel[String, Int]</td>
 </tr>
 <tr>
-<td>longOpt</td>
+<td>Long</td>
 <td>String|Option[String]</td>
-<td>Option[Long]</td>
+<td>ValidationNel[String, Long]</td>
 </tr>
 <tr>
-<td>doubleOpt</td>
+<td>Double</td>
 <td>String|Option[String]</td>
-<td>Option[Double]</td>
+<td>ValidationNel[String, Double]</td>
 </tr>
 <tr>
-<td>floatOpt</td>
+<td>Float</td>
 <td>String|Option[String]</td>
-<td>Option[Float]</td>
+<td>ValidationNel[String, Float]</td>
 </tr>
 <tr>
-<td>uuidOpt</td>
+<td>UUID</td>
 <td>String|Option[String]</td>
-<td>Option[java.util.UUID]</td>
+<td>ValidationNel[String, UUID]</td>
 </tr>
 <tr>
-<td>emailOpt</td>
+<td>Email</td>
 <td>String|Option[String]</td>
-<td>Option[String]</td>
+<td>ValidationNel[String, String]</td>
 </tr>
 <tr>
-<td>timestampOpt</td>
+<td>DateTime</td>
 <td>String|Option[String]</td>
-<td>Option[org.joda.time.DateTime]</td>
-</tr>
-<tr>
-<td>dateOpt</td>
-<td>String|Option[String]</td>
-<td>Option[org.joda.time.DateTime]</td>
+<td>ValidationNel[String, org.joda.time.DateTime]</td>
 </tr>
 </tbody>
 </table>
@@ -326,8 +316,8 @@ applicatives.</p>
 <span class="pl-k">object</span> <span class="pl-en">Test</span> {
   <span class="pl-k">def</span> <span class="pl-en">optionalParsing</span>(<span class="pl-v">email</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">String</span>)<span class="pl-k">:</span> <span class="pl-k">Unit</span> <span class="pl-k">=</span> {
     <span class="pl-k">for</span> {
-      validEmail <span class="pl-k">&lt;</span><span class="pl-k">-</span> emailOpt(email)
-      validAge <span class="pl-k">&lt;</span><span class="pl-k">-</span> intOpt(age)
+      validEmail <span class="pl-k">&lt;</span><span class="pl-k">-</span> parseOpt[<span class="pl-en">EmailAddress</span>](email)
+      validAge <span class="pl-k">&lt;</span><span class="pl-k">-</span> parseOpt[<span class="pl-k">Int</span>](age)
     } <span class="pl-k">yield</span> s<span class="pl-s"><span class="pl-pds">"</span>This person can be reached at $validEmail and is $validAge years old<span class="pl-pds">"</span></span>
   }
 }
@@ -343,49 +333,44 @@ applicatives.</p>
 <table>
 <thead>
 <tr>
-<th>Name</th>
+<th>Type</th>
 <th>Input type</th>
 <th>Parser Output type</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>int</td>
+<td>Int</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, Int]</td>
 </tr>
 <tr>
-<td>long</td>
+<td>Long</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, Long]</td>
 </tr>
 <tr>
-<td>double</td>
+<td>Double</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, Double]</td>
 </tr>
 <tr>
-<td>float</td>
+<td>Float</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, Float]</td>
 </tr>
 <tr>
-<td>uuid</td>
+<td>UUID</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, UUID]</td>
 </tr>
 <tr>
-<td>email</td>
+<td>Email</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, String]</td>
 </tr>
 <tr>
-<td>timestamp</td>
-<td>String|Option[String]</td>
-<td>ValidationNel[String, org.joda.time.DateTime]</td>
-</tr>
-<tr>
-<td>date</td>
+<td>DateTime</td>
 <td>String|Option[String]</td>
 <td>ValidationNel[String, org.joda.time.DateTime]</td>
 </tr>
@@ -402,7 +387,7 @@ applicatives.</p>
 <span class="pl-k">object</span> <span class="pl-en">Test</span> {
 
   <span class="pl-k">def</span> <span class="pl-en">registerUser</span>(<span class="pl-v">str</span>: <span class="pl-k">String</span>, <span class="pl-v">age</span>: <span class="pl-k">String</span>)<span class="pl-k">:</span> <span class="pl-k">Unit</span> <span class="pl-k">=</span> {
-    (email(str) <span class="pl-k">|@|</span> int(age)) {
+    (parse[<span class="pl-en">EmailAddress</span>](str) <span class="pl-k">|@|</span> parse[<span class="pl-k">Int</span>](age)) {
       (validEmail, validAge) <span class="pl-k">=&gt;</span> {
       }
     }.fold {
@@ -471,4 +456,3 @@ Internally, we heavily use the Twitter eco-system for development and we use Fin
   
   </body>
 </html>
-
