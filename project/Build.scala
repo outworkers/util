@@ -44,7 +44,7 @@ object Build extends Build {
   def liftVersion(scalaVersion: String) = {
     (scalaVersion match {
       case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
-      case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M2"
+      case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M6"
     }) % "compile"
   }
 
@@ -89,7 +89,7 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.9.11",
+    version := "0.9.12",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
@@ -113,7 +113,7 @@ object Build extends Build {
     )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++
     GitProject.gitSettings ++
-    mpublishSettings ++
+    bintrayPublishSettings ++
     VersionManagement.newSettings
 
 

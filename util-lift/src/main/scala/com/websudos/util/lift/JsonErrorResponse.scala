@@ -41,7 +41,7 @@ case class JsonErrorResponse(
   headers: List[(String, String)],
   cookies: List[HTTPCookie] = Nil) {
   def toResponse = {
-    val bytes = json.toJsCmd.getBytes()
+    val bytes = json.toJsCmd.getBytes
     InMemoryResponse(bytes, ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers, cookies, 401)
   }
 }

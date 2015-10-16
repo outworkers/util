@@ -29,5 +29,18 @@
  */
 package com.websudos.util
 
-package object parsers extends DefaultParsers
+import scala.util.{Success, Failure, Try}
+import scalaz.ValidationNel
+
+package object parsers extends DefaultParsers {
+
+  implicit class ValidationNelConverted[String, T](val validation: ValidationNel[String, T]) extends AnyVal {
+    def asTry: Try[T] = {
+      validation.fold(
+        nel => Failure(new Exception(nel.list.mkString(", "))),
+        obj => Success(obj)
+      )
+    }
+  }
+}
 
