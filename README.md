@@ -181,9 +181,9 @@ package object mytest {
 ```
 
 You may notice this pattern is already available in better libraries such as ScalaMock and we are not trying to provide an alternative to ScalaMock or compete with it in any way. Our typeclass generator approach only becomes very useful where you really care about very specific properties of the data.
-For instance, you may want to get a user with a valid email address, or you may use the underyling factories to get a name that ressembles the name of a real person, and so on.
+For instance, you may want to get a user with a valid email address, or you may use the underlying factories to get a name that reassembles the name of a real person, and so on.
 
-It's also useful when you want to define specific ways in which hierarchies of classes are composed together into a sample. If generation for the sake of generation is all you care about, then ScalaMock with it's macro based approach is a far superior product simply because there's no typing effort involved.
+It's also useful when you want to define specific ways in which hierarchies of classes are composed together into a sample. If generation for the sake of generation is all you care about, then ScalaMock with its macro based approach is a far superior product simply because there's no typing effort involved.
 
 There are multiple methods available, allowing you to generate more than just the type:
  
@@ -194,9 +194,9 @@ There are multiple methods available, allowing you to generate more than just th
 - ```genMap[T]()```, convenience method that will give you back a ```Map[String, T]```.
 
 
-There is also a default list of available generators for some default types. For things like ```EmailAddress```, the point of the extra class is obviously to distinguish the type during implicit resolution, but you don't need to use our abstraction at all, there will always be an easy way to get to the underlying generated primitives.
+There is also a default list of available generators for some default types, and to get to their value simply use the `value` method if the type is not a primitive. For things like ```EmailAddress```, the point of the extra class is obviously to distinguish the type during implicit resolution, but you don't need to use our abstraction at all, there will always be an easy way to get to the underlying generated primitives.
 
-In the case of email addresses, you can use ```gen[EmailAddress].address```, which will correctly generate a valid ```EmailAddress``` but you can work directly with a ```String```.
+In the case of email addresses, you can use ```gen[EmailAddress].value```, which will correctly generate a valid ```EmailAddress``` but you can work directly with a ```String```.
 
 - ```scala.Int```
 - ```scala.Double```
@@ -209,7 +209,15 @@ In the case of email addresses, you can use ```gen[EmailAddress].address```, whi
 - ```java.util.UUID```
 - ```org.joda.time.DateTime```
 - ```org.joda.time.LocalDate```
-- ```com.websudos.util.testing.EmailAddress(address)```
+- ```com.websudos.util.domain.Definitions.EmailAddress(value)```
+- ```com.websudos.util.domain.Definitions.FirstName(value)```
+- ```com.websudos.util.domain.Definitions.LastName(value)```
+- ```com.websudos.util.domain.Definitions.FullName(value)```
+- ```com.websudos.util.domain.Definitions.CountryCode(value)```
+- ```com.websudos.util.domain.Definitions.Country(value)```
+- ```com.websudos.util.domain.Definitions.City(value)```
+- ```com.websudos.util.domain.Definitions.ProgrammingLanguage(value)```
+- ```com.websudos.util.domain.Definitions.LoremIpsum(value)```
 
 
 ### util-parsers ###
