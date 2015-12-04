@@ -2,14 +2,19 @@ package com.websudos.util.lift
 
 import java.util.UUID
 
+import com.websudos.phantom.builder.primitives.DefaultPrimitives
+import com.websudos.phantom.builder.primitives.DefaultPrimitives.DateTimeIsPrimitive
+import com.websudos.phantom.dsl._
 import net.liftweb.json.JsonAST.{JString, JValue}
 import net.liftweb.json._
+import org.joda.time.DateTime
 
 import scala.reflect.ClassTag
+import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
 
 sealed class UUIDSerializer extends Serializer[UUID] {
-  private val Class = classOf[UUID]
+  private[this] val Class = classOf[UUID]
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), UUID] = {
     case (TypeInfo(Class, _), json) => json match {
@@ -31,8 +36,6 @@ sealed class UUIDSerializer extends Serializer[UUID] {
   }
 }
 
-
-
 class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
   extends Serializer[E#Value] {
   import JsonDSL._
@@ -52,6 +55,31 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
     case i: E#Value => i.id
   }
 }
+
+sealed class DateTimeSerializer extends Serializer[DateTime] {
+
+  def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), DateTime] = {
+    case (TypeInfo(Class, _), json) => json match {
+      case JString(value) =>
+        Try {
+          new DateTime(value.toLong)
+        } match {
+          case Success(dt) => dt
+          case Failure(err) => {
+            val exception =  new MappingException(s"Couldn't extract a DateTime from $value")
+            exception.initCause(err)
+            throw exception
+          }
+        }
+      case x => throw new MappingException("Can't convert " + x + " to DateTime")
+    }
+  }
+
+  def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {
+    case x: DateTime => JString(x.getMillis.toString)
+  }
+}
+
 
 class EnumNameSerializer[E <: Enumeration: ClassTag](enum: E)
   extends Serializer[E#Value] {
@@ -83,5 +111,5 @@ object EnumNameSerializer {
 
 
 trait CustomSerializers {
-  implicit val formats = Serialization.formats(NoTypeHints) + new UUIDSerializer
+  implicit val formats = Serialization.formats(NoTypeHints) + new UUIDSerializer + new DateTimeSerializer
 }
