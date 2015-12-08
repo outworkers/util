@@ -2,9 +2,6 @@ package com.websudos.util.lift
 
 import java.util.UUID
 
-import com.websudos.phantom.builder.primitives.DefaultPrimitives
-import com.websudos.phantom.builder.primitives.DefaultPrimitives.DateTimeIsPrimitive
-import com.websudos.phantom.dsl._
 import net.liftweb.json.JsonAST.{JString, JValue}
 import net.liftweb.json._
 import org.joda.time.DateTime
@@ -59,7 +56,7 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
 sealed class DateTimeSerializer extends Serializer[DateTime] {
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), DateTime] = {
-    case (TypeInfo(Class, _), json) => json match {
+    case (TypeInfo(_, _), json) => json match {
       case JString(value) =>
         Try {
           new DateTime(value.toLong)

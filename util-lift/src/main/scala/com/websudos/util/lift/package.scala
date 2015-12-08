@@ -33,7 +33,7 @@ import net.liftweb.http.rest.RestContinuation
 import net.liftweb.http.{JsonResponse, LiftResponse}
 import net.liftweb.json._
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 import scalaz.{NonEmptyList, ValidationNel}
 
@@ -63,14 +63,20 @@ package object lift extends LiftParsers with JsonHelpers {
   }
 
   implicit class ResponseToFuture(val response: LiftResponse) extends AnyVal {
-    def toFuture(): Future[LiftResponse] = Promise.successful(response).future
+    def toFuture(): Future[LiftResponse] = Future.successful(response)
+
+    def future(): Future[LiftResponse] = Future.successful(response)
   }
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
     def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, resp.list))
 
-    def toJson(code: Int = 406): LiftResponse = JsonResponse(Extraction.decompose(toError(code))(DefaultFormats), code)
+    def toJson(code: Int = 406)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
+
+    def asResponse(code: Int = 406)(implicit formats: Formats): LiftResponse = {
+      JsonResponse(Extraction.decompose(toError(code), 406))
+    }
   }
 
   implicit class ErrorConverter(val err: Throwable) extends AnyVal {
@@ -89,7 +95,7 @@ package object lift extends LiftParsers with JsonHelpers {
       Extraction.decompose(clz)
     }
 
-    def asResponse()(implicit mf: Manifest[T], formats: DefaultFormats): LiftResponse = {
+    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
       JsonResponse(clz.asJValue(), 200)
     }
   }
@@ -103,7 +109,7 @@ package object lift extends LiftParsers with JsonHelpers {
       Extraction.decompose(list)
     }
 
-    def asResponse()(implicit mf: Manifest[T], formats: DefaultFormats): LiftResponse = {
+    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
       if (list.nonEmpty) {
         JsonResponse(list.asJValue(), 200)
       } else {
@@ -121,7 +127,7 @@ package object lift extends LiftParsers with JsonHelpers {
       Extraction.decompose(list)
     }
 
-    def asResponse()(implicit mf: Manifest[T], formats: DefaultFormats): LiftResponse = {
+    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
       list match {
         case head :: tail => JsonResponse(list.asJValue(), 200)
         case Nil => JsonResponse(JArray(Nil), 204)
