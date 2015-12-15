@@ -85,9 +85,7 @@ sealed trait BaseParser[X, T] {
 
 trait BiParser[X, T] extends BaseParser[X, T]
 
-sealed trait Parser[T] extends BaseParser[String, T] {
-
-}
+trait Parser[T] extends BaseParser[String, T]
 
 private[util] trait DefaultImplicitParsers extends GenerationDomain {
 
@@ -100,7 +98,7 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
     override def tryParse(str: String): Try[Boolean] = str match {
       case "true" => Success(true)
       case "false" => Success(false)
-      case _ => Failure(new Exception("A booeal parser will only parse true or false"))
+      case _ => Failure(new Exception("A boolean parser will only parse the tings 'true' and 'false'"))
     }
   }
 
