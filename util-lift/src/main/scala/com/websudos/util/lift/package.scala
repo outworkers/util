@@ -182,9 +182,5 @@ package object lift extends LiftParsers with JsonHelpers {
     def async(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
       eval.fold(_.toJson().toFuture(), pf)
     }
-
-    def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
-      eval.fold(_.toJson().toFuture(), pf)
-    }
   }
 }
