@@ -42,6 +42,8 @@ import scalaz.{Success => _, _}
 
 sealed trait BaseParser[X, T] {
 
+  type Out = ValidationNel[String, T]
+
   final def optional(str: Option[X])(f: X => ValidationNel[String, T]): ValidationNel[String, Option[T]] = {
     str.fold(Option.empty[T].successNel[String]) { s =>
       f(s).map(Some(_))
@@ -61,7 +63,6 @@ sealed trait BaseParser[X, T] {
   }
 
   def tryParse(obj: X): Try[T]
-
 
   /**
    * A basic way to parse known types from options.
@@ -221,6 +222,24 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
 
 
 private[util] trait DefaultParsers extends DefaultImplicitParsers {
+
+
+  implicit class OptionDelegation[T](val option: Option[T]) {
+    def delegate[Y]()(implicit bi: BiParser[T, Y]): ValidationNel[String, Y] = {
+      option.fold(
+        "Option was empty, couldn't delegate to biparser".failureNel[Y])(
+        x => bi.parse(x)
+      )
+    }
+
+    def chain[Y](nel: T => ValidationNel[String, Y]): ValidationNel[String, Y] = {
+      option.fold(
+        "Option was empty, couldn't delegate to biparser".failureNel[Y])(
+        x => nel(x)
+      )
+    }
+  }
+
 
   final def present(str: String, name: String): ValidationNel[String, String] = {
     if (str.trim.length == 0) {
