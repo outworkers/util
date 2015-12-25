@@ -118,6 +118,24 @@ package object lift extends LiftParsers with JsonHelpers {
     }
   }
 
+  implicit class JsonSetHelper[T <: Product with Serializable](val set: Set[T]) extends AnyVal {
+    def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+      compactRender(Extraction.decompose(set))
+    }
+
+    def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
+      Extraction.decompose(set)
+    }
+
+    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
+      if (set.nonEmpty) {
+        JsonResponse(set.asJValue(), 200)
+      } else {
+        JsonResponse(JArray(Nil), 204)
+      }
+    }
+  }
+
   implicit class JsonListHelper[T <: Product with Serializable](val list: List[T]) extends AnyVal {
     def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
       compactRender(Extraction.decompose(list))
