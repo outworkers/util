@@ -241,6 +241,16 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
   }
 
 
+  implicit class NelDelegation[X, T](val nel: ValidationNel[X, T]) {
+    def chain[Y](fn: T => ValidationNel[String, Y]): ValidationNel[String, Y] = {
+      nel.fold(
+        fail => fail.list.mkString(", ").failureNel[Y],
+        succ => fn(succ)
+      )
+    }
+  }
+
+
   final def present(str: String, name: String): ValidationNel[String, String] = {
     if (str.trim.length == 0) {
       s"$name is empty".failureNel[String]
