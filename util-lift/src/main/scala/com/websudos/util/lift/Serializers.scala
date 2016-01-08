@@ -55,8 +55,10 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
 
 sealed class DateTimeSerializer extends Serializer[DateTime] {
 
+  val DateTimeClass = classOf[DateTime]
+
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), DateTime] = {
-    case (TypeInfo(_, _), json) => json match {
+    case (TypeInfo(DateTimeClass, _), json) => json match {
       case JString(value) =>
         Try {
           new DateTime(value.toLong)
