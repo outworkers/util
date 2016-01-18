@@ -191,7 +191,7 @@ package object lift extends LiftParsers with JsonHelpers {
       * @param pf The partial function that maps the successful result to a LiftResponse.
       * @return A future wrapping a Lift Response.
       */
-    def mapSuccess(pf: A => LiftResponse): LiftResponse = {
+    def respond(pf: A => LiftResponse): LiftResponse = {
       eval.fold(_.toJson(), pf)
     }
   }
