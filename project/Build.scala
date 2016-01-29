@@ -89,7 +89,7 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.10.10",
+    version := "0.10.11",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
@@ -180,7 +180,6 @@ object Build extends Build {
   ).settings(
     name := "util-lift",
     libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
-
   ).dependsOn(
     UtilParsers,
     UtilTesting % "test, provided"

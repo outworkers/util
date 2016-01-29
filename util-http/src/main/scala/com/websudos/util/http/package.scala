@@ -1,12 +1,15 @@
 package com.websudos.util
 
 import java.net.{URL, URLDecoder, URLEncoder}
-import scala.collection.breakOut
-import org.jboss.netty.handler.codec.http.HttpResponse
 
 import com.twitter.finagle.http.RequestBuilder
 import com.twitter.io.Charsets.Utf8
+import com.twitter.util.{Future => TwitterFuture, Promise => TwitterPromise, Return, Throw}
+import org.jboss.netty.handler.codec.http.HttpResponse
 
+import scala.collection.breakOut
+import scala.concurrent.{Future => ScalaFuture, Promise => ScalaPromise, ExecutionContext}
+import scala.util.{Failure, Success}
 
 package object http extends HttpExtractor {
 
@@ -18,7 +21,8 @@ package object http extends HttpExtractor {
 
   /**
    * Implicit value class used to simplify extracting responses from a Netty HTTP response.
-   * @param resp The Http response to augment.
+    *
+    * @param resp The Http response to augment.
    */
   implicit class RichHttpResponse(val resp: HttpResponse) extends AnyVal {
 
@@ -75,4 +79,32 @@ package object http extends HttpExtractor {
 
   def :/(uri: String): String = if (uri.indexOf("http") == -1) "https://" + uri else uri
   def ::/(uri: String): String = if (uri.indexOf("http") == -1) "http://" + uri else uri
+
+
+  implicit class TwitterFutureConverter[T](val future: TwitterFuture[T]) extends AnyVal {
+    def asScala: ScalaFuture[T] = {
+      val promise = ScalaPromise[T]()
+
+      future respond {
+        case Return(value) => promise success value
+        case Throw(err) => promise failure err
+      }
+
+      promise.future
+    }
+  }
+
+  implicit class ScalaFutureConverter[T](val future: ScalaFuture[T]) extends AnyVal {
+    def asTwitter()(implicit context: ExecutionContext): TwitterFuture[T] = {
+      val promise = TwitterPromise[T]()
+
+      future onComplete {
+        case Success(value) => promise become TwitterFuture.value(value)
+        case Failure(err) => promise raise err
+      }
+
+      promise
+    }
+  }
+
 }
