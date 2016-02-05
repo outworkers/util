@@ -70,6 +70,16 @@ sealed class DateTimeSerializer extends Serializer[DateTime] {
             throw exception
           }
         }
+      case JInt(value) => {
+        Try(new DateTime(value.toLong)) match {
+          case Success(dt) => dt
+          case Failure(err) => {
+            val exception =  new MappingException(s"Couldn't extract a DateTime from $value")
+            exception.initCause(err)
+            throw exception
+          }
+        }
+      }
       case x => throw new MappingException("Can't convert " + x + " to DateTime")
     }
   }
