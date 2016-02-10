@@ -85,7 +85,7 @@ sealed class DateTimeSerializer extends Serializer[DateTime] {
   }
 
   def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {
-    case x: DateTime => JString(x.getMillis.toString)
+    case x: DateTime => JInt(x.getMillis)
   }
 }
 
