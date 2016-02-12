@@ -37,15 +37,12 @@ object Build extends Build {
   val FinagleVersion = "6.25.0"
   val FinagleZkVersion = "6.24.0"
   val TwitterUtilVersion = "6.24.0"
-  val LiftVersion = "3.0-M1"
+  val LiftVersion = "3.0-M8"
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
 
-  def liftVersion(scalaVersion: String) = {
-    (scalaVersion match {
-      case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
-      case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M6"
-    }) % "compile"
+  def liftVersion(scalaVersion: String): ModuleID = {
+    "net.liftweb" %% "lift-webkit" % LiftVersion
   }
 
   val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
@@ -87,9 +84,10 @@ object Build extends Build {
         </developers>
   )
 
+
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.10.14",
+    version := "0.11.0",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
