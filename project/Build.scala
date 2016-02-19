@@ -30,6 +30,7 @@
 import sbt.Keys._
 import sbt._
 import com.twitter.sbt._
+import bintray.BintrayKeys.{ bintrayReleaseOnPublish,bintrayOrganization, bintrayRepository }
 
 object Build extends Build {
 
@@ -37,7 +38,7 @@ object Build extends Build {
   val FinagleVersion = "6.25.0"
   val FinagleZkVersion = "6.24.0"
   val TwitterUtilVersion = "6.24.0"
-  val LiftVersion = "3.0-M8"
+  val LiftVersion = "3.0-M6"
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
 
@@ -47,9 +48,9 @@ object Build extends Build {
 
   val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
     publishMavenStyle := true,
-    bintray.BintrayKeys.bintrayReleaseOnPublish in ThisBuild := true,
-    bintray.BintrayKeys.bintrayOrganization := Some("websudos"),
-    bintray.BintrayKeys.bintrayRepository := "oss-releases",
+    bintrayReleaseOnPublish in ThisBuild := true,
+    bintrayOrganization := Some("websudos"),
+    bintrayRepository := "oss-releases",
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true},
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
@@ -61,10 +62,12 @@ object Build extends Build {
     publishTo <<= version.apply {
       v =>
         val nexus = "https://oss.sonatype.org/"
-        if (v.trim.endsWith("SNAPSHOT"))
+        if (v.trim.endsWith("SNAPSHOT")) {
           Some("snapshots" at nexus + "content/repositories/snapshots")
-        else
+        }
+        else {
           Some("releases" at nexus + "service/local/staging/deploy/maven2")
+        }
     },
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
