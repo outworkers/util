@@ -76,7 +76,7 @@ package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError(code, resp.list)
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list)
 
     def toJson(code: Int = defaultErrorResponse)(implicit formats: Formats): LiftResponse = {
       JsonResponse(Extraction.decompose(toError(code)), code)
@@ -89,7 +89,7 @@ package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ErrorConverter(val err: Throwable) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError(code, List(err.getMessage))
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, List(err.getMessage))
 
     def toJson(code: Int)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
   }

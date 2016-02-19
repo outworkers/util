@@ -29,6 +29,7 @@
  */
 package com.websudos.util.lift
 
+import com.websudos.util.domain.ApiErrorResponse
 import net.liftweb.http.LiftRulesMocker.toLiftRules
 import net.liftweb.http.js.JsExp
 import net.liftweb.http.provider.HTTPCookie
@@ -50,7 +51,8 @@ case class JsonUnauthorizedResponse(
 
 object JsonUnauthorizedResponse {
 
-  implicit val formats = net.liftweb.json.DefaultFormats
+  protected[this] implicit val formats = net.liftweb.json.DefaultFormats
+  protected[this] final val unauthorizedCode = 401
 
   implicit def jsonUnauthorizedToLiftResponse(resp: JsonUnauthorizedResponse): LiftResponse = {
     resp.toResponse
@@ -60,24 +62,24 @@ object JsonUnauthorizedResponse {
   def cookies: List[HTTPCookie] = S.responseCookies
 
   def apply(json: JsExp): LiftResponse =
-    JsonResponse(json, headers, cookies, 401)
+    JsonResponse(json, headers, cookies, unauthorizedCode)
 
   def apply(): LiftResponse = {
-    val resp = ApiErrorResponse(401, List("Unauthorized request"))
+    val resp = ApiErrorResponse(unauthorizedCode, List("Unauthorized request"))
     val json = "error" -> decompose(resp)
-    JsonResponse(json, 401)
+    JsonResponse(json, unauthorizedCode)
   }
 
   def apply(msg: String): LiftResponse = {
-    val resp = ApiErrorResponse(401, List(msg))
+    val resp = ApiErrorResponse(unauthorizedCode, List(msg))
     val json = "error" -> decompose(resp)
-    JsonResponse(json, 401)
+    JsonResponse(json, unauthorizedCode)
   }
 
   def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
     new JsonResponse(new JsExp {
       lazy val toJsCmd = jsonPrinter(JsonAST.compactRender(_json))
-    }, _headers, _cookies, 401)
+    }, _headers, _cookies, unauthorizedCode)
   }
 
   lazy val jsonPrinter: JValue => String = LiftRules.jsonOutputConverter.vend

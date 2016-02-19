@@ -46,7 +46,7 @@ package object play {
       * @return
       */
     def apiError: ApiError = {
-      ApiError(defaultErrorCode, errors.toList.map {
+      ApiError.fromArgs(defaultErrorCode, errors.toList.map {
         case (path, validations) => {
           s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
         }
@@ -63,7 +63,7 @@ package object play {
   }
 
   def errorResponse(msg: String, code: Int = defaultErrorCode): Result = {
-    Results.BadRequest(Json.toJson(ApiError(code, List(msg))))
+    Results.BadRequest(Json.toJson(ApiError.fromArgs(code, List(msg))))
   }
 
   implicit class ResultAugmenter(val res: Result) {

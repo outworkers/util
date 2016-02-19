@@ -29,6 +29,7 @@
  */
 package com.websudos.util.lift
 
+import com.websudos.util.domain.ApiError
 import net.liftweb.http.js.JsExp
 import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
@@ -42,13 +43,15 @@ case class JsonErrorResponse(
   headers: List[(String, String)],
   cookies: List[HTTPCookie] = Nil) {
 
+  protected[this] val defaultErrorResponse = 400
+
   def toResponse: LiftResponse = {
     val bytes = json.toJsCmd.getBytes
     InMemoryResponse(
       bytes,
       ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers,
       cookies,
-      401
+      defaultErrorResponse
     )
   }
 }
@@ -64,9 +67,8 @@ object JsonErrorResponse {
     JsonResponse(json, headers, cookies, code)
 
   def apply(msg: String, code: Int): LiftResponse = {
-    val resp = ApiErrorResponse(code, List(msg))
-    val json = "error" -> decompose(resp)
-    JsonResponse(json, code)
+    val resp = ApiError.fromArgs(code, List(msg))
+    JsonResponse(decompose(resp), code)
   }
 
   def apply(ex: Exception, code: Int): LiftResponse = {
