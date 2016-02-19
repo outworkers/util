@@ -82,12 +82,3 @@ object JsonUnauthorizedResponse {
 
   lazy val jsonPrinter: JValue => String = LiftRules.jsonOutputConverter.vend
 }
-
-
-
-case class ApiErrorResponse(
-  code: Int,
-  messages: List[String]
-)
-
-case class ApiError(error: ApiErrorResponse)

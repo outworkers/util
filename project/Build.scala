@@ -125,6 +125,7 @@ object Build extends Build {
     UtilDomain,
     UtilHttp,
     UtilLift,
+    UtilPlay,
     UtilParsers,
     UtilZooKeeper,
     UtilTesting
@@ -179,6 +180,22 @@ object Build extends Build {
     name := "util-lift",
     libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
   ).dependsOn(
+    UtilDomain,
+    UtilParsers,
+    UtilTesting % "test, provided"
+  )
+
+  lazy val UtilPlay = Project(
+    id ="util-play",
+    base = file("util-play"),
+    settings = sharedSettings
+  ).settings(
+    name := "util-play",
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-ws" % "2.4.2"
+    )
+  ).dependsOn(
+    UtilDomain,
     UtilParsers,
     UtilTesting % "test, provided"
   )
