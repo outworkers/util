@@ -64,7 +64,7 @@ class ZooKeeperInstanceTest extends FlatSpec with Matchers with BeforeAndAfterAl
     instance.zookeeperServer.isRunning shouldEqual true
   }
 
-  it should "allow setting a value for the path" in {
+  ignore should "allow setting a value for the path" in {
 
     val data = gen[String]
 
@@ -81,7 +81,7 @@ class ZooKeeperInstanceTest extends FlatSpec with Matchers with BeforeAndAfterAl
     }
   }
 
-  it should "correctly parse the retrieved data into a Sequence of InetSocketAddresses" in {
+  ignore should "correctly parse the retrieved data into a Sequence of InetSocketAddresses" in {
 
     val data = InetAddress.getLocalHost
     val port = 1001
