@@ -36,7 +36,6 @@ import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
 import net.liftweb.json.Extraction._
 import net.liftweb.json.JsonAST
-import net.liftweb.json.JsonAST.JValue
 import net.liftweb.json.JsonDSL._
 
 case class JsonUnauthorizedResponse(
@@ -78,9 +77,10 @@ object JsonUnauthorizedResponse {
 
   def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
     new JsonResponse(new JsExp {
-      lazy val toJsCmd = jsonPrinter(JsonAST.compactRender(_json))
+      lazy val toJsCmd = jsonPrinter(JsonAST.render(_json))
     }, _headers, _cookies, unauthorizedCode)
   }
 
-  lazy val jsonPrinter: JValue => String = LiftRules.jsonOutputConverter.vend
+  lazy val jsonPrinter: scala.text.Document => String =
+    LiftRules.jsonOutputConverter.vend
 }
