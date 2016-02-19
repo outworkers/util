@@ -26,14 +26,31 @@ package object play {
     }
   }
 
-  implicit class ParseErrorConverter(val errors: Seq[(JsPath, Seq[ValidationError])]) extends AnyVal {
+  implicit class ParseErrorAugmenter(val errors: Seq[(JsPath, Seq[ValidationError])]) extends AnyVal {
 
+    /**
+      * This will transform a list of accumulated errors to a JSON body that's usable as a response format.
+      * From a non empty liust of errors this will produce something in the following format:
+      *
+      * {{{
+      *   {
+      *     "error": {
+      *       "code": 400,
+      *       "messages": [
+      *         "this is an error message",
+      *         "this is another error message
+      *       ]
+      *     }
+      *   }
+      * }}}
+      * @return
+      */
     def apiError: ApiError = {
-      ApiError(ApiErrorResponse(defaultErrorCode, errors.toList.map {
+      ApiError(defaultErrorCode, errors.toList.map {
         case (path, validations) => {
           s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
         }
-      }))
+      })
     }
 
     def toJson: JsValue = {
