@@ -30,6 +30,7 @@
 import sbt.Keys._
 import sbt._
 import com.twitter.sbt._
+import bintray.BintrayKeys.{ bintrayReleaseOnPublish,bintrayOrganization, bintrayRepository }
 
 object Build extends Build {
 
@@ -41,18 +42,18 @@ object Build extends Build {
   val ScalazVersion = "7.1.0"
   val JodaTimeVersion = "2.3"
 
-  def liftVersion(scalaVersion: String) = {
-    (scalaVersion match {
+  def liftVersion(version: String): ModuleID = {
+    version match {
       case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
       case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M6"
-    }) % "compile"
+    }
   }
 
   val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
     publishMavenStyle := true,
-    bintray.BintrayKeys.bintrayReleaseOnPublish in ThisBuild := true,
-    bintray.BintrayKeys.bintrayOrganization := Some("websudos"),
-    bintray.BintrayKeys.bintrayRepository := "oss-releases",
+    bintrayReleaseOnPublish in ThisBuild := true,
+    bintrayOrganization := Some("websudos"),
+    bintrayRepository := "oss-releases",
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true},
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
@@ -64,10 +65,12 @@ object Build extends Build {
     publishTo <<= version.apply {
       v =>
         val nexus = "https://oss.sonatype.org/"
-        if (v.trim.endsWith("SNAPSHOT"))
+        if (v.trim.endsWith("SNAPSHOT")) {
           Some("snapshots" at nexus + "content/repositories/snapshots")
-        else
+        }
+        else {
           Some("releases" at nexus + "service/local/staging/deploy/maven2")
+        }
     },
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
@@ -87,9 +90,10 @@ object Build extends Build {
         </developers>
   )
 
+
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.10.7",
+    version := "0.12.0",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
@@ -127,6 +131,7 @@ object Build extends Build {
     UtilDomain,
     UtilHttp,
     UtilLift,
+    UtilPlay,
     UtilParsers,
     UtilZooKeeper,
     UtilTesting
@@ -180,8 +185,23 @@ object Build extends Build {
   ).settings(
     name := "util-lift",
     libraryDependencies <++= scalaVersion (sv => Seq(liftVersion(sv)))
-
   ).dependsOn(
+    UtilDomain,
+    UtilParsers,
+    UtilTesting % "test, provided"
+  )
+
+  lazy val UtilPlay = Project(
+    id ="util-play",
+    base = file("util-play"),
+    settings = sharedSettings
+  ).settings(
+    name := "util-play",
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-ws" % "2.4.2"
+    )
+  ).dependsOn(
+    UtilDomain,
     UtilParsers,
     UtilTesting % "test, provided"
   )

@@ -29,6 +29,7 @@
  */
 package com.websudos.util
 
+import com.websudos.util.domain.ApiError
 import net.liftweb.http.rest.RestContinuation
 import net.liftweb.http.{JsonResponse, LiftResponse}
 import net.liftweb.json._
@@ -39,13 +40,18 @@ import scalaz.{NonEmptyList, ValidationNel}
 
 package object lift extends LiftParsers with JsonHelpers {
 
+  protected[this] val defaultSuccessResponse = 200
+  protected[this] val noContentSuccessResponse = 204
+  protected[this] val defaultErrorResponse = 400
+  protected[this] val failureResponse = 500
 
   implicit class OptionResponseHelper[T](val opt: Option[T]) extends AnyVal {
 
     /**
      * When the Option is full, this will continue the transformation flow of an Option to a LiftResponse.
      * Otherwise, the flow will short-circuit to a an unauthorized response.
-     * @param pf A partial function from a full option of type T to an async LiftResponse.
+      *
+      * @param pf A partial function from a full option of type T to an async LiftResponse.
      * @return A Future wrapping the obtained LiftResponse.
      */
     def required(pf: T => Future[LiftResponse]): Future[LiftResponse] = {
@@ -57,7 +63,7 @@ package object lift extends LiftParsers with JsonHelpers {
 
     def json()(implicit ec: ExecutionContext, formats: Formats, mf: Manifest[T]): Future[LiftResponse] = {
       future map {
-        item => item.fold(JsonUnauthorizedResponse())(item => JsonResponse(item.asJValue(), 200))
+        item => item.fold(JsonUnauthorizedResponse())(item => JsonResponse(item.asJValue(), defaultSuccessResponse))
       }
     }
   }
@@ -70,18 +76,20 @@ package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, resp.list))
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list)
 
-    def toJson(code: Int = 406)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
+    def toJson(code: Int = defaultErrorResponse)(implicit formats: Formats): LiftResponse = {
+      JsonResponse(Extraction.decompose(toError(code)), code)
+    }
 
-    def asResponse(code: Int = 406)(implicit formats: Formats): LiftResponse = {
-      JsonResponse(Extraction.decompose(toError(code), 406))
+    def asResponse(code: Int = defaultErrorResponse)(implicit formats: Formats): LiftResponse = {
+      JsonResponse(Extraction.decompose(toError(code), code))
     }
   }
 
   implicit class ErrorConverter(val err: Throwable) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError(ApiErrorResponse(code, List(err.getMessage)))
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, List(err.getMessage))
 
     def toJson(code: Int)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
   }
@@ -96,7 +104,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
-      JsonResponse(clz.asJValue(), 200)
+      JsonResponse(clz.asJValue(), defaultSuccessResponse)
     }
   }
 
@@ -111,9 +119,9 @@ package object lift extends LiftParsers with JsonHelpers {
 
     def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
       if (list.nonEmpty) {
-        JsonResponse(list.asJValue(), 200)
+        JsonResponse(list.asJValue(), defaultSuccessResponse)
       } else {
-        JsonResponse(JArray(Nil), 204)
+        JsonResponse(JArray(Nil), noContentSuccessResponse)
       }
     }
   }
@@ -129,9 +137,9 @@ package object lift extends LiftParsers with JsonHelpers {
 
     def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
       if (set.nonEmpty) {
-        JsonResponse(set.asJValue(), 200)
+        JsonResponse(set.asJValue(), defaultSuccessResponse)
       } else {
-        JsonResponse(JArray(Nil), 204)
+        JsonResponse(JArray(Nil), noContentSuccessResponse)
       }
     }
   }
@@ -147,15 +155,15 @@ package object lift extends LiftParsers with JsonHelpers {
 
     def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
       list match {
-        case head :: tail => JsonResponse(list.asJValue(), 200)
-        case Nil => JsonResponse(JArray(Nil), 204)
+        case head :: tail => JsonResponse(list.asJValue(), defaultSuccessResponse)
+        case Nil => JsonResponse(JArray(Nil), noContentSuccessResponse)
       }
     }
   }
 
   implicit class FutureResponseHelper(val responseFuture: Future[LiftResponse]) extends AnyVal {
 
-    def async(failureCode: Int = 500)(implicit context: ExecutionContext): LiftResponse = {
+    def async(failureCode: Int = failureResponse)(implicit context: ExecutionContext): LiftResponse = {
       RestContinuation.async {
         reply => {
           responseFuture.onComplete {
@@ -168,37 +176,31 @@ package object lift extends LiftParsers with JsonHelpers {
   }
 
   implicit class ValidationResponseHelper[+A](val eval: ValidationNel[String, A]) extends AnyVal {
-    def respond(pf: A => LiftResponse)(code: Int = 400): LiftResponse = {
-      eval.fold(_.toJson(code), pf)
-    }
-
 
     /**
-     * Maps a validation to a LiftResponse if the validation is successful.
-     * If the validation is not successful, this method provides a default response mechanism
-     * which returns a JSON HTTP 400 response, where the body is an object containing the error code
-     * and a list of messages corresponding to each individual error in the applicative functor.
-     *
-     * @param pf The partial function that maps the successful result to a LiftResponse.
-     * @param code The error status code to use if the validation is a failure.
-     * @return A future wrapping a Lift Response.
-     */
-    @deprecated("Use mapSuccess instead", "0.9.11")
-    def async(pf: A => Future[LiftResponse])(code: Int = 400): Future[LiftResponse] = {
-      eval.fold(_.toJson(code).toFuture(), pf)
-    }
-
+      * Maps a validation to a LiftResponse if the validation is successful.
+      * If the validation is not successful, this method provides a default response mechanism
+      * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+      * and a list of messages corresponding to each individual error in the applicative functor.
+      *
+      * @param pf The partial function that maps the successful result to a LiftResponse.
+      * @return A future wrapping a Lift Response.
+      */
     def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
       eval.fold(_.toJson().toFuture(), pf)
     }
 
+    /**
+      * Maps a validation to a LiftResponse if the validation is successful.
+      * If the validation is not successful, this method provides a default response mechanism
+      * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+      * and a list of messages corresponding to each individual error in the applicative functor.
+      *
+      * @param pf The partial function that maps the successful result to a LiftResponse.
+      * @return A future wrapping a Lift Response.
+      */
     def respond(pf: A => LiftResponse): LiftResponse = {
       eval.fold(_.toJson(), pf)
-    }
-
-    @deprecated("Use mapSuccess instead", "0.9.11")
-    def async(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
-      eval.fold(_.toJson().toFuture(), pf)
     }
   }
 }
