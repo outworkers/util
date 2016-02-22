@@ -15,3 +15,5 @@ addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
 addSbtPlugin("com.websudos" %% "sbt-package-dist" % "1.2.0")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.8.5")
+
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.1")
