@@ -43,10 +43,10 @@ object Build extends Build {
   val JodaTimeVersion = "2.3"
 
   def liftVersion(version: String): ModuleID = {
-    (version match {
+    version match {
       case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
       case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M6"
-    }) % "compile"
+    }
   }
 
   val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
@@ -90,9 +90,10 @@ object Build extends Build {
         </developers>
   )
 
+
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.14.0",
+    version := "0.15.0",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
@@ -130,6 +131,7 @@ object Build extends Build {
     UtilDomain,
     UtilHttp,
     UtilLift,
+    UtilPlay,
     UtilParsers,
     UtilZooKeeper,
     UtilTesting
