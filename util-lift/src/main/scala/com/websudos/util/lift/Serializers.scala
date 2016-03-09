@@ -55,8 +55,10 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
 
 sealed class DateTimeSerializer extends Serializer[DateTime] {
 
+  val DateTimeClass = classOf[DateTime]
+
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), DateTime] = {
-    case (TypeInfo(_, _), json) => json match {
+    case (TypeInfo(DateTimeClass, _), json) => json match {
       case JString(value) =>
         Try {
           new DateTime(value.toLong)
@@ -68,12 +70,22 @@ sealed class DateTimeSerializer extends Serializer[DateTime] {
             throw exception
           }
         }
+      case JInt(value) => {
+        Try(new DateTime(value.toLong)) match {
+          case Success(dt) => dt
+          case Failure(err) => {
+            val exception =  new MappingException(s"Couldn't extract a DateTime from $value")
+            exception.initCause(err)
+            throw exception
+          }
+        }
+      }
       case x => throw new MappingException("Can't convert " + x + " to DateTime")
     }
   }
 
   def serialize(implicit format: Formats): PartialFunction[Any, JValue] = {
-    case x: DateTime => JString(x.getMillis.toString)
+    case x: DateTime => JInt(x.getMillis)
   }
 }
 

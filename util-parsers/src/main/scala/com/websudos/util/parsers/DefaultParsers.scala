@@ -62,7 +62,7 @@ sealed trait BaseParser[X, T] {
     opt.fold("Required parameter is empty".failureNel[T])(_.successNel[String])
   }
 
-  def tryParse(obj: X): Try[T]
+  def tryParse(obj: X): Try[T] = parse(obj).asTry
 
   /**
    * A basic way to parse known types from options.
@@ -71,9 +71,7 @@ sealed trait BaseParser[X, T] {
    */
   def parseOpt(str: X): Option[T] = tryParse(str).toOption
 
-  def parse(str: X): ValidationNel[String, T] = {
-    parseOpt(str).fold(s"Failed to parse from $str".failureNel[T])(_.successNel[String])
-  }
+  def parse(str: X): ValidationNel[String, T]
 
   def parse(str: Option[X]): ValidationNel[String, T] = {
     parseRequired(str)(s => parse(s))
@@ -91,91 +89,106 @@ trait Parser[T] extends BaseParser[String, T]
 private[util] trait DefaultImplicitParsers extends GenerationDomain {
 
   implicit object UUIDParser extends Parser[UUID] {
-    override def tryParse(str: String): Try[UUID] = Try(UUID.fromString(str))
+    override def parse(str: String): ValidationNel[String, UUID] = {
+      Try(UUID.fromString(str)).asValidation
+    }
   }
 
   implicit object BooleanParser extends Parser[Boolean] {
 
-    override def tryParse(str: String): Try[Boolean] = str match {
-      case "true" => Success(true)
-      case "false" => Success(false)
-      case _ => Failure(new Exception("A boolean parser will only parse the tings 'true' and 'false'"))
+    override def parse(str: String): ValidationNel[String, Boolean] = {
+      val obj = str match {
+        case "true" => Success(true)
+        case "false" => Success(false)
+        case _ => Failure(new Exception("A boolean parser will only parse the tings 'true' and 'false'"))
+      }
+
+      obj.asValidation
     }
+
   }
 
   implicit object TimestampParser extends Parser[DateTime] {
     /**
      * A basic way to parse known types from options.
-     * @param str The string to attempt to parse from.
+      *
+      * @param str The string to attempt to parse from.
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[DateTime] = {
-      Try(new DateTime(str.toLong))
+    override def parse(str: String): ValidationNel[String, DateTime] = {
+      Try(new DateTime(str.toLong)).asValidation
     }
-  }
+}
 
   implicit object IntParser extends Parser[Int] {
     /**
      * A basic way to parse known types from options.
-     * @param str The string to attempt to parse from.
-     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
+      *
+      * @param str The string to attempt to parse from.
+     * @return An ValidationNel wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[Int] = {
-      Try(str.toInt)
+    override def parse(str: String): ValidationNel[String, Int] = {
+      Try(str.toInt).asValidation
     }
-  }
+}
 
   implicit object DoubleParser extends Parser[Double] {
     /**
      * A basic way to parse known types from options.
+ *
      * @param str The string to attempt to parse from.
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[Double] = {
-      Try(str.toDouble)
+    override def parse(str: String): ValidationNel[String, Double] = {
+      Try(str.toDouble).asValidation
     }
-  }
+}
 
   implicit object FloatParser extends Parser[Float] {
     /**
      * A basic way to parse known types from options.
+ *
      * @param str The string to attempt to parse from.
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[Float] = {
-      Try(str.toFloat)
+    override def parse(str: String): ValidationNel[String, Float] = {
+      Try(str.toFloat).asValidation
     }
-  }
+}
 
   implicit object LongParser extends Parser[Long] {
     /**
      * A basic way to parse known types from options.
+ *
      * @param str The string to attempt to parse from.
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[Long] = {
-      Try(str.toLong)
+    override def parse(str: String): ValidationNel[String, Long] = {
+      Try(str.toLong).asValidation
     }
-  }
+}
 
   implicit object URLParser extends Parser[URL] {
     /**
      * A basic way to parse known types from options.
+ *
      * @param str The string to attempt to parse from.
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[URL] = {
-      Try(new URL(str))
+    override def parse(str: String): ValidationNel[String, URL] = {
+      Try(new URL(str)).asValidation
     }
-  }
+}
 
   implicit object EmailParser extends Parser[EmailAddress] {
-    override def tryParse(str: String): Try[EmailAddress] = {
-      if (EmailValidator.getInstance().isValid(str)) {
+    override def parse(str: String): ValidationNel[String, EmailAddress] = {
+      val block: Try[EmailAddress] = if (EmailValidator.getInstance().isValid(str)) {
         Success(EmailAddress(str))
       } else {
         Failure(new Exception(s"The string $str is not a vlaid email address"))
       }
+
+      block.asValidation
     }
   }
 
@@ -183,13 +196,17 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
 
     /**
      * A basic way to parse known types from options.
+ *
      * @param str The string to attempt to parse from.
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
-    override def tryParse(str: String): Try[T#Value] = {
-      Try(enum.withName(str))
+    override def parse(str: String): ValidationNel[String, T#Value] = {
+      enum.values.find(_.toString == str) match {
+        case Some(value) => value.successNel[String]
+        case None => s"Value $str not found inside enumeration ${enum.getClass.getName}".failureNel[T#Value]
+      }
     }
-  }
+}
 
   def tryParse[T : Parser](str: String): Try[T] = implicitly[Parser[T]].tryParse(str)
 

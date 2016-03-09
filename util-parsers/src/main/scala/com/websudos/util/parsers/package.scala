@@ -30,7 +30,8 @@
 package com.websudos.util
 
 import scala.util.{Success, Failure, Try}
-import scalaz.ValidationNel
+import scalaz._
+import scalaz.Scalaz._
 
 package object parsers extends DefaultParsers {
 
@@ -40,6 +41,15 @@ package object parsers extends DefaultParsers {
         nel => Failure(new Exception(nel.list.mkString(", "))),
         obj => Success(obj)
       )
+    }
+  }
+
+  implicit class TryConverter[T](val block: Try[T]) extends AnyVal {
+    def asValidation: ValidationNel[String, T] = {
+      block match {
+        case Success(value) => value.successNel[String]
+        case Failure(err) => err.getMessage.failureNel[T]
+      }
     }
   }
 }

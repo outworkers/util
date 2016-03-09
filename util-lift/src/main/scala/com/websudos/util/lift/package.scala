@@ -168,37 +168,31 @@ package object lift extends LiftParsers with JsonHelpers {
   }
 
   implicit class ValidationResponseHelper[+A](val eval: ValidationNel[String, A]) extends AnyVal {
-    def respond(pf: A => LiftResponse)(code: Int = 400): LiftResponse = {
-      eval.fold(_.toJson(code), pf)
-    }
-
 
     /**
-     * Maps a validation to a LiftResponse if the validation is successful.
-     * If the validation is not successful, this method provides a default response mechanism
-     * which returns a JSON HTTP 400 response, where the body is an object containing the error code
-     * and a list of messages corresponding to each individual error in the applicative functor.
-     *
-     * @param pf The partial function that maps the successful result to a LiftResponse.
-     * @param code The error status code to use if the validation is a failure.
-     * @return A future wrapping a Lift Response.
-     */
-    @deprecated("Use mapSuccess instead", "0.9.11")
-    def async(pf: A => Future[LiftResponse])(code: Int = 400): Future[LiftResponse] = {
-      eval.fold(_.toJson(code).toFuture(), pf)
-    }
-
+      * Maps a validation to a LiftResponse if the validation is successful.
+      * If the validation is not successful, this method provides a default response mechanism
+      * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+      * and a list of messages corresponding to each individual error in the applicative functor.
+      *
+      * @param pf The partial function that maps the successful result to a LiftResponse.
+      * @return A future wrapping a Lift Response.
+      */
     def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
       eval.fold(_.toJson().toFuture(), pf)
     }
 
+    /**
+      * Maps a validation to a LiftResponse if the validation is successful.
+      * If the validation is not successful, this method provides a default response mechanism
+      * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+      * and a list of messages corresponding to each individual error in the applicative functor.
+      *
+      * @param pf The partial function that maps the successful result to a LiftResponse.
+      * @return A future wrapping a Lift Response.
+      */
     def respond(pf: A => LiftResponse): LiftResponse = {
       eval.fold(_.toJson(), pf)
-    }
-
-    @deprecated("Use mapSuccess instead", "0.9.11")
-    def async(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
-      eval.fold(_.toJson().toFuture(), pf)
     }
   }
 }
