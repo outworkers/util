@@ -29,9 +29,30 @@
  */
 package com.websudos.util.parsers
 
-import org.scalatest.{Matchers, FlatSpec}
+import com.websudos.util.testing._
+import org.scalatest.{FlatSpec, Matchers}
+
+import scala.util.{Failure, Try}
+import scalaz.Scalaz._
 
 class DefaultParsersTest extends FlatSpec with Matchers {
+
+  it should "convert a successful scala.util.Try to a successful validation" in {
+    val attempt = Try("5".toInt).asValidation
+
+    attempt.isSuccess shouldEqual true
+  }
+
+  it should "convert a failed scala.util.Try to a failed validation with the respective error message" in {
+    val msg = gen[String]
+    val attempt: Try[String] = Failure(new Exception(msg))
+
+    attempt.isFailure shouldEqual true
+    attempt.asValidation.isFailure shouldEqual true
+
+    val expected = msg.failureNel[String]
+    (attempt.asValidation.compare(expected) == scalaz.Ordering.EQ) shouldEqual true
+  }
 
   it should "parse a long as an applicative from a valid string" in {
     val parser = parse[Long]("124")

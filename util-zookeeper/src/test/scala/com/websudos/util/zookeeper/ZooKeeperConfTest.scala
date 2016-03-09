@@ -103,7 +103,7 @@ class ZooKeeperConfTest extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
 
-  it should "store and retrieve a sequence of ports from ZooKeeper when ports are passed as a sequence" in {
+  ignore should "store and retrieve a sequence of ports from ZooKeeper when ports are passed as a sequence" in {
 
     val expected = Set(
       new InetSocketAddress("localhost", 9000),
@@ -124,7 +124,7 @@ class ZooKeeperConfTest extends FlatSpec with Matchers with BeforeAndAfterAll {
   }
 
 
-  it should "add a host:port pair to an existing set in ZooKeeper" in {
+  ignore should "add a host:port pair to an existing set in ZooKeeper" in {
 
     val data = "localhost:9000, localhost:9001, localhost:9002"
     val next = RandomSocket.nextAddress()
@@ -150,7 +150,7 @@ class ZooKeeperConfTest extends FlatSpec with Matchers with BeforeAndAfterAll {
     }
   }
 
-  it should "remove a host:port pair from an existing set in ZooKeeper" in {
+  ignore should "remove a host:port pair from an existing set in ZooKeeper" in {
 
     val data = "localhost:9000, localhost:9001, localhost:9002"
     val removable = new InetSocketAddress("localhost", 9002)
