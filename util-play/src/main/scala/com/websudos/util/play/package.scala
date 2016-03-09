@@ -6,6 +6,7 @@ import _root_.play.api.mvc.{Results, Result}
 import com.websudos.util.domain.{ApiErrorResponse, ApiError}
 
 import scala.concurrent.Future
+import scala.util.control.NoStackTrace
 import scalaz.NonEmptyList
 
 package object play {
@@ -28,6 +29,16 @@ package object play {
 
   implicit class ParseErrorAugmenter(val errors: Seq[(JsPath, Seq[ValidationError])]) extends AnyVal {
 
+    def errorMessages: List[String] = errors.toList.map {
+      case (path, validations) => {
+        s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
+      }
+    }
+
+    def asException: Exception with NoStackTrace = {
+      new RuntimeException(errorMessages.mkString(", ")) with NoStackTrace
+    }
+
     /**
       * This will transform a list of accumulated errors to a JSON body that's usable as a response format.
       * From a non empty liust of errors this will produce something in the following format:
@@ -43,23 +54,14 @@ package object play {
       *     }
       *   }
       * }}}
+ *
       * @return
       */
-    def apiError: ApiError = {
-      ApiError.fromArgs(defaultErrorCode, errors.toList.map {
-        case (path, validations) => {
-          s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
-        }
-      })
-    }
+    def apiError: ApiError = ApiError.fromArgs(defaultErrorCode, errorMessages)
 
-    def toJson: JsValue = {
-      Json.toJson(apiError)
-    }
+    def toJson: JsValue = Json.toJson(apiError)
 
-    def response: Result = {
-      Results.BadRequest(toJson)
-    }
+    def response: Result = Results.BadRequest(toJson)
   }
 
   def errorResponse(msg: String, code: Int = defaultErrorCode): Result = {

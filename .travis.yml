@@ -26,4 +26,8 @@ before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
 
 
 script:
-  - sbt test
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate coveralls
+
+after_success:
+  - ./build/publish_develop.sh
+
