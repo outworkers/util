@@ -43,10 +43,10 @@ object Build extends Build {
   val JodaTimeVersion = "2.3"
 
   def liftVersion(version: String): ModuleID = {
-    (version match {
+    version match {
       case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
       case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M6"
-    }) % "compile"
+    }
   }
 
   val bintrayPublishSettings : Seq[Def.Setting[_]] = Seq(
@@ -90,9 +90,10 @@ object Build extends Build {
         </developers>
   )
 
+
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.14.0",
+    version := "0.15.0",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
@@ -119,21 +120,27 @@ object Build extends Build {
     bintrayPublishSettings ++
     VersionManagement.newSettings
 
+  private[this] def isJdk8: Boolean = sys.props("java.specification.version") == "1.8"
 
-	lazy val websudosUtil = Project(
-		id = "util",
-		base = file("."),
-		settings = Defaults.coreDefaultSettings ++ sharedSettings
-	).aggregate(
+  private[this] def addOnCondition(condition: Boolean, projectReference: ProjectReference): Seq[ProjectReference] =
+    if (condition) projectReference :: Nil else Nil
+
+  lazy val baseProjectList: Seq[ProjectReference] = Seq(
     UtilAws,
-		UtilCore,
+    UtilCore,
     UtilDomain,
     UtilHttp,
     UtilLift,
     UtilParsers,
     UtilZooKeeper,
     UtilTesting
-	)
+  )
+
+  lazy val util = Project(
+		id = "util",
+		base = file("."),
+		settings = Defaults.coreDefaultSettings ++ sharedSettings
+	).aggregate(baseProjectList ++ addOnCondition(isJdk8, UtilPlay): _*)
 
 	lazy val UtilCore = Project(
 		id = "util-core",
