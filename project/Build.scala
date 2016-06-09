@@ -133,6 +133,7 @@ object Build extends Build {
     UtilLift,
     UtilParsers,
     UtilZooKeeper,
+    UtilValidators,
     UtilTesting
   )
 
@@ -179,6 +180,20 @@ object Build extends Build {
     )
   ).dependsOn(
     UtilDomain,
+    UtilTesting % "test, provided"
+  )
+
+  lazy val UtilValidators = Project(
+    id = "util-validators",
+    base = file("util-validators"),
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
+  ).settings(
+    name := "util-validators",
+    libraryDependencies ++= Seq(
+      "com.chuusai" %% "shapeless" % "2.3.1"
+    )
+  ).dependsOn(
+    UtilParsers,
     UtilTesting % "test, provided"
   )
 
