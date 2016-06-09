@@ -11,18 +11,20 @@ import scala.language.higherKinds
 import scalaz.{Applicative, NonEmptyList, ValidationNel}
 import scalaz.Scalaz._
 import shapeless.ops.hlist.Reverse
+import shapeless.poly._
 
 package object validators {
 
   object applier extends Poly2 {
     implicit def ap[F[_]: Applicative, H, T <: HList, R]:
-    shapeless.poly.Case2.Aux[applier.type, F[(H :: T) => R], F[H], F[T => R]] =
+    Case2.Aux[applier.type, F[(H :: T) => R], F[H], F[T => R]] =
       at[F[(H :: T) => R], F[H]](
         (f, fa) => fa <*> f.map(hf => (h: H) => (t: T) => hf(h :: t))
       )
   }
 
-  def validate[F[_], G, H, V <: HList, I <: HList, M <: HList, A <: HList, R](g: G)(v: V)(implicit hlG: FnToProduct.Aux[G, A => R],
+  def validate[F[_], G, H, V <: HList, I <: HList, M <: HList, A <: HList, R](g: G)(v: V)(
+    implicit hlG: FnToProduct.Aux[G, A => R],
     zip: ZipApply.Aux[V, I, M],
     mapped: Mapped.Aux[A, F, M],
     unH: FnFromProduct.Aux[I => F[R], H],
@@ -68,7 +70,7 @@ package object validators {
     def and[A](wv: WrappedValidation[A]): ValidationBuilder[
       ErrorsOr[T] ::ErrorsOr[A] :: HNil,
       T :: A :: HNil
-      ] = {
+    ] = {
       new ValidationBuilder(List(wv.prop, prop), validation :: wv.validation :: HNil)
     }
 
@@ -89,7 +91,7 @@ package object validators {
       implicit unH: FnToProduct.Aux[F, ArgTypes => R],
       zip: ZipApply.Aux[ValTypes, I, M],
       rev: Reverse.Aux[ArgTypes, Rev],
-      mapped: Mapped.Aux[A, F, M],
+      mapped: Mapped.Aux[A, F, M]
     ) = {
       validate(fn)(list)
     }
