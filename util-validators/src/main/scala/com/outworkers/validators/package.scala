@@ -11,9 +11,10 @@ import scala.language.higherKinds
 import scalaz.{Applicative, NonEmptyList, ValidationNel}
 import scalaz.Scalaz._
 import shapeless.ops.hlist.Reverse
-import shapeless.poly._
+import shapeless.poly.Case2
 
 package object validators {
+
 
   object applier extends Poly2 {
     implicit def ap[F[_]: Applicative, H, T <: HList, R]:
@@ -33,18 +34,22 @@ package object validators {
     appl: Applicative[F]
   ): H = unH((in: I) => folder(zip(v, in), hlG(g).point[F]).map(_(HNil)))
 
+
   type ErrorsOr[A] = ValidationNel[String, A]
+  type NestedErrorsOr[T] = ValidationNel[(String, String), T]
   type Validator[A] = String => ErrorsOr[A]
 
   implicit class VdNelAug[T](val vd: ErrorsOr[T]) extends AnyVal {
-    def prop(key: String): WrappedValidation[T] = new WrappedValidation[T](key, vd)
+    def prop(key: String): WrappedValidation[T] = new WrappedValidation[T](key, vd.bimap(
+      nel => nel.map(value => key -> value), identity)
+    )
   }
 
+
+  /*
   case class Foo(a: Int, b: Char, c: String)
 
   def f: (Int, Char, String) => Foo = Foo.apply
-  /*
-
   val checkA: Validator[Int] = (s: String) =>
     try s.toInt.success catch {
       case _: NumberFormatException => "Not a number!".failureNel
@@ -63,15 +68,19 @@ package object validators {
   val validateFoo = validate(Foo.apply _)(checkA :: checkB :: checkC :: HNil)
   */
 
-  class WrappedValidation[T](val prop: String, val validation: ErrorsOr[T]) {
+  class WrappedValidation[T](val prop: String, val validation: NestedErrorsOr[T]) {
 
-    def tp: (String, ErrorsOr[T]) = prop -> validation
+    def tp: (String, NestedErrorsOr[T]) = prop -> validation
+
 
     def and[A](wv: WrappedValidation[A]): ValidationBuilder[
-      ErrorsOr[T] ::ErrorsOr[A] :: HNil,
+      NestedErrorsOr[T] :: NestedErrorsOr[A] :: HNil,
       T :: A :: HNil
     ] = {
-      new ValidationBuilder(List(wv.prop, prop), validation :: wv.validation :: HNil)
+      new ValidationBuilder(
+        List(wv.prop, prop),
+        validation |@| wv.validation
+      )
     }
 
   }
@@ -79,21 +88,30 @@ package object validators {
   class ValidationBuilder[
     ValTypes <: HList,
     ArgTypes <: HList
-  ](props: List[String], list: ValTypes) {
+  ](
+    props: List[String],
+    vd: NestedErrorsOr[_]
+  ) {
     def and[T](wv: WrappedValidation[T]): ValidationBuilder[
       ErrorsOr[T] :: ValTypes,
       T :: ArgTypes
       ] = {
-      new ValidationBuilder(props.::(wv.prop), wv.validation :: list)
+      new ValidationBuilder(
+        props.::(wv.prop),
+        vd <*> wv.validation
+      )
     }
 
-    def unwrap[F, H, R, Rev, I <: HList, M <: HList](fn: F)(
-      implicit unH: FnToProduct.Aux[F, ArgTypes => R],
-      zip: ZipApply.Aux[ValTypes, I, M],
-      rev: Reverse.Aux[ArgTypes, Rev],
-      mapped: Mapped.Aux[A, F, M]
-    ) = {
-      validate(fn)(list)
+    def unwrap[Ret, Args <: HList, TupledArgs <: Product](fn: TupledArgs => Ret)(
+      implicit rev: Reverse.Aux[ArgTypes, Args],
+        tupler: Tupler.Aux[Args, TupledArgs]
+    ): Either[ValidationError, Ret] = {
+      vd.fold(
+        nel => nel.list.groupBy(_._1).map {
+          case (key, value) => key => value.map(_._2)
+        },
+        identity
+      )
     }
   }
 }
