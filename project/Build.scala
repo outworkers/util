@@ -93,7 +93,7 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.15.0",
+    version := "0.16.0",
     scalaVersion := "2.11.7",
     crossScalaVersions := Seq("2.10.5", "2.11.7"),
 		resolvers ++= Seq(
@@ -133,6 +133,7 @@ object Build extends Build {
     UtilLift,
     UtilParsers,
     UtilZooKeeper,
+    UtilUrls,
     UtilTesting
   )
 
@@ -210,6 +211,14 @@ object Build extends Build {
     UtilTesting % "test, provided"
   )
 
+  lazy val UtilUrls = Project(
+    id = "util-urls",
+    base = file("util-urls"),
+    settings = sharedSettings
+  ) settings(
+    name := "util-urls"
+  )
+
   lazy val UtilAws = Project(
     id = "util-aws",
     base = file("util-aws"),
@@ -220,7 +229,7 @@ object Build extends Build {
       "com.twitter"             %% "finagle-http"                      % FinagleVersion
     )
   ).dependsOn(
-    UtilHttp,
+    UtilUrls,
     UtilTesting % "test, provided"
   )
 
