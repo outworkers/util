@@ -80,7 +80,7 @@ class ZooKeeperConfTest extends FlatSpec with Matchers with BeforeAndAfterAll {
     TestConf.parse(data) shouldEqual expected
   }
 
-  it should "store and retrieve a sequence of ports from ZooKeeper when ports are passed as a string of data" in {
+  ignore should "store and retrieve a sequence of ports from ZooKeeper when ports are passed as a string of data" in {
 
     val data = "localhost:9000, localhost:9001, localhost:9002"
 

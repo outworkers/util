@@ -9,6 +9,8 @@ import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.data.Validated.{Invalid, Valid}
 import cats.std.list._
 
+import scalaz.{Validation, ValidationNel}
+
 package object validators extends Wrappers {
 
   implicit class ValidatedApiError[T](val valid: Validated[Map[String, List[String]], T]) extends AnyVal {
@@ -49,5 +51,30 @@ package object validators extends Wrappers {
 
   implicit class ValidatedNelAugmenter[T](val v1: Nel[T]) extends AnyVal {
     def and[T2](v2: Nel[T2]): Wrapper2[T, T2] = new Wrapper2[T, T2](v1, v2)
+  }
+
+  implicit class ScalazToCatsValidation[X, T](val vd: Validation[X, T]) extends AnyVal {
+    def cats: Validated[X, T] = vd.fold(
+      fail => Invalid(fail),
+      valid => Valid(valid)
+    )
+  }
+
+  implicit class ScalazStringVdToCatsValidation[T](val vd: Validation[String, T]) extends AnyVal {
+    def prop(str: String): ValidatedNel[(String, String), T] = {
+      vd.leftMap(f => str -> f).cats.toValidatedNel
+    }
+  }
+
+  implicit class ScalazToCatsValidationNel[X, T](val vd: ValidationNel[X, T]) extends AnyVal {
+
+    def prop(str: String): ValidatedNel[(String, X), T] = {
+      vd.cats.leftMap(f => NonEmptyList(str -> f.head))
+    }
+
+    def cats: ValidatedNel[X, T] = vd.fold(
+      fail => Invalid(NonEmptyList(fail.head, fail.tail)),
+      valid => Valid(valid)
+    )
   }
 }

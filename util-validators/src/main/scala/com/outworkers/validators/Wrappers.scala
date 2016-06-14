@@ -74,8 +74,27 @@ trait Wrappers {
     v5: Nel[T5],
     v6: Nel[T6]
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6)] {
+
+    def and[T7](v7: Nel[T7]): Wrapper7[T1, T2, T3, T4, T5, T6, T7] = new Wrapper7(v1, v2, v3, v4, v5, v6, v7)
+
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map6[T1, T2, T3, T4, T5, T6, R](v1, v2, v3, v4, v5, v6) {
+        case tp => fn(tp)
+      }
+    }
+  }
+
+  case class Wrapper7[T1, T2, T3, T4, T5, T6, T7](
+    v1: Nel[T1],
+    v2: Nel[T2],
+    v3: Nel[T3],
+    v4: Nel[T4],
+    v5: Nel[T5],
+    v6: Nel[T6],
+    v7: Nel[T7]
+  ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7)] {
+    override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7)) => R): Nel[R] = {
+      Apply[ValidatedNel[(String, String), ?]].map7[T1, T2, T3, T4, T5, T6, T7, R](v1, v2, v3, v4, v5, v6, v7) {
         case tp => fn(tp)
       }
     }

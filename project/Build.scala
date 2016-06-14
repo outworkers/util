@@ -35,12 +35,12 @@ import bintray.BintrayKeys.{ bintrayReleaseOnPublish,bintrayOrganization, bintra
 object Build extends Build {
 
 	val ScalaTestVersion = "2.2.4"
-  val FinagleVersion = "6.25.0"
+  val FinagleVersion = "6.35.0"
   val FinagleZkVersion = "6.24.0"
-  val TwitterUtilVersion = "6.24.0"
+  val TwitterUtilVersion = "6.33.0"
   val LiftVersion = "3.0-M1"
   val ScalazVersion = "7.1.0"
-  val JodaTimeVersion = "2.3"
+  val JodaTimeVersion = "2.8"
 
   def liftVersion(version: String): ModuleID = {
     version match {

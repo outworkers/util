@@ -60,6 +60,7 @@ class ValidatorsTest extends FlatSpec with Matchers {
     "name" -> "cat",
     "age" -> "not a number",
     "houseNumber" -> "1234",
+    "email" -> "teasg",
     "lane" -> "feline street"
   ))
 
@@ -70,8 +71,9 @@ class ValidatorsTest extends FlatSpec with Matchers {
         config2.parse[Int]("age") and
         config2.parse[Int]("house_number") and
         config2.parse[Double]("house_number") and
+        parse[EmailAddress](config2.map("email")).prop("email") and
         config2.parse[String]("street") map {
-        case (name, name2, age, houseNumber, hn, street) => {
+        case (name, name2, age, houseNumber, hn, email, street) => {
           Person(name, age, Address(houseNumber, street))
         }
       }

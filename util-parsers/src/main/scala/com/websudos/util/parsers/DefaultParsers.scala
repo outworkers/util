@@ -185,7 +185,7 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
       val block: Try[EmailAddress] = if (EmailValidator.getInstance().isValid(str)) {
         Success(EmailAddress(str))
       } else {
-        Failure(new Exception(s"The string $str is not a vlaid email address"))
+        Failure(new Exception(s"""The string value "$str" is not a valid email address"""))
       }
 
       block.asValidation
