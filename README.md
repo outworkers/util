@@ -1,7 +1,6 @@
-# util[![Build Status](https://travis-ci.org/outworkers/util.svg?branch=develop)](https://travis-ci.org/outworkers/util) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util_2.10/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util_2.10)   [ ![Bintray](https://api.bintray.com/packages/websudos/oss-releases/util/images/download.svg) ](https://bintray.com/websudos/oss-releases/util/_latestVersion)
+# util[![Build Status](https://travis-ci.org/outworkers/util.svg?branch=develop)](https://travis-ci.org/outworkers/util) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.websudos/util_2.10)   [ ![Bintray](https://api.bintray.com/packages/websudos/oss-releases/util/images/download.svg) ](https://bintray.com/websudos/oss-releases/util/_latestVersion)
 
-The latest available version of the util library is ```val UtilVersion = 0.9.2```. This library is available on Maven Central and
-on our public Bintray repository, found at: `https://dl.bintray.com/websudos/oss-releases/`.
+This library is available on Maven Central and on our public Bintray repository, found at: `https://dl.bintray.com/websudos/oss-releases/`.
 
 It is publicly available, for both Scala 2.10.x and Scala 2.11.x. Check the badges at the top of this README for the
 latest version of `util` available. The badges are automatically updated when a new version is out, this readme is not.
