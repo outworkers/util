@@ -22,9 +22,13 @@ object Read {
 
   implicit val intRead: Read[Int] =
     new Read[Int] {
-      def read(s: String): Option[Int] =
-        if (s.matches("-?[0-9]+")) Some(s.toInt)
-        else None
+      def read(s: String): Option[Int] = {
+        if (s.matches("-?[0-9]+")) {
+          Some(s.toInt)
+        } else {
+          None
+        }
+      }
     }
 
   implicit val doubleRead: Read[Double] = new Read[Double] {
@@ -60,15 +64,13 @@ class ValidatorsTest extends FlatSpec with Matchers {
   ))
 
   it should "correctly group validations by name" in {
-    val personFromConfig: ValidatedNel[(String, String), Person] =
-      Apply[ValidatedNel[(String, String), ?]].map6(
-        config2.parse[String]("name"),
-        config2.parse[Int]("name"),
-        config2.parse[Int]("age"),
-        config2.parse[Int]("house_number"),
-        config2.parse[Double]("house_number"),
-        config2.parse[String]("street")
-      ) {
+    val personFromConfig =
+      config2.parse[String]("name") and
+        config2.parse[Int]("name") and
+        config2.parse[Int]("age") and
+        config2.parse[Int]("house_number") and
+        config2.parse[Double]("house_number") and
+        config2.parse[String]("street") map {
         case (name, name2, age, houseNumber, hn, street) => {
           Person(name, age, Address(houseNumber, street))
         }
@@ -77,7 +79,7 @@ class ValidatorsTest extends FlatSpec with Matchers {
     personFromConfig.unwrap.isLeft shouldEqual true
     personFromConfig.unwrap match {
       case Left(err) => info(err.asPrettyJson())
-      case Right(value) => info(value.asJson())
+      case Right(clz) => info(clz.asJson())
     }
   }
 }

@@ -9,7 +9,7 @@ import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.data.Validated.{Invalid, Valid}
 import cats.std.list._
 
-package object validators {
+package object validators extends Wrappers {
 
   implicit class ValidatedApiError[T](val valid: Validated[Map[String, List[String]], T]) extends AnyVal {
     def unwrap: Either[ValidationError, T] = {
@@ -46,4 +46,8 @@ package object validators {
 
   implicit val nelSemigroup: Semigroup[NonEmptyList[(String, String)]] =
     SemigroupK[NonEmptyList].algebra[(String, String)]
+
+  implicit class ValidatedNelAugmenter[T](val v1: Nel[T]) extends AnyVal {
+    def and[T2](v2: Nel[T2]): Wrapper2[T, T2] = new Wrapper2[T, T2](v1, v2)
+  }
 }
