@@ -36,7 +36,7 @@ import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.{Http, RequestBuilder}
 import com.twitter.util.Future
-import com.websudos.util.http._
+import com.websudos.urls._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
 
 object AwsMetadata {

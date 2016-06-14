@@ -230,6 +230,14 @@ object Build extends Build {
     UtilTesting % "test, provided"
   )
 
+  lazy val UtilUrls = Project(
+    id = "util-urls",
+    base = file("util-urls"),
+    settings = sharedSettings
+  ) settings(
+    name := "util-urls"
+  )
+
   lazy val UtilAws = Project(
     id = "util-aws",
     base = file("util-aws"),
@@ -240,7 +248,7 @@ object Build extends Build {
       "com.twitter" %% "finagle-http" % FinagleVersion
     )
   ).dependsOn(
-    UtilHttp,
+    UtilUrls,
     UtilTesting % "test, provided"
   )
 

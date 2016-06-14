@@ -11,7 +11,7 @@ import scala.collection.breakOut
 import scala.concurrent.{Future => ScalaFuture, Promise => ScalaPromise, ExecutionContext}
 import scala.util.{Failure, Success}
 
-package object http extends HttpExtractor {
+package object http {
 
   implicit class RichResponseBuilder[X, Y](val builder: RequestBuilder[X, Y]) extends AnyVal {
     def asJson(): RequestBuilder[X, Y] = {
