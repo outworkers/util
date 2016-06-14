@@ -35,16 +35,16 @@ import bintray.BintrayKeys.{ bintrayReleaseOnPublish,bintrayOrganization, bintra
 object Build extends Build {
 
 	val ScalaTestVersion = "2.2.4"
-  val FinagleVersion = "6.25.0"
+  val FinagleVersion = "6.35.0"
   val FinagleZkVersion = "6.24.0"
-  val TwitterUtilVersion = "6.24.0"
+  val TwitterUtilVersion = "6.33.0"
   val LiftVersion = "3.0-M1"
   val ScalazVersion = "7.1.0"
-  val JodaTimeVersion = "2.3"
+  val JodaTimeVersion = "2.8"
 
   def liftVersion(version: String): ModuleID = {
     version match {
-      case "2.10.5" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
+      case "2.10.6" => "net.liftweb" % "lift-webkit_2.10" % LiftVersion
       case _ => "net.liftweb" % "lift-webkit_2.11" % "3.0-M6"
     }
   }
@@ -93,9 +93,9 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.15.0",
-    scalaVersion := "2.11.7",
-    crossScalaVersions := Seq("2.10.5", "2.11.7"),
+    version := "0.17.0",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.10.6", "2.11.8"),
 		resolvers ++= Seq(
       "Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
       "Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
@@ -112,8 +112,11 @@ object Build extends Build {
       "-feature",
       "-unchecked"
 		),
+    addCompilerPlugin(
+      "org.spire-math" % "kind-projector" % "0.8.0" cross CrossVersion.binary
+    ),
     libraryDependencies ++= Seq(
-      "org.scalatest"           %% "scalatest" % ScalaTestVersion % "test, provided"
+      "org.scalatest"           %% "scalatest" % ScalaTestVersion % Test
     )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++
     GitProject.gitSettings ++
@@ -132,7 +135,8 @@ object Build extends Build {
     UtilHttp,
     UtilLift,
     UtilParsers,
-    UtilZooKeeper,
+    UtilTasks,
+    UtilValidators,
     UtilTesting
   )
 
@@ -149,7 +153,7 @@ object Build extends Build {
 	).settings(
 		name := "util-core",
     libraryDependencies ++= Seq(
-      "org.scalatest"                    %% "scalatest"                % ScalaTestVersion % "test, provided"
+      "org.scalatest"                    %% "scalatest"                % ScalaTestVersion % Test
     )
 	)
 
@@ -175,11 +179,27 @@ object Build extends Build {
       "joda-time"               %  "joda-time"                      % JodaTimeVersion,
       "org.joda"                %  "joda-convert"                   % "1.6",
       "org.scalaz"              %% "scalaz-core"                    % ScalazVersion,
-      "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % "test, provided"
+      "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % Test
     )
   ).dependsOn(
     UtilDomain,
     UtilTesting % "test, provided"
+  )
+
+  lazy val UtilValidators = Project(
+    id = "util-validators",
+    base = file("util-validators"),
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
+  ).settings(
+    name := "util-validators",
+    libraryDependencies ++= Seq(
+      "com.chuusai" %% "shapeless" % "2.3.1",
+      "org.typelevel" %% "cats" % "0.6.0"
+    )
+  ).dependsOn(
+    UtilParsers,
+    UtilTesting % Test,
+    UtilLift % Test
   )
 
   lazy val UtilLift = Project(
@@ -217,25 +237,11 @@ object Build extends Build {
   ).settings(
     name := "util-aws",
     libraryDependencies ++= Seq(
-      "com.twitter"             %% "finagle-http"                      % FinagleVersion
+      "com.twitter" %% "finagle-http" % FinagleVersion
     )
   ).dependsOn(
     UtilHttp,
     UtilTesting % "test, provided"
-  )
-
-  lazy val UtilZooKeeper = Project(
-    id = "util-zookeeper",
-    base = file("util-zookeeper"),
-    settings = Defaults.coreDefaultSettings ++ sharedSettings
-  ).settings(
-    name := "util-zookeeper",
-    libraryDependencies ++= Seq(
-      "com.twitter"                     %% "finagle-zookeeper"        % FinagleZkVersion,
-      "com.twitter"                      %% "finagle-serversets"       % FinagleVersion
-    )
-  ).dependsOn(
-    UtilTesting % "test"
   )
 
   lazy val UtilDomain = Project(
@@ -244,6 +250,17 @@ object Build extends Build {
     settings = Defaults.coreDefaultSettings ++ sharedSettings
   ).settings(
     name := "util-domain"
+  )
+
+  lazy val UtilTasks = Project(
+    id = "util-tasks",
+    base = file("util-tasks"),
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
+  ).settings(
+    name := "util-tasks",
+    libraryDependencies ++= Seq(
+      "org.scalaz" %% "scalaz-concurrent" % "7.3.0-M1"
+    )
   )
 
   lazy val UtilTesting = Project(

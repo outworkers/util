@@ -99,6 +99,10 @@ package object lift extends LiftParsers with JsonHelpers {
       compactRender(Extraction.decompose(clz))
     }
 
+    def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+      pretty(render(Extraction.decompose(clz)))
+    }
+
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
       Extraction.decompose(clz)
     }
@@ -111,6 +115,10 @@ package object lift extends LiftParsers with JsonHelpers {
   implicit class JsonSeqHelper[T <: Product with Serializable](val list: Seq[T]) extends AnyVal {
     def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
       compactRender(Extraction.decompose(list))
+    }
+
+    def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+      pretty(render(Extraction.decompose(list)))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
@@ -131,6 +139,10 @@ package object lift extends LiftParsers with JsonHelpers {
       compactRender(Extraction.decompose(set))
     }
 
+    def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+      pretty(render(Extraction.decompose(set)))
+    }
+
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
       Extraction.decompose(set)
     }
@@ -140,23 +152,6 @@ package object lift extends LiftParsers with JsonHelpers {
         JsonResponse(set.asJValue(), defaultSuccessResponse)
       } else {
         JsonResponse(JArray(Nil), noContentSuccessResponse)
-      }
-    }
-  }
-
-  implicit class JsonListHelper[T <: Product with Serializable](val list: List[T]) extends AnyVal {
-    def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      compactRender(Extraction.decompose(list))
-    }
-
-    def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
-      Extraction.decompose(list)
-    }
-
-    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
-      list match {
-        case head :: tail => JsonResponse(list.asJValue(), defaultSuccessResponse)
-        case Nil => JsonResponse(JArray(Nil), noContentSuccessResponse)
       }
     }
   }
