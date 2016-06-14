@@ -93,9 +93,9 @@ object Build extends Build {
 
   val sharedSettings: Seq[Def.Setting[_]] = Seq(
 		organization := "com.websudos",
-    version := "0.15.0",
-    scalaVersion := "2.11.7",
-    crossScalaVersions := Seq("2.10.5", "2.11.7"),
+    version := "0.15.1",
+    scalaVersion := "2.11.8",
+    crossScalaVersions := Seq("2.10.6", "2.11.8"),
 		resolvers ++= Seq(
       "Sonatype repo"                    at "https://oss.sonatype.org/content/groups/scala-tools/",
       "Sonatype releases"                at "https://oss.sonatype.org/content/repositories/releases",
@@ -112,8 +112,11 @@ object Build extends Build {
       "-feature",
       "-unchecked"
 		),
+    addCompilerPlugin(
+      "org.spire-math" % "kind-projector" % "0.8.0" cross CrossVersion.binary
+    ),
     libraryDependencies ++= Seq(
-      "org.scalatest"           %% "scalatest" % ScalaTestVersion % "test, provided"
+      "org.scalatest"           %% "scalatest" % ScalaTestVersion % Test
     )
 	) ++ net.virtualvoid.sbt.graph.Plugin.graphSettings ++
     GitProject.gitSettings ++
@@ -132,6 +135,7 @@ object Build extends Build {
     UtilHttp,
     UtilLift,
     UtilParsers,
+    UtilTasks,
     UtilZooKeeper,
     UtilValidators,
     UtilTesting
@@ -150,7 +154,7 @@ object Build extends Build {
 	).settings(
 		name := "util-core",
     libraryDependencies ++= Seq(
-      "org.scalatest"                    %% "scalatest"                % ScalaTestVersion % "test, provided"
+      "org.scalatest"                    %% "scalatest"                % ScalaTestVersion % Test
     )
 	)
 
@@ -176,7 +180,7 @@ object Build extends Build {
       "joda-time"               %  "joda-time"                      % JodaTimeVersion,
       "org.joda"                %  "joda-convert"                   % "1.6",
       "org.scalaz"              %% "scalaz-core"                    % ScalazVersion,
-      "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % "test, provided"
+      "org.scalatest"           %% "scalatest"                      % ScalaTestVersion % Test
     )
   ).dependsOn(
     UtilDomain,
@@ -190,11 +194,13 @@ object Build extends Build {
   ).settings(
     name := "util-validators",
     libraryDependencies ++= Seq(
-      "com.chuusai" %% "shapeless" % "2.3.1"
+      "com.chuusai" %% "shapeless" % "2.3.1",
+      "org.typelevel" %% "cats" % "0.6.0"
     )
   ).dependsOn(
     UtilParsers,
-    UtilTesting % "test, provided"
+    UtilTesting % Test,
+    UtilLift % Test
   )
 
   lazy val UtilLift = Project(
@@ -232,7 +238,7 @@ object Build extends Build {
   ).settings(
     name := "util-aws",
     libraryDependencies ++= Seq(
-      "com.twitter"             %% "finagle-http"                      % FinagleVersion
+      "com.twitter" %% "finagle-http" % FinagleVersion
     )
   ).dependsOn(
     UtilHttp,
@@ -246,8 +252,8 @@ object Build extends Build {
   ).settings(
     name := "util-zookeeper",
     libraryDependencies ++= Seq(
-      "com.twitter"                     %% "finagle-zookeeper"        % FinagleZkVersion,
-      "com.twitter"                      %% "finagle-serversets"       % FinagleVersion
+      "com.twitter" %% "finagle-zookeeper" % FinagleZkVersion,
+      "com.twitter" %% "finagle-serversets" % FinagleVersion
     )
   ).dependsOn(
     UtilTesting % "test"
@@ -259,6 +265,17 @@ object Build extends Build {
     settings = Defaults.coreDefaultSettings ++ sharedSettings
   ).settings(
     name := "util-domain"
+  )
+
+  lazy val UtilTasks = Project(
+    id = "util-tasks",
+    base = file("util-tasks"),
+    settings = Defaults.coreDefaultSettings ++ sharedSettings
+  ).settings(
+    name := "util-tasks",
+    libraryDependencies ++= Seq(
+      "org.scalaz" %% "scalaz-concurrent" % "7.3.0-M1"
+    )
   )
 
   lazy val UtilTesting = Project(
