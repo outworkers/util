@@ -29,15 +29,15 @@
  */
 package com.websudos.util.aws
 
+import java.io.{BufferedInputStream, BufferedOutputStream, InputStream, StringReader}
 import java.net.InetSocketAddress
 
 import com.twitter.conversions.time._
 import com.twitter.finagle.builder.ClientBuilder
 import com.twitter.finagle.http.{Http, RequestBuilder}
 import com.twitter.util.Future
-import com.websudos.util.http._
+import com.websudos.urls._
 import org.jboss.netty.handler.codec.http.HttpResponseStatus
-
 
 object AwsMetadata {
 
@@ -55,7 +55,7 @@ object AwsMetadata {
     .tcpConnectTimeout(5.seconds)
     .hostConnectionLimit(2)
     .retries(2)
-    .failFast(onOrOff = false)
+    .failFast(enabled = false)
     .build()
 
   def metadata: Future[Option[String]] = {
@@ -64,8 +64,8 @@ object AwsMetadata {
 
     client(req) map  {
       response => {
-        if (response.getStatus == HttpResponseStatus.OK) {
-          Some(response.responseBody)
+        if (response.status.code == HttpResponseStatus.OK.getCode) {
+          Some(response.contentString)
         } else {
           None
         }

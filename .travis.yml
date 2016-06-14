@@ -3,8 +3,8 @@
 language: scala
 
 scala:
- - "2.10.5"
- - "2.11.7"
+ - "2.10.6"
+ - "2.11.8"
 
 sudo: false
 
@@ -17,13 +17,18 @@ notifications:
 jdk:
   - oraclejdk7
   - openjdk7
+  - oraclejdk8
+
+branches:
+  only:
+  - master
+  - develop
 
 cache:
   directories:
     - $HOME/.ivy2/cache
 
 before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
-
 
 script:
   - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate coveralls
