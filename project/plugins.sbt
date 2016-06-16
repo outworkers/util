@@ -1,12 +1,12 @@
 resolvers ++= Seq(
   Classpaths.typesafeReleases,
-  "Sonatype snapshots"                                 at "http://oss.sonatype.org/content/repositories/snapshots/",
-  "jgit-repo"                                          at "http://download.eclipse.org/jgit/maven",
-  "Twitter Repo"                                       at "http://maven.twttr.com/",
-  "scct-github-repository"                             at "http://mtkopone.github.com/scct/maven-repo"
+  Resolver.sonatypeRepo("releases"),
+  Resolver.jcenterRepo,
+  "jgit-repo" at "http://download.eclipse.org/jgit/maven",
+  "Twitter Repo" at "http://maven.twttr.com/"
 )
 
-addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.7.4")
+addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 

@@ -76,7 +76,7 @@ package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list)
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list.toList)
 
     def toJson(code: Int = defaultErrorResponse)(implicit formats: Formats): LiftResponse = {
       JsonResponse(Extraction.decompose(toError(code)), code)
@@ -100,7 +100,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      pretty(render(Extraction.decompose(clz)))
+      prettyRender(Extraction.decompose(clz))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
@@ -118,7 +118,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      pretty(render(Extraction.decompose(list)))
+      prettyRender(Extraction.decompose(list))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
@@ -140,7 +140,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      pretty(render(Extraction.decompose(set)))
+      prettyRender(Extraction.decompose(set))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {

@@ -66,7 +66,8 @@ sealed trait BaseParser[X, T] {
 
   /**
    * A basic way to parse known types from options.
-   * @param str The string to attempt to parse from.
+    *
+    * @param str The string to attempt to parse from.
    * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
    */
   def parseOpt(str: X): Option[T] = tryParse(str).toOption
@@ -261,12 +262,11 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
   implicit class NelDelegation[X, T](val nel: ValidationNel[X, T]) {
     def chain[Y](fn: T => ValidationNel[String, Y]): ValidationNel[String, Y] = {
       nel.fold(
-        fail => fail.list.mkString(", ").failureNel[Y],
+        fail => fail.list.toList.mkString(", ").failureNel[Y],
         succ => fn(succ)
       )
     }
   }
-
 
   final def present(str: String, name: String): ValidationNel[String, String] = {
     if (str.trim.length == 0) {

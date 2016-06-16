@@ -29,6 +29,8 @@
  */
 package com.websudos.util.lift
 
+import java.nio.charset.StandardCharsets
+
 import com.websudos.util.domain.ApiErrorResponse
 import net.liftweb.http.LiftRulesMocker.toLiftRules
 import net.liftweb.http.js.JsExp
@@ -36,15 +38,21 @@ import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
 import net.liftweb.json.Extraction._
 import net.liftweb.json.JsonAST
+import net.liftweb.json.JsonAST.JValue
 import net.liftweb.json.JsonDSL._
 
 case class JsonUnauthorizedResponse(
  json: JsExp,
  headers: List[(String, String)],
  cookies: List[HTTPCookie] = Nil) {
-  def toResponse = {
-    val bytes = json.toJsCmd.getBytes("UTF-8")
-    InMemoryResponse(bytes, ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers, cookies, 401)
+  def toResponse: InMemoryResponse = {
+    val bytes = json.toJsCmd.getBytes(StandardCharsets.UTF_8)
+
+    InMemoryResponse(bytes,
+      "Content-Length" -> bytes.length.toString :: "Content-Type" -> "application/json; charset=utf-8" :: headers,
+      cookies,
+      401
+    )
   }
 }
 
@@ -77,10 +85,9 @@ object JsonUnauthorizedResponse {
 
   def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
     new JsonResponse(new JsExp {
-      lazy val toJsCmd = jsonPrinter(JsonAST.render(_json))
+      lazy val toJsCmd = jsonPrinter(JsonAST.render(_json).value)
     }, _headers, _cookies, unauthorizedCode)
   }
 
-  lazy val jsonPrinter: scala.text.Document => String =
-    LiftRules.jsonOutputConverter.vend
+  lazy val jsonPrinter: JsonAST.JValue => String = LiftRules.jsonOutputConverter.vend
 }

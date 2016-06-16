@@ -38,7 +38,7 @@ package object parsers extends DefaultParsers {
   implicit class ValidationNelConverted[String, T](val validation: ValidationNel[String, T]) extends AnyVal {
     def asTry: Try[T] = {
       validation.fold(
-        nel => Failure(new Exception(nel.list.mkString(", "))),
+        nel => Failure(new Exception(nel.list.toList.mkString(", "))),
         obj => Success(obj)
       )
     }

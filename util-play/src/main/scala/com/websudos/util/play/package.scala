@@ -19,7 +19,7 @@ package object play {
   implicit class NelAugmenter(val list: NonEmptyList[String]) extends AnyVal {
 
     def response: Result = {
-      Results.BadRequest(Json.toJson(ApiError(ApiErrorResponse(defaultErrorCode, list.list))))
+      Results.BadRequest(Json.toJson(ApiError(ApiErrorResponse(defaultErrorCode, list.list.toList))))
     }
 
     def futureResponse(): Future[Result] = {

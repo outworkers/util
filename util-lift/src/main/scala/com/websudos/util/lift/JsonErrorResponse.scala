@@ -35,6 +35,7 @@ import net.liftweb.http.provider.HTTPCookie
 import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
 import net.liftweb.json.Extraction._
 import net.liftweb.json.JsonAST
+import net.liftweb.json.JsonAST.JValue
 
 case class JsonErrorResponse(
   json: JsExp,
@@ -52,6 +53,8 @@ case class JsonErrorResponse(
       defaultErrorResponse
     )
   }
+
+  JsonResponse
 }
 
 object JsonErrorResponse {
@@ -75,10 +78,9 @@ object JsonErrorResponse {
 
   def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie], _code: Int): LiftResponse = {
     new JsonResponse(new JsExp {
-      lazy val toJsCmd = jsonPrinter(JsonAST.render(_json))
+      lazy val toJsCmd: String = jsonPrinter(JsonAST.render(_json).value)
     }, _headers, _cookies, _code)
   }
 
-  lazy val jsonPrinter: scala.text.Document => String =
-    LiftRules.jsonOutputConverter.vend
+  lazy val jsonPrinter: JValue => String = LiftRules.jsonOutputConverter.vend
 }
