@@ -5,7 +5,7 @@ import cats.data.Validated.{Invalid, Valid}
 import cats.data._
 import net.liftweb.json.{DefaultFormats, Extraction, pretty, render}
 import org.scalatest.{FlatSpec, Matchers}
-import com.websudos.util.lift._
+import com.outworkers.util.lift._
 import scala.util.Try
 
 trait Read[A] {

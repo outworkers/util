@@ -92,7 +92,7 @@ The underlying mechanism will create an async ```Waiter```, that will wait for t
 awaiting is done asynchronously and the assertions are invoked and evaluated once the future in question has returned a result.
 
 ```scala
-import com.websudos.util.testing._
+import com.outworkers.util.testing._
 
 class MyTests extends FlatSuite with Matchers {
 
@@ -143,7 +143,7 @@ implicit val timeout: PatienceConfiguration.Timeout = timeout(20 seconds)
 Summary:
 
 - The dependency you need is ```"com.websudos" %% "util-testing" % UtilVersion```.
-- You have to import ```com.websudos.util.testing._```.
+- You have to import ```com.outworkers.util.testing._```.
 - You have three main assertion methods, ```successful```, ```failing```, and ```failingWith```.
 - You can configure the timeout of waiters with ```implicit val timeout: PatienceConfiguration.Timeout = timeout(20 seconds)```.
 - The default timeout value is ```1 second```.
@@ -160,7 +160,7 @@ It's useful to define such typeclass instances inside package objects, as they w
 
 ```scala
 
-import com.websudos.util.testing._
+import com.outworkers.util.testing._
 
 
 case class MyAwesomeClass(name: String, age: Int, email: String)
@@ -208,15 +208,15 @@ In the case of email addresses, you can use ```gen[EmailAddress].value```, which
 - ```java.util.UUID```
 - ```org.joda.time.DateTime```
 - ```org.joda.time.LocalDate```
-- ```com.websudos.util.domain.Definitions.EmailAddress(value)```
-- ```com.websudos.util.domain.Definitions.FirstName(value)```
-- ```com.websudos.util.domain.Definitions.LastName(value)```
-- ```com.websudos.util.domain.Definitions.FullName(value)```
-- ```com.websudos.util.domain.Definitions.CountryCode(value)```
-- ```com.websudos.util.domain.Definitions.Country(value)```
-- ```com.websudos.util.domain.Definitions.City(value)```
-- ```com.websudos.util.domain.Definitions.ProgrammingLanguage(value)```
-- ```com.websudos.util.domain.Definitions.LoremIpsum(value)```
+- ```com.outworkers.util.domain.Definitions.EmailAddress(value)```
+- ```com.outworkers.util.domain.Definitions.FirstName(value)```
+- ```com.outworkers.util.domain.Definitions.LastName(value)```
+- ```com.outworkers.util.domain.Definitions.FullName(value)```
+- ```com.outworkers.util.domain.Definitions.CountryCode(value)```
+- ```com.outworkers.util.domain.Definitions.Country(value)```
+- ```com.outworkers.util.domain.Definitions.City(value)```
+- ```com.outworkers.util.domain.Definitions.ProgrammingLanguage(value)```
+- ```com.outworkers.util.domain.Definitions.LoremIpsum(value)```
 
 
 ### util-parsers ###
@@ -256,7 +256,7 @@ An example of how to use ```Option``` parsers might be:
 
 ```scala
 
-import com.websudos.util.parsers._
+import com.outworkers.util.parsers._
 
 object Test {
   def optionalParsing(email: String, age: String): Unit = {
@@ -291,7 +291,7 @@ To illustrate the basic usage of applicative parsers and how to chain them, have
 
 import scalaz._
 import scalaz.Scalaz._
-import com.websudos.util.parsers._
+import com.outworkers.util.parsers._
 
 object Test {
   

@@ -73,7 +73,7 @@ package object validators extends Wrappers {
     }
 
     def cats: ValidatedNel[X, T] = vd.fold(
-      fail => Invalid(NonEmptyList(fail.head, fail.tail)),
+      fail => Invalid(NonEmptyList(fail.head, fail.tail.toList)),
       valid => Valid(valid)
     )
   }
