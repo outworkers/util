@@ -69,7 +69,7 @@ package object lift extends LiftParsers with JsonHelpers {
   }
 
   implicit class ResponseToFuture(val response: LiftResponse) extends AnyVal {
-    def toFuture(): Future[LiftResponse] = Future.successful(response)
+    def toFuture: Future[LiftResponse] = Future.successful(response)
 
     def future(): Future[LiftResponse] = Future.successful(response)
   }
@@ -100,7 +100,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      prettyRender(Extraction.decompose(clz))
+      JsonWrapper.prettyRender(Extraction.decompose(clz))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
@@ -118,7 +118,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      prettyRender(Extraction.decompose(list))
+      JsonWrapper.prettyRender(Extraction.decompose(list))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
@@ -140,7 +140,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
 
     def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      prettyRender(Extraction.decompose(set))
+      JsonWrapper.prettyRender(Extraction.decompose(set))
     }
 
     def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
@@ -182,7 +182,7 @@ package object lift extends LiftParsers with JsonHelpers {
       * @return A future wrapping a Lift Response.
       */
     def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
-      eval.fold(_.toJson().toFuture(), pf)
+      eval.fold(_.toJson().future(), pf)
     }
 
     /**

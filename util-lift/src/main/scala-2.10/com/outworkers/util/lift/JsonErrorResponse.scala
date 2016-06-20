@@ -1,3 +1,5 @@
+package com.outworkers.util.lift
+
 /*
  * Copyright 2013-2015 Websudos, Limited.
  *
@@ -27,66 +29,58 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package com.outworkers.util.lift
-
-import java.nio.charset.StandardCharsets
-
-import com.outworkers.util.domain.ApiErrorResponse
-import net.liftweb.http.LiftRulesMocker.toLiftRules
+import com.outworkers.util.domain.ApiError
+import net.liftweb.http._
 import net.liftweb.http.js.JsExp
 import net.liftweb.http.provider.HTTPCookie
-import net.liftweb.http.{InMemoryResponse, JsonResponse, LiftResponse, LiftRules, S}
 import net.liftweb.json.Extraction._
 import net.liftweb.json.JsonAST
-import net.liftweb.json.JsonDSL._
+import net.liftweb.json.JsonAST.JValue
 
-case class JsonUnauthorizedResponse(
- json: JsExp,
- headers: List[(String, String)],
- cookies: List[HTTPCookie] = Nil) {
-  def toResponse: InMemoryResponse = {
-    val bytes = json.toJsCmd.getBytes(StandardCharsets.UTF_8)
+case class JsonErrorResponse(
+  json: JsExp,
+  headers: List[(String, String)],
+  cookies: List[HTTPCookie] = Nil) {
 
-    InMemoryResponse(bytes,
-      "Content-Length" -> bytes.length.toString :: "Content-Type" -> "application/json; charset=utf-8" :: headers,
-      cookies,
-      401
-    )
+    protected[this] val defaultErrorResponse = 400
+
+    def toResponse: LiftResponse = {
+      val bytes = json.toJsCmd.getBytes
+      InMemoryResponse(
+        bytes,
+        ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers,
+        cookies,
+        defaultErrorResponse
+      )
+    }
+
+    JsonResponse
   }
-}
 
-object JsonUnauthorizedResponse {
+object JsonErrorResponse {
 
-  protected[this] implicit val formats = net.liftweb.json.DefaultFormats
-  protected[this] final val unauthorizedCode = 401
-
-  implicit def jsonUnauthorizedToLiftResponse(resp: JsonUnauthorizedResponse): LiftResponse = {
-    resp.toResponse
-  }
+  implicit val formats = net.liftweb.json.DefaultFormats
 
   def headers: List[(String, String)] = S.getResponseHeaders(Nil)
   def cookies: List[HTTPCookie] = S.responseCookies
 
-  def apply(json: JsExp): LiftResponse =
-    JsonResponse(json, headers, cookies, unauthorizedCode)
+  def apply(json: JsExp, code: Int): LiftResponse =
+    JsonResponse(json, headers, cookies, code)
 
-  def apply(): LiftResponse = {
-    val resp = ApiErrorResponse(unauthorizedCode, List("Unauthorized request"))
-    val json = "error" -> decompose(resp)
-    JsonResponse(json, unauthorizedCode)
+  def apply(msg: String, code: Int): LiftResponse = {
+    val resp = ApiError.fromArgs(code, List(msg))
+    JsonResponse(decompose(resp), code)
   }
 
-  def apply(msg: String): LiftResponse = {
-    val resp = ApiErrorResponse(unauthorizedCode, List(msg))
-    val json = "error" -> decompose(resp)
-    JsonResponse(json, unauthorizedCode)
+  def apply(ex: Exception, code: Int): LiftResponse = {
+    apply(ex.getMessage, code)
   }
 
-  def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
+  def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie], _code: Int): LiftResponse = {
     new JsonResponse(new JsExp {
-      lazy val toJsCmd = jsonPrinter(JsonAST.render(_json).value)
-    }, _headers, _cookies, unauthorizedCode)
+      lazy val toJsCmd: String = jsonPrinter(JsonAST.render(_json))
+    }, _headers, _cookies, _code)
   }
 
-  lazy val jsonPrinter: JsonAST.JValue => String = LiftRules.jsonOutputConverter.vend
+  lazy val jsonPrinter: scala.text.Document => String = LiftRules.jsonOutputConverter.vend
 }
