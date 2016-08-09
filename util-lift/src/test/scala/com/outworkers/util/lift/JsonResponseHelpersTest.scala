@@ -20,4 +20,18 @@ class JsonResponseHelpersTest extends LiftTest {
       list.asResponse().toResponse.code shouldEqual 200
     }
   }
+
+  it should "create a JSON error response from an empty product list" in {
+    val resp = JsonErrorResponse("This went wrong", 400)
+
+    resp.toResponse.code shouldEqual 400
+    info(resp.toResponse.toString)
+  }
+
+  it should "create a JSON Unauthorised response" in {
+    val resp = JsonUnauthorizedResponse()
+
+    resp.toResponse.code shouldEqual 401
+    info(resp.toResponse.toString)
+  }
 }
