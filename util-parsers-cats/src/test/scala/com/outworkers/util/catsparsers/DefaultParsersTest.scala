@@ -1,9 +1,8 @@
 package com.outworkers.util.catsparsers
 
-import cats.std.list._
+import cats.implicits._
 import com.outworkers.util.testing._
 import org.scalatest.{FlatSpec, Matchers}
-
 import scala.util.{Failure, Try}
 
 class DefaultParsersTest extends FlatSpec with Matchers {
@@ -53,4 +52,23 @@ class DefaultParsersTest extends FlatSpec with Matchers {
     parser.isValid shouldEqual false
     parser.toOption.isDefined shouldEqual false
   }
+
+  "The email parser" should "parse a valid email address" in {
+    val parser = parse[EmailAddress]("boti@google.com")
+    parser.isValid shouldEqual true
+    parser.toOption.isDefined shouldEqual true
+  }
+
+  "The email parser" should "fail to parse an invalid email address" in {
+    val parser = parse[EmailAddress]("botigoogle.com")
+    parser.isValid shouldEqual false
+    parser.toOption.isDefined shouldEqual false
+  }
+
+  /*
+  "The email parser" should "combine with another parser" in {
+    val parser = parse[EmailAddress]("boti@google.com") |@| parse[Int]("5")
+    parser map {}
+    parser.toOption.isDefined shouldEqual true
+  }*/
 }
