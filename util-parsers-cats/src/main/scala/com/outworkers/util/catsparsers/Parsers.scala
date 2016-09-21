@@ -7,7 +7,6 @@ import cats.data.ValidatedNel
 import com.outworkers.util.domain.GenerationDomain
 import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.DateTime
-import cats.std.list._
 import scala.util.{Failure, Success, Try}
 
 sealed trait CatsBiParser[X, T] {

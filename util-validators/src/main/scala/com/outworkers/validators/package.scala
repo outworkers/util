@@ -7,7 +7,6 @@ import com.outworkers.validators.{ParseError, ValidationError}
 import cats.{Applicative, Apply, SemigroupK}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import cats.data.Validated.{Invalid, Valid}
-import cats.std.list._
 
 import scalaz.{Validation, ValidationNel}
 
@@ -26,7 +25,7 @@ package object validators extends Wrappers {
 
   implicit class ValidationNelAugmenter[T](val valid: ValidatedNel[(String, String), T]) extends AnyVal {
     def unwrap: Either[ValidationError, T] = {
-      valid.leftMap(nel => nel.unwrap.groupBy(_._1).map {
+      valid.leftMap(nel => nel.toList.groupBy(_._1).map {
         case (label, errors) => label -> errors.map(_._2)
       }).unwrap
     }
@@ -69,7 +68,7 @@ package object validators extends Wrappers {
   implicit class ScalazToCatsValidationNel[X, T](val vd: ValidationNel[X, T]) extends AnyVal {
 
     def prop(str: String): ValidatedNel[(String, X), T] = {
-      vd.cats.leftMap(f => NonEmptyList(str -> f.head))
+      vd.cats.leftMap(f => NonEmptyList(str -> f.head, Nil))
     }
 
     def cats: ValidatedNel[X, T] = vd.fold(
