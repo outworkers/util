@@ -64,13 +64,13 @@ The full list of available modules is:
 ```scala
 
 libraryDependencies ++= Seq(
-  "com.websudos" %% "util-aws" % UtilVersion,
-  "com.websudos" %% "util-core" % UtilVersion,
-  "com.websudos" %% "util-http" % UtilVersion,
-  "com.websudos" %% "util-lift" % UtilVersion,
-  "com.websudos" %% "util-parsers" % UtilVersion,
-  "com.websudos" %% "util-testing" % UtilVersion,
-  "com.websudos" %% "util-zookeeper" % UtilVersion
+  "com.outworkers" %% "util-aws" % UtilVersion,
+  "com.outworkers" %% "util-core" % UtilVersion,
+  "com.outworkers" %% "util-http" % UtilVersion,
+  "com.outworkers" %% "util-lift" % UtilVersion,
+  "com.outworkers" %% "util-parsers" % UtilVersion,
+  "com.outworkers" %% "util-testing" % UtilVersion,
+  "com.outworkers" %% "util-zookeeper" % UtilVersion
 )
 ```
 
@@ -306,34 +306,6 @@ object Test {
   
 }
 ```
-
-### util-zookeeper ###
-
-The ZooKeeper utilities are a set of convenience utilities for using ZooKeeper as a service discovery tool in your eco-system. The tooling found in this project is relatively small and most of the underlying functionality has already been very well address by Twitter and by the finagle-zookeeper project.
-
-
-### ZooKeeperInstance ###
-
-This is useful when you want to test against a local ZooKeeper installation but you don't really want to provision ZooKeeper in your test environment. It's a really neat trick to pull when you want to test your distribution across a service discovery based eco-system.
-
-The instance is meant to allow testing on a specific path and it will automatically provision the path you pass as an argument to it. However, you can exactly create further paths using the client.
-
-```scala
-val instance = new ZooKeeperInstance(path)
-
-// Now you have 2 control methods.
-instance.start()
-
-// And you can stop the instance and free up the port
-instance.stop()
-```
-
-### ZooKeeperConf ###
-
-This is indented for applications that want to register themselves to ZooKeeper nodes or fetch a set of ```host:port``` combinations from ZooKeeper. The underlying Scala collection we use for this config is a ```Set```, which means no duplicates are allowed by design.
-Internally, we heavily use the Twitter eco-system for development and we use Finagle + Twitter Server to create applications that are later discovered by other apps via ZooKeeper. As such, we provide a sequence of asynchronous/reactive access patterns to allow our apps to quickly access ZooKeeper.
-
-
 
 ### Contributors
 <a href="#table-of-contents">Back to top</a>
