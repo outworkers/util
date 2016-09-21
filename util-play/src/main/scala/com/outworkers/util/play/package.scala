@@ -1,13 +1,13 @@
 package com.outworkers.util
 
 import _root_.play.api.data.validation.ValidationError
-import _root_.play.api.libs.json.{JsValue, JsPath, Json}
-import _root_.play.api.mvc.{Results, Result}
-import com.outworkers.util.domain.{ApiErrorResponse, ApiError}
+import _root_.play.api.libs.json.{JsPath, JsValue, Json}
+import _root_.play.api.mvc.{Result, Results}
+import cats.data.NonEmptyList
+import com.outworkers.util.domain.{ApiError, ApiErrorResponse}
 
 import scala.concurrent.Future
 import scala.util.control.NoStackTrace
-import scalaz.NonEmptyList
 
 package object play {
 

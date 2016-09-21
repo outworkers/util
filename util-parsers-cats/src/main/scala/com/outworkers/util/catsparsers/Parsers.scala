@@ -222,7 +222,7 @@ trait DefaultParsers extends CatsImplicitParsers {
   implicit class NelDelegation[X, T](val nel: ValidatedNel[X, T]) {
     def chain[Y](fn: T => ValidatedNel[String, Y]): ValidatedNel[String, Y] = {
       nel.fold(
-        fail => fail.unwrap.mkString(", ").invalidNel[Y],
+        fail => fail.toList.mkString(", ").invalidNel[Y],
         succ => fn(succ)
       )
     }
