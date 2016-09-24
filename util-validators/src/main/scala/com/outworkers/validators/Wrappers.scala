@@ -3,11 +3,14 @@ package com.outworkers.validators
 import cats.Apply
 import cats.data.ValidatedNel
 
-case class ParseError(label: String, errors: List[String])
+case class ParseError(property: String, messages: List[String])
 
 case class ValidationError(
   errors: List[ParseError]
-)
+) {
+  def add(other: ValidationError): ValidationError = ValidationError(errors ++ other.errors)
+  def ++(other: ValidationError): ValidationError = add(other)
+}
 
 trait Wrappers {
   type Nel[T] = ValidatedNel[(String, String), T]
@@ -95,6 +98,25 @@ trait Wrappers {
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7)] {
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map7[T1, T2, T3, T4, T5, T6, T7, R](v1, v2, v3, v4, v5, v6, v7) {
+        case tp => fn(tp)
+      }
+    }
+
+    def and[T8](v8: Nel[T8]): Wrapper8[T1, T2, T3, T4, T5, T6, T7, T8] = new Wrapper8(v1, v2, v3, v4, v5, v6, v7, v8)
+  }
+
+  case class Wrapper8[T1, T2, T3, T4, T5, T6, T7, T8](
+    v1: Nel[T1],
+    v2: Nel[T2],
+    v3: Nel[T3],
+    v4: Nel[T4],
+    v5: Nel[T5],
+    v6: Nel[T6],
+    v7: Nel[T7],
+    v8: Nel[T8]
+  ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8)] {
+    override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8)) => R): Nel[R] = {
+      Apply[ValidatedNel[(String, String), ?]].map8[T1, T2, T3, T4, T5, T6, T7, T8, R](v1, v2, v3, v4, v5, v6, v7, v8) {
         case tp => fn(tp)
       }
     }

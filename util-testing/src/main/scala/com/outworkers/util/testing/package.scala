@@ -62,6 +62,17 @@ package object testing extends ScalaFutures
    */
   implicit class TwitterFutureAssertions[A](val f: Future[A]) extends Assertions with AsyncAssertions {
 
+    def asScala: scala.concurrent.Future[A] = {
+      val promise = scala.concurrent.Promise[A]()
+
+      f respond {
+        case Throw(er) => promise failure er
+        case Return(data) => promise success data
+      }
+
+      promise.future
+    }
+
     /**
      * Use this to assert an expected asynchronous failure of a @code {com.twitter.util.Future}
      * The computation and waiting are both performed asynchronously.
@@ -120,6 +131,17 @@ package object testing extends ScalaFutures
    * @tparam A The underlying type of the computation.
    */
   implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with AsyncAssertions {
+
+    def asTwitter()(implicit ec: ExecutionContext): com.twitter.util.Future[A] = {
+      val promise = com.twitter.util.Promise[A]()
+
+      f onComplete {
+        case Failure(er) => promise raise er
+        case Success(data) => promise become Future.value(data)
+      }
+
+      promise
+    }
 
     /**
      * Use this to assert an expected asynchronous failure of a @code {com.twitter.util.Future}

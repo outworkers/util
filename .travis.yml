@@ -1,38 +1,31 @@
-# Travis CI credentials
-
 language: scala
-
 scala:
- - "2.10.6"
- - "2.11.8"
+- 2.10.6
+- 2.11.8
 
 sudo: false
-
-# Emails to notify
 notifications:
   slack:
-    - websudos:P9QNXx1ZGFnDHp3v3jUqtB8k
+  - websudos:P9QNXx1ZGFnDHp3v3jUqtB8k
   email:
-    - dev@websudos.co.uk
+  - dev@websudos.co.uk
 jdk:
-  - oraclejdk7
-  - openjdk7
-  - oraclejdk8
-
+- oraclejdk7
+- openjdk7
+- oraclejdk8
 branches:
   only:
   - master
   - develop
-
+env:
+  global:
+  - GH_REF: github.com/outworkers/util.git
+  - secure: Onl6jQhDgCHVhsxIhC2FltwTlvTWI5815lI9wsb79OvE+Xl/hh8XcafOBzUJ/LtKmt021oieOsR53RAdIJDKhNrKo3AQYoyp3rAX48zCInE0Y29slKVCwj51w5Mns+aYlPbJcHJvRNWkFIpaQ1AmBvkHfc0A0rxfoSB1lOIrtHs=
+  - secure: k/DGy5KkvzmQNJEfazsEoD6biwkIoYC9DyjhDTMCxhXLz/mURsCtfhdWo3Uz4nhuX3qDK0N/6C6BTwl0ktVEA7eH8XZQY/dW1lLTY3jglD2U/FhAfCngbcI+ToL5kdK77Zy4LKvu4XBKXfSusI20E1gbK+Tjp1uCkNvVaAyyVv0=
 cache:
   directories:
-    - $HOME/.ivy2/cache
-
+  - $HOME/.ivy2/cache
 before_script: travis_retry sbt ++$TRAVIS_SCALA_VERSION update
-
-script:
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test coverageReport coverageAggregate coveralls
-
+script: ./build/run_tests.sh
 after_success:
-  - ./build/publish_develop.sh
-
+- ./build/publish_develop.sh
