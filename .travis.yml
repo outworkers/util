@@ -2,7 +2,6 @@ language: scala
 scala:
 - 2.10.6
 - 2.11.8
-
 sudo: false
 notifications:
   slack:
@@ -22,6 +21,8 @@ env:
   - GH_REF: github.com/outworkers/util.git
   - secure: Onl6jQhDgCHVhsxIhC2FltwTlvTWI5815lI9wsb79OvE+Xl/hh8XcafOBzUJ/LtKmt021oieOsR53RAdIJDKhNrKo3AQYoyp3rAX48zCInE0Y29slKVCwj51w5Mns+aYlPbJcHJvRNWkFIpaQ1AmBvkHfc0A0rxfoSB1lOIrtHs=
   - secure: k/DGy5KkvzmQNJEfazsEoD6biwkIoYC9DyjhDTMCxhXLz/mURsCtfhdWo3Uz4nhuX3qDK0N/6C6BTwl0ktVEA7eH8XZQY/dW1lLTY3jglD2U/FhAfCngbcI+ToL5kdK77Zy4LKvu4XBKXfSusI20E1gbK+Tjp1uCkNvVaAyyVv0=
+  - secure: Mq2DExZRRQBvLwcw8O+tNTbT7M0NzWEGid30PnlAKtXQlupAo45VBoSb7fEY9zWqLaH7fJEQ/AauirgLdPPwqhVT1qx91ioSZ3+ikzSdkZu5LbfM89C1rnvpjpWY3uiCwtAYql2yIu3lhWncpIXl2rBhwSHi6DUTnRUnjzd/yws=
+  - secure: KJca+iYGyO9svC+V1UF5y7Ff9OtS83CRY6VHZ0cKtBi6xID68J9BE/70TyDgNM6eLdweVw3Qw2tVUJdlFlkq9x4swOJqZkG7CodO9+NsHcYvlOWVNEXJ8ETu6vli5BY3w4UJlebjszUjOmC4cW7h5Y+omW0NHT6RrYbxVmvkQgs=
 cache:
   directories:
   - $HOME/.ivy2/cache

@@ -72,10 +72,10 @@ then
         sbt +bintray:publish
 
         echo "Creating GPG deploy key"
-        openssl aes-256-cbc -K $encrypted_759d2b7e5bb0_key -iv $encrypted_759d2b7e5bb0_iv -in build/deploy.asc.enc -out build/deploy.asc -d
+        openssl aes-256-cbc -K $encrypted_d543e1d8b539_key -iv $encrypted_d543e1d8b539_iv -in build/codesigning.asc.enc -out build/codesigning.asc -d
 
         echo "importing GPG key to local GBP repo"
-        gpg --fast-import build/deploy.asc
+        gpg --fast-import build/codesigning.asc.enc
 
         echo "Setting MAVEN_PUBLISH mode to true"
         export MAVEN_PUBLISH="true"
