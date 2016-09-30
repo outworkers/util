@@ -8,7 +8,6 @@ import com.typesafe.sbt.pgp.PgpKeys._
 object Publishing {
 
   val RunningUnderCi = sys.env.contains("CI") || sys.env.contains("TRAVIS")
-  lazy val TravisScala211 = sys.env.get("TRAVIS_SCALA_VERSION").exists(_.contains("2.11"))
 
   lazy val defaultCredentials: Seq[Credentials] = {
     if (!RunningUnderCi) {
