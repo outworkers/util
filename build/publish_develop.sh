@@ -81,10 +81,13 @@ then
         export MAVEN_PUBLISH="true"
         export pgp_passphrase=${maven_password}
         sbt +publishSigned sonatypeReleaseAll
+        exit $?
 
     else
         echo "Only publishing version for Scala 2.11.8 and Oracle JDK 8 to prevent multiple artifacts"
+        exit 0
     fi
 else
     echo "This is either a pull request or the branch is not develop, deployment not necessary"
+    exit 0
 fi
