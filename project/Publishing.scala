@@ -7,10 +7,10 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object Publishing {
 
-  val RunningUnderCi = sys.env.contains("CI") || sys.env.contains("TRAVIS")
+  def runningUnderCi = sys.env.contains("CI") || sys.env.contains("TRAVIS")
 
   lazy val defaultCredentials: Seq[Credentials] = {
-    if (!RunningUnderCi) {
+    if (!runningUnderCi) {
       Seq(
         Credentials(Path.userHome / ".bintray" / ".credentials"),
         Credentials(Path.userHome / ".ivy2" / ".credentials")
@@ -50,14 +50,14 @@ object Publishing {
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
     pgpPassphrase in ThisBuild := {
-      if (RunningUnderCi && pgpPass.isDefined) {
+      if (runningUnderCi && pgpPass.isDefined) {
         println("Running under CI and PGP password specified under settings.")
         println(s"Password longer than five characters: ${pgpPass.exists(_.length > 5)}")
         pgpPass
       } else {
         println("Could not find settings for a PGP passphrase.")
         println(s"pgpPass defined in environemnt: ${pgpPass.isDefined}")
-        println(s"Running under CI: $RunningUnderCi")
+        println(s"Running under CI: $runningUnderCi")
         None
       }
     },

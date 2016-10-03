@@ -80,7 +80,7 @@ then
         echo "Setting MAVEN_PUBLISH mode to true"
         export MAVEN_PUBLISH="true"
         export pgp_passphrase=${maven_password}
-        sbt +publishSigned sonatypeReleaseAll]
+        sbt +publishSigned sonatypeReleaseAll
         exit $?
 
     else
