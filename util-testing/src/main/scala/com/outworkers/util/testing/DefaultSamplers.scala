@@ -31,9 +31,8 @@ package com.outworkers.util.testing
 
 import java.util.{Date, Locale, UUID}
 
-import org.joda.time.{DateTime, LocalDate}
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
-
 import com.outworkers.util.domain._
 
 trait Sample[T] {
@@ -146,7 +145,7 @@ trait DefaultSamplers extends Generators {
   }
 
   implicit object DateTimeSampler extends Sample[DateTime] {
-    def sample: DateTime = new DateTime()
+    def sample: DateTime = new DateTime(DateTimeZone.UTC)
   }
 
   implicit object LocalDateSampler extends Sample[LocalDate] {
