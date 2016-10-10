@@ -37,13 +37,13 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
     params: Seq[ValDef]
   ): Tree = {
 
-    val fresh = c.freshName(typeName)
+    val fresh = c.freshName(name)
     val applies = accessors(params).map {
       case (nm, tp) => q"""$prefix.Sample[$tp]"""
     }
 
     q"""implicit object $fresh extends $prefix.Sample[$typeName] {
-      override def sample: $typeName = $typeName(..$applies)
+      override def sample: $typeName = $name(..$applies)
     }"""
   }
 
@@ -60,8 +60,8 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
        }
        """
         println(showCode(res))
-        c.Expr[Any](res)
+        res
 
-      case _ => c.abort(c.enclosingPosition, "Invalid annotation target, UDTs must be a case classes")
+      case _ => c.abort(c.enclosingPosition, "Invalid annotation target, Sample must be a case classes")
   }
 }
