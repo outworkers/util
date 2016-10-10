@@ -39,6 +39,10 @@ trait Sample[T] {
   def sample: T
 }
 
+object Sample {
+  def apply[T : Sample] = implicitly[Sample[T]]
+}
+
 sealed trait Generators extends GenerationDomain {
 
   protected[this] val domains = List("net", "com", "org", "io", "biz", "co.uk", "co.za")

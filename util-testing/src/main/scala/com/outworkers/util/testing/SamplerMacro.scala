@@ -39,7 +39,7 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
 
     val fresh = c.freshName(name)
     val applies = accessors(params).map {
-      case (nm, tp) => q"""$prefix.Sample[$tp]"""
+      case (nm, tp) => q"""$prefix.Sample[$tp].sample"""
     }
 
     q"""implicit object $fresh extends $prefix.Sample[$typeName] {
