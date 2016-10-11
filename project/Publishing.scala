@@ -7,7 +7,7 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object Publishing {
 
-  def runningUnderCi = sys.env.contains("CI") || sys.env.contains("TRAVIS")
+  def runningUnderCi: Boolean = sys.env.contains("CI") || sys.env.contains("TRAVIS")
 
   lazy val defaultCredentials: Seq[Credentials] = {
     if (!runningUnderCi) {
@@ -89,7 +89,7 @@ object Publishing {
             <url>http://github.com/alexflav23</url>
           </developer>
         </developers>
-  )
+  ) ++ defaultPublishingSettings
 
   val bintraySettings: Seq[Def.Setting[_]] = Seq(
     publishMavenStyle := true,
@@ -99,7 +99,7 @@ object Publishing {
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true},
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
-  )
+  ) ++ defaultPublishingSettings
 
   def isJdk8: Boolean = sys.props("java.specification.version") == "1.8"
 

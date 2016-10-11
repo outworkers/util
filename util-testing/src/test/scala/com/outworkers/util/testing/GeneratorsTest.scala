@@ -17,7 +17,11 @@ class GeneratorsTest extends FlatSpec {
 
   it should "generate a sized map of known key and value types" in {
     val limit = 10
-
     assert(genMap[Int, Int](limit).size == limit)
+  }
+
+  it should "automatically derive valid samples" in {
+    val sample = gen[User]
+    info(sample.trace())
   }
 }

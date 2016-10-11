@@ -34,6 +34,7 @@ import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{AsyncAssertions, PatienceConfiguration, ScalaFutures}
 
+import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.{Failure, Success}
 
@@ -42,6 +43,16 @@ package object testing extends ScalaFutures
   with DefaultSamplers
   with ScalaTestHelpers
   with GenerationDomain {
+
+
+  @compileTimeOnly("Enable macro paradise to expand macro annotations")
+  class sample extends StaticAnnotation {
+    def macroTransform(annottees: Any*): Any = macro SamplerMacro.macroImpl
+  }
+
+  implicit class Printer[T](val obj: T) extends AnyVal {
+    def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
+  }
 
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {

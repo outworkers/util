@@ -13,19 +13,19 @@ latest version of `util` available. The badges are automatically updated when a 
   <li><a href="#integrating-the-util-library">Integrating the util library</a></li>
   
   <li>
-    <p><a href="#util-http">util-http</a></p>
+    <p><a href="#util-parsers">util-parsers</a></p>
     <ul>
       <li><a href="#option-parsers">Option parsers</a></li>
       <li><a href="#applicative-parsers">Applicative parsers</a></li>
-    </ul>
+      </ul>
   </li>
   
-    <li>
-      <p><a href="#util-parsers">util-parsers</a></p>
+  <li>
+      <p><a href="#util-parsers">util-parsers-cats</a></p>
       <ul>
         <li><a href="#option-parsers">Option parsers</a></li>
         <li><a href="#applicative-parsers">Applicative parsers</a></li>
-      </ul>
+        </ul>
     </li>
     
   <li>
@@ -33,6 +33,7 @@ latest version of `util` available. The badges are automatically updated when a 
     <ul>
       <li><a href="#async-assertions">Async assertions</a></li>
       <li><a href="#data-sampling">Data sampling</a></li>
+      <li><a href="#automated-sampling">Automated sampling</a></li>
     </ul>
   </li>
 
@@ -64,13 +65,14 @@ The full list of available modules is:
 ```scala
 
 libraryDependencies ++= Seq(
-  "com.outworkers" %% "util-aws" % UtilVersion,
-  "com.outworkers" %% "util-core" % UtilVersion,
-  "com.outworkers" %% "util-http" % UtilVersion,
-  "com.outworkers" %% "util-lift" % UtilVersion,
-  "com.outworkers" %% "util-parsers" % UtilVersion,
-  "com.outworkers" %% "util-testing" % UtilVersion,
-  "com.outworkers" %% "util-zookeeper" % UtilVersion
+  "com.outworkers" %% "util-lift" % Versions.util,
+  "com.outworkers" %% "util-domain" % Versions.util,
+  "com.outworkers" %% "util-parsers" % Versions.util,
+  "com.outworkers" %% "util-parsers-cats" % Versions.util,
+  "com.outworkers" %% "util-validators" % Versions.util,
+  "com.outworkers" %% "util-play" % Versions.util,
+  "com.outworkers" %% "util-urls" % Versions.util,
+  "com.outworkers" %% "util-testing" % Versions.util
 )
 ```
 
@@ -79,7 +81,7 @@ libraryDependencies ++= Seq(
 <a href="#table-of-contents">Back to top</a>
 
 The testing module features the ```AsyncAssertionsHelper```, which builds on top of ScalaTest to offer simple asynchronous assertions. We use this pattern 
-heavily throughout the Websudos ecosystem of projects, from internal to DSL modules and so forth. Asynchronous testing generally offers a considerable 
+heavily throughout the Outworkers ecosystem of projects, from internal to DSL modules and so forth. Asynchronous testing generally offers a considerable 
 performance gain in code.
 
 
@@ -142,7 +144,7 @@ implicit val timeout: PatienceConfiguration.Timeout = timeout(20 seconds)
 
 Summary:
 
-- The dependency you need is ```"com.websudos" %% "util-testing" % UtilVersion```.
+- The dependency you need is ```"com.outworkers" %% "util-testing" % UtilVersion```.
 - You have to import ```com.outworkers.util.testing._```.
 - You have three main assertion methods, ```successful```, ```failing```, and ```failingWith```.
 - You can configure the timeout of waiters with ```implicit val timeout: PatienceConfiguration.Timeout = timeout(20 seconds)```.
@@ -162,27 +164,60 @@ It's useful to define such typeclass instances inside package objects, as they w
 
 import com.outworkers.util.testing._
 
-
-case class MyAwesomeClass(name: String, age: Int, email: String)
-
-package object mytest {
-
-  implicit object MyAwesomeClassSampler extends Sample[MyAwesomeClass] {
-    def sample: MyAwesomeClass = {
-      MyAwesomeClass(
-        gen[String],
-        gen[Int],
-        gen[EmailAddress].address
-      )
-    }
-  }
-}
+@sample case class MyAwesomeClass(name: String, age: Int, email: String)
 ```
 
 You may notice this pattern is already available in better libraries such as ScalaMock and we are not trying to provide an alternative to ScalaMock or compete with it in any way. Our typeclass generator approach only becomes very useful where you really care about very specific properties of the data.
 For instance, you may want to get a user with a valid email address, or you may use the underlying factories to get a name that reassembles the name of a real person, and so on.
 
-It's also useful when you want to define specific ways in which hierarchies of classes are composed together into a sample. If generation for the sake of generation is all you care about, then ScalaMock with its macro based approach is a far superior product simply because there's no typing effort involved.
+It's also useful when you want to define specific ways in which hierarchies of classes are composed together into a sample. If generation for the sake of generation is all you care about, then ScalaMock is probably more robust.
+
+
+### Automated sampling
+
+<a href="#table-of-contents">Back to top</a>
+
+One interesting thing that happens when using the `@sample` annotation is that using `gen` immediately after it will basically
+give you an instance of your `case class` with the fields appropiately pre-filled, and some of the basic scenarios are also name aware.
+
+What this means is that we try to make the data feel "real" with respect to what it should be. Let's take the below example:
+
+```scala
+@sample case class User(
+  id: UUID,
+  firstName: String,
+  lastName: String,
+  email: String
+)
+```
+This is interesting and common enough. What's more interesting is the output of `gen`.
+
+```scala
+
+val user = gen[User]
+
+Console.println(user.trace())
+
+/**
+User(
+  id = 6be8914c-4274-40ee-83f5-334131246fd8
+  firstName = Lindsey
+  lastName = Craft
+  email = rparker@hotma1l.us
+)
+*/
+
+```
+
+So as you can see, the fields have been appropriately pre-filled. The email is a valid email, and the first and last name look like first and last names. For
+anything that's in the default generation domain, including dates and country codes and much more, we have the ability to produce automated
+appropriate values.
+
+During the macro expansion phase, we check the annotation targets and try to infer the "natural" value based on the field name and type. So
+if your field name is either "email" or "emailAddress" or anything similar enough, you will get an "email" back.
+
+
+### Generating data
 
 There are multiple methods available, allowing you to generate more than just the type:
  
