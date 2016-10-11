@@ -50,6 +50,10 @@ package object testing extends ScalaFutures
     def macroTransform(annottees: Any*): Any = macro SamplerMacro.macroImpl
   }
 
+  implicit class Printer[T](val obj: T) extends AnyVal {
+    def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
+  }
+
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {
       ScalaAwait.result(future, duration)

@@ -30,6 +30,18 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
 
   val prefix = q"com.outworkers.util.testing"
 
+  def inferType(nm: TermName, tp: TypeName): Tree = {
+    val str = nm.decodedName.toString
+    str.toLowerCase() match {
+      case "first_name" | "firstname" => q"""$prefix.gen[$prefix.FirstName].value"""
+      case "last_name" | "lastname" => q"""$prefix.gen[$prefix.LastName].value"""
+      case "name" | "fullname" | "full_name" => q"""$prefix.gen[$prefix.FullName].value"""
+      case "email" | "email_address" | "emailaddress" => q"""$prefix.gen[$prefix.EmailAddress].value"""
+      case "country" => q"""$prefix.gen[$prefix.CountryCode].value"""
+      case _ => q"""$prefix.Sample[$tp].sample"""
+    }
+
+  }
 
   def makeSample(
     typeName: c.TypeName,
@@ -39,7 +51,7 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
 
     val fresh = c.freshName(name)
     val applies = accessors(params).map {
-      case (nm, tp) => q"""$prefix.Sample[$tp].sample"""
+      case (nm, tp) => inferType(nm, tp)
     }
 
     q"""implicit object $fresh extends $prefix.Sample[$typeName] {
