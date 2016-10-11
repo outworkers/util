@@ -22,6 +22,6 @@ class GeneratorsTest extends FlatSpec {
 
   it should "automatically derive valid samples" in {
     val sample = gen[User]
-    Console.println(sample.trace())
+    info(sample.trace())
   }
 }

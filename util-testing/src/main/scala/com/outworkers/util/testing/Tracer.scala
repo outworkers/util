@@ -59,15 +59,11 @@ class TracerMacro(val c: scala.reflect.macros.blackbox.Context) {
   def macroImpl[T : WeakTypeTag]: Tree = {
     val sym = weakTypeOf[T].typeSymbol
 
-    val tree = if (sym.isClass && sym.asClass.isCaseClass) {
+    if (sym.isClass && sym.asClass.isCaseClass) {
       caseClassImpl[T]
     } else {
       q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
     }
-
-    println(showCode(tree))
-
-    tree
   }
 
   def caseClassImpl[T : WeakTypeTag]: Tree = {

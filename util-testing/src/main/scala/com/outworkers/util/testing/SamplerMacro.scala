@@ -65,14 +65,12 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
         :: Nil if mods.hasFlag(Flag.CASE) =>
         val name = tpname.toTermName
 
-        val res = q"""
-       $classDef
-       object $name {
-         ..${makeSample(tpname.toTypeName, name, params.head)}
-       }
-       """
-        println(showCode(res))
-        res
+        q"""
+          $classDef
+          object $name {
+            ..${makeSample(tpname.toTypeName, name, params.head)}
+          }
+        """
 
       case _ => c.abort(c.enclosingPosition, "Invalid annotation target, Sample must be a case classes")
   }
