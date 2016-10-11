@@ -7,7 +7,7 @@ import com.typesafe.sbt.pgp.PgpKeys._
 
 object Publishing {
 
-  def runningUnderCi = sys.env.contains("CI") || sys.env.contains("TRAVIS")
+  def runningUnderCi: Boolean = sys.env.contains("CI") || sys.env.contains("TRAVIS")
 
   lazy val defaultCredentials: Seq[Credentials] = {
     if (!runningUnderCi) {
