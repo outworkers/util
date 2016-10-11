@@ -179,7 +179,7 @@ import com.outworkers.util.testing._
 You may notice this pattern is already available in better libraries such as ScalaMock and we are not trying to provide an alternative to ScalaMock or compete with it in any way. Our typeclass generator approach only becomes very useful where you really care about very specific properties of the data.
 For instance, you may want to get a user with a valid email address, or you may use the underlying factories to get a name that reassembles the name of a real person, and so on.
 
-It's also useful when you want to define specific ways in which hierarchies of classes are composed together into a sample. If generation for the sake of generation is all you care about, then ScalaMock with its macro based approach is a far superior product simply because there's no typing effort involved.
+It's also useful when you want to define specific ways in which hierarchies of classes are composed together into a sample. If generation for the sake of generation is all you care about, then ScalaMock is probably more robust.
 
 
 ### Automated sampling
