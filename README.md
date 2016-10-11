@@ -13,14 +13,6 @@ latest version of `util` available. The badges are automatically updated when a 
   <li><a href="#integrating-the-util-library">Integrating the util library</a></li>
   
   <li>
-    <p><a href="#util-http">util-http</a></p>
-    <ul>
-      <li><a href="#option-parsers">Option parsers</a></li>
-      <li><a href="#applicative-parsers">Applicative parsers</a></li>
-    </ul>
-  </li>
-
-  <li>
     <p><a href="#util-parsers">util-parsers</a></p>
     <ul>
       <li><a href="#option-parsers">Option parsers</a></li>
@@ -73,7 +65,6 @@ The full list of available modules is:
 ```scala
 
 libraryDependencies ++= Seq(
-  "com.outworkers" %% "util-http" % Versions.util,
   "com.outworkers" %% "util-lift" % Versions.util,
   "com.outworkers" %% "util-domain" % Versions.util,
   "com.outworkers" %% "util-parsers" % Versions.util,
