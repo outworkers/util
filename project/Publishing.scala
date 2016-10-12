@@ -39,7 +39,7 @@ object Publishing {
     }
   }
 
-  val defaultPublishingSettings = Seq(
+  val versionSettings = Seq(
     version := "0.20.0",
     credentials ++= defaultCredentials
   )
@@ -89,7 +89,7 @@ object Publishing {
             <url>http://github.com/alexflav23</url>
           </developer>
         </developers>
-  ) ++ defaultPublishingSettings
+  ) ++ versionSettings
 
   val bintraySettings: Seq[Def.Setting[_]] = Seq(
     publishMavenStyle := true,
@@ -99,7 +99,7 @@ object Publishing {
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true},
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))
-  ) ++ defaultPublishingSettings
+  ) ++ versionSettings
 
   def isJdk8: Boolean = sys.props("java.specification.version") == "1.8"
 
