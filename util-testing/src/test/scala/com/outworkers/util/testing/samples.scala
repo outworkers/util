@@ -8,3 +8,7 @@ import java.util.UUID
   lastName: String,
   email: String
 )
+
+object User {
+  val x = 5
+}

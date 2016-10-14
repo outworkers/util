@@ -40,13 +40,15 @@ trait Sample[T] {
 }
 
 object Sample {
-  def apply[T : Sample] = implicitly[Sample[T]]
+  def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]
 }
 
 sealed trait Generators extends GenerationDomain {
 
   protected[this] val domains = List("net", "com", "org", "io", "biz", "co.uk", "co.za")
   protected[this] val protocols = List("http", "https")
+
+  val defaultGenerationSize = 5
 
   /**
    * Uses the type class available in implicit scope to mock a certain custom object.
@@ -65,9 +67,9 @@ sealed trait Generators extends GenerationDomain {
 
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
 
-  def genList[T : Sample](size: Int = 5): List[T] = List.tabulate(size)(i => gen[T])
+  def genList[T : Sample](size: Int = defaultGenerationSize): List[T] = List.tabulate(size)(i => gen[T])
 
-  def genMap[T: Sample](size: Int = 5): Map[String, T] = {
+  def genMap[T: Sample](size: Int = defaultGenerationSize): Map[String, T] = {
     genList[T](size).map(item => (item.toString, item)).toMap
   }
 

@@ -72,6 +72,18 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
           }
         """
 
+      case (classDef @ q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
+        :: q"object $objName extends { ..$objEarlyDefs } with ..$objParents { $objSelf => ..$objDefs }"
+        :: Nil if mods.hasFlag(Flag.CASE) =>
+
+        q"""
+         $classDef
+         object $objName extends { ..$objEarlyDefs} with ..$objParents { $objSelf =>
+           ..${makeSample(tpname.toTypeName, tpname.toTermName, paramss.head)}
+           ..$objDefs
+         }
+         """
+
       case _ => c.abort(c.enclosingPosition, "Invalid annotation target, Sample must be a case classes")
   }
 }
