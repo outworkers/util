@@ -148,7 +148,7 @@ private[util] trait Generators extends GenerationDomain {
   protected[this] val domains = List("net", "com", "org", "io", "biz", "co.uk", "co.za")
   protected[this] val protocols = List("http", "https")
 
-  val defaultGenerationSize = 5
+  val defaultGeneration = 5
 
   /**
    * Uses the type class available in implicit scope to mock a certain custom object.
@@ -167,9 +167,9 @@ private[util] trait Generators extends GenerationDomain {
 
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
 
-  def genList[T : Sample](size: Int = defaultGenerationSize): List[T] = List.tabulate(size)(i => gen[T])
+  def genList[T : Sample](size: Int = defaultGeneration): List[T] = List.tabulate(size)(i => gen[T])
 
-  def genMap[T : Sample](size: Int = defaultGenerationSize): Map[String, T] = {
+  def genMap[T : Sample](size: Int = defaultGeneration): Map[String, T] = {
     genList[T](size).map(item => (item.toString, item)).toMap
   }
 

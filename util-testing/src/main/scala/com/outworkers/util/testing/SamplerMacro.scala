@@ -7,6 +7,13 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
 
   val prefix = q"com.outworkers.util.testing"
 
+
+  // val example: String => gen[String]
+  // val firstName: String => gen[FirstName].value
+  // val lastName: Option[String] => genOpt[LastName].map(_.value)
+  // val emails: List[String] => genList[EmailAddress].map(_.value)
+  // val sample: List[String] => genList[String]
+
   /**
     * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.
     * For every single field in a case class, a reference to the string name and string type of the field are returned.
@@ -30,17 +37,18 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
     }
   }
 
-  def fieldNameInference(nm: TermName): Option[TypeName] = {
-    case "first_name" | "firstname" => Some(tq"$prefix.FirstName")
-    case "last_name" | "lastname" => Some(tq"$prefix.LastName")
-    case "name" | "fullname" | "full_name" => Some(tq"""$prefix.FullName""")
-    case "email" | "email_address" | "emailaddress" => Some(tq"""$prefix.EmailAddress""")
-    case "country" => Some(tq"""$prefix.CountryCode""")
-    case _ => None
-  }
-
   object KnownField {
-    def unapply(arg: TermName): Option[TypeName] = fieldNameInference(arg)
+    def unapply(nm: TermName): Option[TypeName] = {
+      val str = nm.decodedName.toString
+      str.toLowerCase() match {
+        case "first_name" | "firstname" => Some(TypeName(s"$prefix.FirstName"))
+        case "last_name" | "lastname" => Some(TypeName(s"$prefix.LastName"))
+        case "name" | "fullname" | "full_name" => Some(TypeName(s"$prefix.FullName"))
+        case "email" | "email_address" | "emailaddress" => Some(TypeName(s"$prefix.EmailAddress"))
+        case "country" => Some(TypeName(s"$prefix.CountryCode"))
+        case _ => None
+      }
+    }
   }
 
   /**
@@ -55,98 +63,128 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
     * @param sources The source types that are needed to produce the collection type.
     * @param applier The applier function that allows producing a collection type from a list of type arguments.
     */
-  case class CollectionType(
+  case class MapType(
     sources: List[TypeName],
-    applier: List[TypeName] => TypeName
-  )
+    applier: List[TypeName] => TypeName,
+    generator: List[TypeName] => Tree
+  ) {
+    def infer: TypeName = applier(sources)
 
-  object CollectionType {
-    def apply(
-      source: TypeName,
-      applier: List[TypeName] => TypeName
-    ): Option[CollectionType] = Some(new CollectionType(source :: Nil, applier))
-
-    def unapply(arg: TypeName): Option[CollectionType] = collectionType(arg)
+    def default: Tree = generator(sources)
   }
 
+  object MapType {
+    def apply(
+      source: TypeName,
+      applier: List[TypeName] => TypeName,
+      generator: List[TypeName] => Tree
+    ): Option[MapType] = Some(new MapType(source :: Nil, applier, generator))
 
-  private[this] def collectionType(
-    source: TypeName
-  ): Option[CollectionType] = {
-    val strTpe = source.decodedName.toString
+    def unapply(arg: TypeName): Option[MapType] = {
+      val strTpe = arg.decodedName.toString
 
-    if (strTpe.startsWith("List[")) {
-      CollectionType.apply(
-        source = TypeName(strTpe.drop(5).dropRight(1)),
-        applier = applied => TypeName(s"scala.collection.immutable.List[..$applied]")
-      )
-    } else if (strTpe.startsWith("Option[")) {
-      CollectionType(
-        source = TypeName(strTpe.drop(4).dropRight(1)),
-        applier = applied => TypeName(s"scala.Option[$applied]")
-      )
-    } else if (strTpe.startsWith("Set[")) {
-      CollectionType(
-        source = TypeName(strTpe.drop(4).dropRight(1)),
-        applied => TypeName(s"scala.collection.immutable.Set[..$applied]")
-      )
-    } else if (strTpe.startsWith("Map[")) {
-      val parts = strTpe.replaceAll(" ", "").drop(4).split(",")
+      if (strTpe.startsWith("Map[")) {
+        val parts = strTpe.replaceAll(" ", "").drop(4).split(",")
+        val keyTpe = TypeName(parts(0))
+        val valueTpe = TypeName(parts(1).dropRight(1))
 
-      Some(
-        CollectionType(
-          List(TypeName(parts(0)), TypeName(parts(1))),
-          applied => TypeName(s"scala.collection.immutable.Map[..$applied]")
+        Some(
+          MapType(
+            List(keyTpe, valueTpe),
+            applied => TypeName(s"scala.collection.immutable.Map[..$applied]"),
+            generator = types => q"$prefix.genMap[..$types]($prefix.defaultGeneration)"
+          )
         )
-      )
-    } else {
-      None
+      } else {
+        None
+      }
     }
   }
 
-  object CollectionSample {
-    def unapply(arg: TypeName): Option[CollectionType] = collectionType(arg)
+  case class CollectionType(
+    source: TypeName,
+    applier: TypeName => TypeName,
+    generator: TypeName => Tree
+  ) {
+    def infer: TypeName = applier(source)
+
+    def default: Tree = generator(source)
+  }
+
+  object CollectionType {
+    def unapply(arg: TypeName): Option[CollectionType] = {
+      val strTpe = arg.decodedName.toString
+
+      if (strTpe.startsWith("List[")) {
+        val sourceTpe = TypeName(strTpe.drop(5).dropRight(1))
+        Some(
+          CollectionType(
+            source = sourceTpe,
+            applier = applied => TypeName(s"scala.collection.immutable.List[..$applied]"),
+            generator = tpe => q"$prefix.genList[$tpe]($prefix.defaultGeneration)"
+          )
+        )
+      } else if (strTpe.startsWith("Set[")) {
+        val sourceTpe = TypeName(strTpe.drop(4).dropRight(1))
+        Some(
+          CollectionType(
+            source = sourceTpe,
+            applied => TypeName(s"scala.collection.immutable.Set[..$applied]"),
+            generator = tpe => q"$prefix.genSet[$tpe]($prefix.defaultGeneration)"
+          )
+        )
+      } else {
+        None
+      }
+    }
+  }
+
+  case class OptionType(
+    source: TypeName,
+    applier: TypeName => TypeName,
+    generator: TypeName => Tree
+  ) {
+    def infer: TypeName = applier(source)
+
+    def default: Tree = generator(source)
+  }
+
+  object OptionType {
+    def unapply(arg: TypeName): Option[(OptionType)] = {
+      val strTpe = arg.decodedName.toString
+
+      if (strTpe.startsWith("Option[")) {
+        val sourceTpe = TypeName(strTpe.drop(4).dropRight(1))
+        Some(
+          OptionType(
+            source = sourceTpe,
+            applier = applied => TypeName(s"scala.Option[$applied]"),
+            generator = tpe => q"$prefix.genOpt[$sourceTpe]"
+          )
+        )
+      } else {
+        None
+      }
+    }
   }
 
   private[this] def deriveSamplerType(
     field: TermName,
     tpe: TypeName
-  ): TypeName = {
-    val strTpe = tpe.decodedName.toString
-
+  ): Tree = {
     tpe match {
-      case col @ CollectionType(tp) => {
-
+      case MapType(col) => col.default
+      case OptionType(opt) => field match {
+        case KnownField(derived) => opt.generator(derived)
+        case _ => opt.default
       }
+      case CollectionType(col) => field match {
+        case KnownField(derived) => col.generator(derived)
+        case _ => col.default
+      }
+      case KnownField(derived) => q"$prefix.gen[$derived].value"
+      case _ => q"$prefix.gen[$tpe]"
     }
-
-
-
-    if (strTpe.startsWith("List[")) {
-      tq"$prefix.genList[${TypeName(strTpe.drop(5).dropRight(1))}]()"
-    } else if(strTpe.startsWith("Option[")) {
-      tq"$prefix.genOpt[${TypeName(strTpe.drop(4).dropRight(1))}]()"
-    } else if (strTpe.startsWith("Set[")) {
-      tq"$prefix.getSet[${TypeName(strTpe.drop(4).dropRight(1))}]()"
-    } else if (strTpe.startsWith("Map[")) {
-      val parts = strTpe.replaceAll(" ", "").drop(4).split(",")
-      tq"$prefix.genMap[${TypeName(parts(0))}, ${TypeName(parts(1))}]()"
-    } else {
-      tq"$tpe"
-    }
-  }
-
-  def inferType(nm: TermName, tp: TypeName): Tree = {
-    val str = nm.decodedName.toString
-    str.toLowerCase() match {
-      case "first_name" | "firstname" => q"""$prefix.gen[$prefix.FirstName].value"""
-      case "last_name" | "lastname" => q"""$prefix.gen[$prefix.LastName].value"""
-      case "name" | "fullname" | "full_name" => q"""$prefix.gen[$prefix.FullName].value"""
-      case "email" | "email_address" | "emailaddress" => q"""$prefix.gen[$prefix.EmailAddress].value"""
-      case "country" => q"""$prefix.gen[$prefix.CountryCode].value"""
-      case _ => q"""$prefix.Sample[$tp].sample"""
-    }
-
   }
 
   def makeSample(
@@ -157,12 +195,16 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
 
     val fresh = c.freshName(name)
     val applies = accessors(params).map {
-      case (nm, tp) => inferType(nm, tp)
+      case (nm, tp) => q"$nm = ${deriveSamplerType(nm, tp)}"
     }
 
-    q"""implicit object $fresh extends $prefix.Sample[$typeName] {
+    val tree = q"""implicit object $fresh extends $prefix.Sample[$typeName] {
       override def sample: $typeName = $name(..$applies)
     }"""
+
+    println(showCode(tree))
+
+    tree
   }
 
   def macroImpl(annottees: c.Expr[Any]*): Tree =
