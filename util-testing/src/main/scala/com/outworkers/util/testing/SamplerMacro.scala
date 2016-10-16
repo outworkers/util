@@ -32,8 +32,9 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
   def accessors(
     params: Seq[ValDef]
   ): Iterable[(TermName, TypeName)] = {
+
     params.map {
-      case ValDef(_, name: TermName, tpt: Tree, _) => name -> TypeName(tpt.toString)
+      case x @ ValDef(_, name: TermName, tpt: Tree, _) => name -> TypeName(tpt.toString)
     }
   }
 
@@ -154,12 +155,12 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
       val strTpe = arg.decodedName.toString
 
       if (strTpe.startsWith("Option[")) {
-        val sourceTpe = TypeName(strTpe.drop(4).dropRight(1))
+        val sourceTpe = TypeName(strTpe.drop(7).dropRight(1))
         Some(
           OptionType(
             source = sourceTpe,
             applier = applied => TypeName(s"scala.Option[$applied]"),
-            generator = tpe => q"$prefix.genOpt[$sourceTpe]"
+            generator = tpe => q"""scala.Some.apply[$sourceTpe]($prefix.gen[$sourceTpe])"""
           )
         )
       } else {
@@ -174,9 +175,11 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
   ): Tree = {
     tpe match {
       case MapType(col) => col.default
-      case OptionType(opt) => field match {
-        case KnownField(derived) => opt.generator(derived)
-        case _ => opt.default
+      case OptionType(opt) => {
+        field match {
+          case KnownField(derived) => opt.generator(derived)
+          case _ => opt.default
+        }
       }
       case CollectionType(col) => field match {
         case KnownField(derived) => col.generator(derived)
@@ -194,6 +197,7 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
   ): Tree = {
 
     val fresh = c.freshName(name)
+
     val applies = accessors(params).map {
       case (nm, tp) => q"$nm = ${deriveSamplerType(nm, tp)}"
     }
@@ -207,9 +211,9 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
     tree
   }
 
-  def macroImpl(annottees: c.Expr[Any]*): Tree =
+  def macroImpl(annottees: c.Expr[Any]*): Tree = {
     annottees.map(_.tree) match {
-      case (classDef @ q"$mods class $tpname[..$tparams] $ctorMods(...$params) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
+      case tree@(classDef@q"$mods class $tpname[..$tparams] $ctorMods(...$params) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
         :: Nil if mods.hasFlag(Flag.CASE) =>
         val name = tpname.toTermName
 
@@ -220,7 +224,7 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
           }
         """
 
-      case (classDef @ q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
+      case tree@(classDef@q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
         :: q"object $objName extends { ..$objEarlyDefs } with ..$objParents { $objSelf => ..$objDefs }"
         :: Nil if mods.hasFlag(Flag.CASE) =>
 
@@ -233,5 +237,6 @@ class SamplerMacro(val c: scala.reflect.macros.blackbox.Context) {
          """
 
       case _ => c.abort(c.enclosingPosition, "Invalid annotation target, Sample must be a case classes")
+    }
   }
 }

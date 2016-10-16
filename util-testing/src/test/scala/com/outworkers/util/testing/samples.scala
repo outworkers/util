@@ -22,5 +22,6 @@ object User {
   tests: List[String],
   sets: List[String],
   map: Map[String, String],
-  emails: List[String]
+  emails: List[String],
+  opt: Option[Int]
 )
