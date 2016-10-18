@@ -18,7 +18,6 @@ target/
 # JRebel
 
 #SBT
-build.sbt
 .metadata
 project/target/
 
