@@ -112,7 +112,7 @@ lazy val urls = (project in file("util-urls"))
 lazy val domain = (project in file("util-domain"))
   .settings(sharedSettings: _*)
   .settings(
-      moduleName := "util-domain"
+    moduleName := "util-domain"
   )
 
 lazy val parsers = (project in file("util-parsers"))

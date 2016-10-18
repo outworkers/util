@@ -3,7 +3,6 @@ package com.outworkers.util.macros
 class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
   import c.universe._
 
-
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
   object Symbols {
@@ -13,14 +12,71 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
     val optSymbol = typed[scala.Option[_]]
   }
 
+  case class ListAccessor(
+    accessor: Accessor
+  )
+
+  object ListAccessor {
+    def unapply(arg: Accessor): Option[ListAccessor] = {
+      if (arg.origin.typeSymbol == Symbols.listSymbol) {
+        Some(ListAccessor(arg))
+      } else {
+        None
+      }
+    }
+  }
+
+  case class SetAccessor(
+    accessor: Accessor
+  )
+
+  object SetAccessor {
+    def unapply(arg: Accessor): Option[SetAccessor] = {
+      if (arg.origin.typeSymbol == Symbols.setSymbol) {
+        Some(SetAccessor(arg))
+      } else {
+        None
+      }
+    }
+  }
+
+  case class OptionAccessor(
+    accessor: Accessor
+  )
+
+  object OptionAccessor {
+    def unapply(arg: Accessor): Option[OptionAccessor] = {
+      if (arg.origin.typeSymbol == Symbols.optSymbol) {
+        Some(OptionAccessor(arg))
+      } else {
+        None
+      }
+    }
+  }
+
+  case class MapAccessor(
+    accessor: Accessor
+  )
+
+  object MapAccessor {
+    def unapply(arg: Accessor): Option[MapAccessor] = {
+      if (arg.origin.typeSymbol == Symbols.mapSymbol) {
+        Some(MapAccessor(arg))
+      } else {
+        None
+      }
+    }
+  }
+
   case class Accessor(
     name: TermName,
-    tpe: TypeName,
-    paramType: Type
+    origin: Type
   ) {
-    def symbol: Symbol = paramType.typeSymbol
+    def symbol: Symbol = origin.typeSymbol
 
-    def typeName: TypeName = symbol.asType.name
+    def tpe: TypeName = newTypeName(origin.typeSymbol.asType.name.decodedName.toString)
+
+    def typeName: TypeName = tpe
   }
 
   /**
@@ -41,14 +97,6 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
   def accessors(
     params: Seq[ValDef]
   ): Iterable[Accessor] = {
-    params.map(valDef => {
-      val ex = c.typecheck(tq"${valDef.tpt}", c.TYPEmode)
-      Accessor(
-        valDef.name,
-        TypeName(valDef.tpt.toString),
-        ex.tpe
-      )
-    }
-    )
+    params.map(valDef => Accessor(valDef.name, c.typecheck(tq"${valDef.tpt}", c.TYPEmode).tpe))
   }
 }
