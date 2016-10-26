@@ -12,13 +12,27 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
     val optSymbol = typed[scala.Option[_]]
   }
 
+  case class Accessor(
+    name: TermName,
+    paramType: Type
+  ) {
+
+    def typeName: TypeName = paramType.typeSymbol.name.toTypeName
+
+    def typeArgs: List[Type] = paramType.typeArgs
+
+    def tpe: TypeName = symbol.name.toTypeName
+
+    def symbol: Symbol = paramType.typeSymbol
+  }
+
   case class ListAccessor(
     accessor: Accessor
   )
 
   object ListAccessor {
     def unapply(arg: Accessor): Option[ListAccessor] = {
-      if (arg.origin.typeSymbol == Symbols.listSymbol) {
+      if (arg.paramType.typeSymbol == Symbols.listSymbol) {
         Some(ListAccessor(arg))
       } else {
         None
@@ -32,7 +46,7 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
 
   object SetAccessor {
     def unapply(arg: Accessor): Option[SetAccessor] = {
-      if (arg.origin.typeSymbol == Symbols.setSymbol) {
+      if (arg.paramType.typeSymbol == Symbols.setSymbol) {
         Some(SetAccessor(arg))
       } else {
         None
@@ -46,7 +60,7 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
 
   object OptionAccessor {
     def unapply(arg: Accessor): Option[OptionAccessor] = {
-      if (arg.origin.typeSymbol == Symbols.optSymbol) {
+      if (arg.paramType.typeSymbol == Symbols.optSymbol) {
         Some(OptionAccessor(arg))
       } else {
         None
@@ -60,23 +74,12 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
 
   object MapAccessor {
     def unapply(arg: Accessor): Option[MapAccessor] = {
-      if (arg.origin.typeSymbol == Symbols.mapSymbol) {
+      if (arg.paramType.typeSymbol == Symbols.mapSymbol) {
         Some(MapAccessor(arg))
       } else {
         None
       }
     }
-  }
-
-  case class Accessor(
-    name: TermName,
-    origin: Type
-  ) {
-    def symbol: Symbol = origin.typeSymbol
-
-    def tpe: TypeName = newTypeName(origin.typeSymbol.asType.name.decodedName.toString)
-
-    def typeName: TypeName = tpe
   }
 
   /**
@@ -88,7 +91,7 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
     * {{{
     *   case class Test(id: UUID, name: String, age: Int)
     *
-    *   accessors(Test) = Iterable(Accessor(id, UUID, java.util.UUID), etc)
+    *   accessors(Test) = Iterable("id" -> "UUID", "name" -> "String", age: "Int")
     * }}}
     *
     * @param params The list of params retrieved from the case class.
@@ -97,6 +100,10 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
   def accessors(
     params: Seq[ValDef]
   ): Iterable[Accessor] = {
-    params.map(valDef => Accessor(valDef.name, c.typecheck(tq"${valDef.tpt}", c.TYPEmode).tpe))
+    params.map {
+      case ValDef(_, name: TermName, tpt: Tree, _) => {
+        Accessor(name, c.typecheck(tq"$tpt", c.TYPEmode).tpe)
+      }
+    }
   }
 }

@@ -48,7 +48,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   ) {
     def infer: TypeName = applier(sources)
 
-    def default: Tree = generator(sources.map(sym => newTypeName(sym.typeSymbol.asType.name.decodedName.toString)))
+    def default: Tree = generator(sources.map(sym => sym.typeSymbol.name.toTypeName))
   }
 
   object MapType {
@@ -61,7 +61,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     def unapply(arg: Accessor): Option[MapType] = {
 
       if (arg.symbol == Symbols.mapSymbol) {
-        arg.origin.typeArgs match {
+        arg.typeArgs match {
           case keyType :: listType :: Nil =>   Some(
             MapType(
               List(keyType, listType),
@@ -86,13 +86,13 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   ) {
     def infer: TypeName = applier(source)
 
-    def default: Tree = generator(newTypeName(source.typeSymbol.asType.name.decodedName.toString))
+    def default: Tree = generator(source.typeSymbol.name.toTypeName)
   }
 
   object CollectionType {
     def unapply(arg: Accessor): Option[CollectionType] = {
       if (arg.symbol == Symbols.listSymbol) {
-        arg.origin.typeArgs match {
+        arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
               source = sourceTpe,
@@ -103,7 +103,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
         }
       } else if (arg.symbol == Symbols.setSymbol) {
-        arg.origin.typeArgs match {
+        arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
               source = sourceTpe,
@@ -126,14 +126,14 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   ) {
     def infer: TypeName = applier(source)
 
-    def default: Tree = generator(newTypeName(source.typeSymbol.asType.name.decodedName.toString))
+    def default: Tree = generator(source.typeSymbol.name.toTypeName)
   }
 
   object OptionType {
     def unapply(arg: Accessor): Option[(OptionType)] = {
 
       if (arg.symbol == Symbols.optSymbol) {
-        arg.origin.typeArgs match {
+        arg.typeArgs match {
           case head :: Nil => Some(
             OptionType(
               source = head,
@@ -141,7 +141,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
               generator = tpe => q"""$prefix.genOpt[$head]"""
             )
           )
-          case _ => c.abort(c.enclosingPosition, s"Expected a single type argument for List[], found ${arg.origin.typeArgs.size} instead")
+          case _ => c.abort(c.enclosingPosition, s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead")
         }
       } else {
         None
