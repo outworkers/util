@@ -67,7 +67,6 @@ class TracerMacro(val c: scala.reflect.macros.blackbox.Context) {
   }
 
   def caseClassImpl[T : WeakTypeTag]: Tree = {
-
     val tpe = weakTypeOf[T]
     val flds = fields(tpe)
     val cmp = tpe.typeSymbol.name
@@ -76,8 +75,12 @@ class TracerMacro(val c: scala.reflect.macros.blackbox.Context) {
       case (nm, tp) => q""" "  " + ${nm.toString} + "= " + $packagePrefix.Tracer[$tp].trace(${c.parse(s"instance.$nm")})"""
     }
 
-    q"""new $packagePrefix.Tracer[$tpe] {
-      def trace(instance: $tpe): String = ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(..$appliers).mkString("\n") + "\n)"
-    }"""
+    q"""
+      new $packagePrefix.Tracer[$tpe] {
+        def trace(instance: $tpe): String = {
+          ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(..$appliers).mkString("\n") + "\n)"
+        }
+      }
+    """
   }
 }

@@ -9,6 +9,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
   val prefix = q"com.outworkers.util.testing"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
+  val collectionPkg = q"scala.collection.immutable"
 
   // val example: String => gen[String]
   // val firstName: String => gen[FirstName].value
@@ -112,7 +113,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
           case sourceTpe :: Nil => Some(
             CollectionType(
               source = sourceTpe,
-              applier = applied => TypeName(s"scala.collection.immutable.List[..$applied]"),
+              applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
               generator = tpe => q"$prefix.genList[$tpe]($prefix.defaultGeneration)"
             )
           )
@@ -123,7 +124,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
           case sourceTpe :: Nil => Some(
             CollectionType(
               source = sourceTpe,
-              applier = applied => TypeName(s"scala.collection.immutable.Set[..$applied]"),
+              applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
               generator = tpe => q"$prefix.genSet[$tpe]($prefix.defaultGeneration)"
             )
           )
