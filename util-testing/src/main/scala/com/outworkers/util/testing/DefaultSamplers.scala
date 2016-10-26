@@ -43,7 +43,6 @@ trait Sample[T] {
 
 object Sample extends Generators {
 
-
   implicit object StringSample extends Sample[String] {
     def sample: String = Sampler.string
   }

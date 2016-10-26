@@ -8,6 +8,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   import c.universe._
 
   val prefix = q"com.outworkers.util.testing"
+  val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
 
   // val example: String => gen[String]
   // val firstName: String => gen[FirstName].value
@@ -15,15 +16,30 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   // val emails: List[String] => genList[EmailAddress].map(_.value)
   // val sample: List[String] => genList[String]
 
+  def extract(exp: Tree): Option[TypeName] = {
+    Some(c.typecheck(exp, c.TYPEmode).tpe.typeSymbol.name.toTypeName)
+  }
+
   object KnownField {
     def unapply(nm: TermName): Option[TypeName] = {
       val str = nm.decodedName.toString
       str.toLowerCase() match {
-        case "first_name" | "firstname" => Some(TypeName(s"$prefix.FirstName"))
-        case "last_name" | "lastname" => Some(TypeName(s"$prefix.LastName"))
-        case "name" | "fullname" | "full_name" => Some(TypeName(s"$prefix.FullName"))
-        case "email" | "email_address" | "emailaddress" => Some(TypeName(s"$prefix.EmailAddress"))
-        case "country" => Some(TypeName(s"$prefix.CountryCode"))
+        case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
+        case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
+        case "name" | "fullname" | "full_name" => extract(q"$domainPkg.FullName")
+        case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
+        case "country" => extract(q"$domainPkg.CountryCode")
+        case _ => None
+      }
+    }
+
+    def unapply(str: String): Option[TypeName] = {
+      str.toLowerCase() match {
+        case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
+        case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
+        case "name" | "fullname" | "full_name" => extract(q"$domainPkg.FullName")
+        case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
+        case "country" => extract(q"$domainPkg.CountryCode")
         case _ => None
       }
     }
@@ -162,8 +178,11 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
         case KnownField(derived) => col.generator(derived)
         case _ => col.default
       }
-      case KnownField(derived) => q"$prefix.gen[$derived].value"
-      case _ => q"$prefix.gen[${accessor.typeName}]"
+
+      case _ => accessor.name match {
+        case KnownField(derived) => q"$prefix.gen[$derived].value"
+        case _ => q"$prefix.gen[${accessor.typeName}]"
+      }
     }
   }
 
@@ -178,10 +197,8 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val applies = accessors(params).map { accessor => q"${accessor.name} = ${deriveSamplerType(accessor)}" }
 
     val tree = q"""implicit object $fresh extends $prefix.Sample[$typeName] {
-      override def sample: $typeName = $name(..$applies)
+      override def sample: $typeName = $name.apply(..$applies)
     }"""
-
-    println(showCode(tree))
 
     tree
   }
