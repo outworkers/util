@@ -1,5 +1,6 @@
 package com.outworkers.util.macros
 
+@macrocompat.bundle
 class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
   import c.universe._
 
