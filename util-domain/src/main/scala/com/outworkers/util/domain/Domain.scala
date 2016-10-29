@@ -58,3 +58,5 @@ private[util] trait GenerationDomain {
   type ShortString = Definitions.ShortString
   val ShortString = Definitions.ShortString
 }
+
+private[util] object GenerationDomain extends GenerationDomain

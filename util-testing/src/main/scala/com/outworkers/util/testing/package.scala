@@ -40,10 +40,9 @@ import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures
   with DefaultTags
-  with DefaultSamplers
   with ScalaTestHelpers
+  with Generators
   with GenerationDomain {
-
 
   @compileTimeOnly("Enable macro paradise to expand macro annotations")
   class sample extends StaticAnnotation {
@@ -126,7 +125,7 @@ package object testing extends ScalaFutures
       val w = new Waiter
 
       f onSuccess {
-        case res => w{x(res)}; w.dismiss()
+        res => w{x(res)}; w.dismiss()
       }
 
       f onFailure {
