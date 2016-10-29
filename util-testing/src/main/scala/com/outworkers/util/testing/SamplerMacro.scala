@@ -191,7 +191,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     typeName: c.TypeName,
     name: c.TermName,
     params: Seq[ValDef]
-  ): Tree = {
+  ): List[Tree] = {
 
     val fresh = c.freshName(name)
 
@@ -201,7 +201,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       override def sample: $typeName = $name.apply(..$applies)
     }"""
 
-    tree
+    tree :: Nil
   }
 
   def macroImpl(annottees: c.Expr[Any]*): Tree = {
