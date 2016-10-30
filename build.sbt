@@ -197,7 +197,8 @@ lazy val lift = (project in file("util-lift"))
       "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
     )
   ).dependsOn(
-    parsers
+    parsers,
+    testing % Test
   )
 
 
