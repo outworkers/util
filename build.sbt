@@ -66,7 +66,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo,
-    Resolver.bintrayRepo("websudos", "oss-releases")
+    Resolver.bintrayRepo("outwokers", "oss-releases")
   ),
   gitTagName in ThisBuild <<= (organization, name, version) map { (o, n, v) => s"version=$v"},
   scalacOptions ++= Seq(
@@ -128,7 +128,7 @@ lazy val parsers = (project in file("util-parsers"))
     )
   ).dependsOn(
     domain,
-    testing
+    testing % Test
   )
 
 lazy val parsersCats = (project in file("util-parsers-cats"))
@@ -144,7 +144,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
     )
   ).dependsOn(
     domain,
-    testing
+    testing % Test
   )
 
 lazy val play = (project in file("util-play"))
