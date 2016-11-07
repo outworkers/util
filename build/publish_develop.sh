@@ -75,7 +75,7 @@
         openssl aes-256-cbc -K $encrypted_d543e1d8b539_key -iv $encrypted_d543e1d8b539_iv -in build/deploy.asc.enc -out build/deploy.asc -d
 
         echo "importing GPG key to local GBP repo"
-        gpg --fast-import build/codesigning.asc.enc
+        gpg --fast-import build/deploy.asc.enc
 
         echo "Setting MAVEN_PUBLISH mode to true"
         export MAVEN_PUBLISH="true"
