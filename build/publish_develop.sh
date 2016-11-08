@@ -74,7 +74,8 @@
         echo "Creating GPG deploy key"
 
         echo "importing GPG key to local GBP repo"
-        gpg --fast-import build/deploy.asc.enc
+        gpg --fast-import build/deploy.asc
+        gpg --list-keys
 
         echo "Setting MAVEN_PUBLISH mode to true"
         export MAVEN_PUBLISH="true"

@@ -31,5 +31,4 @@ script: "./build/run_tests.sh"
 after_success:
 - "./build/publish_develop.sh"
 before_install:
-- openssl aes-256-cbc -K $encrypted_d543e1d8b539_key -iv $encrypted_d543e1d8b539_iv
-  -in build/deploy.asc.enc -out build/deploy.asc -d
+- openssl aes-256-cbc -K $encrypted_d543e1d8b539_key -iv $encrypted_d543e1d8b539_iv -in build/deploy.asc.enc -out build/deploy.asc -d
