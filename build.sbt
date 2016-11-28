@@ -50,8 +50,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
-    Resolver.jcenterRepo,
-    Resolver.bintrayRepo("outwokers", "oss-releases")
+    Resolver.jcenterRepo
   ),
   gitTagName in ThisBuild <<= (organization, name, version) map { (o, n, v) => s"version=$v"},
   scalacOptions ++= Seq(
@@ -82,8 +81,7 @@ lazy val util = (project in file("."))
   .settings(sharedSettings: _*)
   .settings(
     name := "util",
-    moduleName := "util",
-    pgpPassphrase := Publishing.pgpPass
+    moduleName := "util"
   ).aggregate(
     baseProjectList ++ Publishing.jdk8Only(play): _*
   )

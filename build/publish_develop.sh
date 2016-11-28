@@ -70,17 +70,6 @@
 
         echo "Publishing new version to bintray"
         sbt +bintray:publish
-
-        echo "Creating GPG deploy key"
-
-        echo "importing GPG key to local GBP repo"
-        gpg --fast-import build/deploy.asc
-        gpg --list-keys
-
-        echo "Setting MAVEN_PUBLISH mode to true"
-        export MAVEN_PUBLISH="true"
-        export pgp_passphrase=${maven_password}
-        sbt +publishSigned sonatypeReleaseAll
         exit $?
 
     #else

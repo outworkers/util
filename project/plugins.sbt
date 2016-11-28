@@ -24,12 +24,4 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.10")
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 
-// We are intentionally adding this twice
 addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
-
-if (sys.env.contains("MAVEN_PUBLISH")) {
-  // As we just need the right return type here.
-  addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "1.1")
-} else {
-  addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
-}
