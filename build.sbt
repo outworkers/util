@@ -22,7 +22,7 @@ lazy val Versions = new {
   val joda = "2.9.4"
   val jodaConvert = "1.8.1"
   val lift = "3.0-RC3"
-  val twitterUtil = "6.33.0"
+  val twitterUtil = "6.39.0"
   val scalaz = "7.2.6"
   val scalacheck = "1.13.2"
   val datafactory = "0.8"
@@ -174,6 +174,7 @@ lazy val lift = (project in file("util-lift"))
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
           case Some((major, minor)) => minor
+          case _ => "2.10"
         }
     })),
     libraryDependencies ++= Seq(
@@ -201,7 +202,7 @@ lazy val validators = (project in file("util-validators"))
   .settings(
     moduleName := "util-validators",
     addCompilerPlugin(
-      "org.spire-math" % "kind-projector" % "0.8.0" cross CrossVersion.binary
+      "org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary
     ),
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats" % Versions.cats
