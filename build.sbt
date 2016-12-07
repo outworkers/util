@@ -191,6 +191,7 @@ lazy val lift = (project in file("util-lift"))
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
           case Some((major, minor)) => minor
+          case _ => "10"
         }
     })),
     libraryDependencies ++= Seq(
@@ -205,7 +206,7 @@ lazy val lift = (project in file("util-lift"))
 lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
   .settings(
-    moduleName := "util-validators",
+    moduleName := "util-macros",
     libraryDependencies ++= Seq(
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       "org.typelevel"  %% "macro-compat" % "1.1.1",
