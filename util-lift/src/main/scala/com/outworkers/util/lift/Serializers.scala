@@ -19,7 +19,7 @@ sealed class UUIDSerializer extends Serializer[UUID] {
         UUID.fromString(value)
       }  catch {
         case NonFatal(err) => {
-          val exception =  new MappingException(s"Couldn't extract an UUID from $value")
+          val exception = new MappingException(s"Couldn't extract an UUID from $value")
           exception.initCause(err)
           throw exception
         }
@@ -100,8 +100,7 @@ class EnumNameSerializer[E <: Enumeration: ClassTag](enum: E)
     case (TypeInfo(EnumerationClass, _), json) => json match {
       case JString(value) if enum.values.exists(_.toString == value) =>
         enum.withName(value)
-      case value => throw new MappingException("Can't convert " +
-        value + " to " + EnumerationClass)
+      case value => throw new MappingException(s"Can't convert $value to $EnumerationClass")
     }
   }
 
