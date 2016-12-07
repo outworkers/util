@@ -6,7 +6,8 @@ import java.util.UUID
 import cats.data.ValidatedNel
 import com.outworkers.util.domain.GenerationDomain
 import org.apache.commons.validator.routines.EmailValidator
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
+
 import scala.util.{Failure, Success, Try}
 
 sealed trait CatsBiParser[X, T] {
@@ -82,7 +83,7 @@ trait CatsImplicitParsers extends GenerationDomain {
       * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
       */
     override def parse(str: String): ValidatedNel[String, DateTime] = {
-      Try(new DateTime(str.toLong)).asValidation
+      Try(new DateTime(str.toLong, DateTimeZone.UTC)).asValidation
     }
   }
 
