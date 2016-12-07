@@ -133,7 +133,6 @@ object EnumNameSerializer {
   }
 }
 
-
 trait CustomSerializers {
   implicit val formats = Serialization.formats(NoTypeHints) + new UUIDSerializer + new DateTimeSerializer
 }
