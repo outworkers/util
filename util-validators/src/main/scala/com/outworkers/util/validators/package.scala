@@ -13,15 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers
+package com.outworkers.util
 
 import cats.data.Validated.{Invalid, Valid}
-import cats.{Applicative, SemigroupK, _}
-import cats.data._
-import com.outworkers.validators.{ParseError, ValidationError}
-import cats.{Applicative, Apply, SemigroupK}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
-import cats.data.Validated.{Invalid, Valid}
+import cats.{Applicative, SemigroupK, _}
 
 import scalaz.{Validation, ValidationNel}
 

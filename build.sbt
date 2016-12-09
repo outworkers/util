@@ -39,7 +39,7 @@ lazy val Versions = new {
   val liftVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
       case Some((major, minor)) if minor >= 11 => lift
-      case _ => "3.0"
+      case _ => "3.0-M1"
     }
   }
 }
