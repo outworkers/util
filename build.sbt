@@ -30,8 +30,8 @@
 import com.twitter.sbt.{GitProject, VersionManagement}
 
 lazy val Versions = new {
-  val scalatest = "2.2.5"
-  val cats = "0.7.2"
+  val scalatest = "3.0.0"
+  val cats = "0.8.1"
   val finagle = "6.36.0"
   val joda = "2.9.4"
   val jodaConvert = "1.8.1"
@@ -39,7 +39,7 @@ lazy val Versions = new {
   val twitterUtil = "6.33.0"
   val scalaz = "7.2.6"
   val finagleZk = "6.24.0"
-  val scalacheck = "1.13.2"
+  val scalacheck = "1.13.4"
   val datafactory = "0.8"
   val play = "2.5.8"
 
@@ -65,8 +65,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
-    Resolver.jcenterRepo,
-    Resolver.bintrayRepo("outwokers", "oss-releases")
+    Resolver.jcenterRepo
   ),
   gitTagName in ThisBuild <<= (organization, name, version) map { (o, n, v) => s"version=$v"},
   scalacOptions ++= Seq(
