@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "develop" ];
-then
+#if [ "$TRAVIS_PULL_REQUEST" == "false" ] && [ "$TRAVIS_BRANCH" == "develop" ];
+#then
 
-    if [ "${TRAVIS_SCALA_VERSION}" == "2.11.8" ] && [ "${TRAVIS_JDK_VERSION}" == "oraclejdk8" ];
-    then
+    #if [ "${TRAVIS_SCALA_VERSION}" == "2.11.8" ] && [ "${TRAVIS_JDK_VERSION}" == "oraclejdk8" ];
+    #then
 
         echo "Setting git user email to ci@outworkers.com"
         git config user.email "ci@outworkers.com"
@@ -72,10 +72,10 @@ then
         sbt +bintray:publish
 
         echo "Creating GPG deploy key"
-        openssl aes-256-cbc -K $encrypted_d543e1d8b539_key -iv $encrypted_d543e1d8b539_iv -in build/codesigning.asc.enc -out build/codesigning.asc -d
 
         echo "importing GPG key to local GBP repo"
-        gpg --fast-import build/codesigning.asc.enc
+        gpg --fast-import build/deploy.asc
+        gpg --list-keys
 
         echo "Setting MAVEN_PUBLISH mode to true"
         export MAVEN_PUBLISH="true"
@@ -83,11 +83,11 @@ then
         sbt +publishSigned sonatypeReleaseAll
         exit $?
 
-    else
-        echo "Only publishing version for Scala 2.11.8 and Oracle JDK 8 to prevent multiple artifacts"
-        exit 0
-    fi
-else
-    echo "This is either a pull request or the branch is not develop, deployment not necessary"
-    exit 0
-fi
+    #else
+        #echo "Only publishing version for Scala 2.11.8 and Oracle JDK 8 to prevent multiple artifacts"
+        #exit 0
+    #fi
+#else
+    #echo "This is either a pull request or the branch is not develop, deployment not necessary"
+    #exit 0
+#fi
