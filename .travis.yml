@@ -46,7 +46,7 @@ before_cache:
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
 
 
-before_script: travis_retry sbt plz $TRAVIS_SCALA_VERSION update
+before_script: travis_retry sbt "plz $TRAVIS_SCALA_VERSION update"
 script: "./build/run_tests.sh"
 after_success:
 - "./build/publish_develop.sh"
