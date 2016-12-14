@@ -18,7 +18,7 @@ package com.outworkers.util
 import com.outworkers.util.domain.GenerationDomain
 import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalatest.Assertions
-import org.scalatest.concurrent.{AsyncAssertions, PatienceConfiguration, ScalaFutures}
+import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 
 import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
@@ -56,7 +56,7 @@ package object testing extends ScalaFutures
    * @param f The future to augment.
    * @tparam A The underlying type of the computation.
    */
-  implicit class TwitterFutureAssertions[A](val f: Future[A]) extends Assertions with AsyncAssertions {
+  implicit class TwitterFutureAssertions[A](val f: Future[A]) extends Assertions with Waiters {
 
     def asScala: scala.concurrent.Future[A] = {
       val promise = scala.concurrent.Promise[A]()
@@ -126,7 +126,7 @@ package object testing extends ScalaFutures
    * @param f The future to augment.
    * @tparam A The underlying type of the computation.
    */
-  implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with AsyncAssertions {
+  implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with Waiters {
 
     def asTwitter()(implicit ec: ExecutionContext): com.twitter.util.Future[A] = {
       val promise = com.twitter.util.Promise[A]()

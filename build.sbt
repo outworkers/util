@@ -17,17 +17,30 @@ import com.twitter.sbt.{GitProject, VersionManagement}
 
 lazy val Versions = new {
   val scalatest = "3.0.0"
-  val cats = "0.7.2"
-  val finagle = "6.36.0"
+  val cats = "0.8.1"
   val joda = "2.9.4"
   val jodaConvert = "1.8.1"
   val lift = "3.0"
-  val twitterUtil = "6.33.0"
-  val scalaz = "7.3.0-M7"
-  val finagleZk = "6.24.0"
+  val twitterUtil = "6.39.0"
+  val twitterUtil210 = "6.34.0"
+  val scalaz = "7.2.8"
   val scalacheck = "1.13.4"
   val datafactory = "0.8"
   val play = "2.5.8"
+
+  val catsVersion: String => String = {
+    s => CrossVersion.partialVersion(s) match {
+      case Some((major, minor)) if minor >= 11 => cats
+      case _ => twitterUtil210
+    }
+  }
+
+  val twitterUtilVersion: String => String = {
+    s => CrossVersion.partialVersion(s) match {
+      case Some((major, minor)) if minor >= 11 => twitterUtil
+      case _ => twitterUtil210
+    }
+  }
 
   val playVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
@@ -46,8 +59,7 @@ lazy val Versions = new {
 
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
-  scalaVersion := "2.12.0",
-  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
+  scalaVersion := "2.11.8",
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
@@ -90,7 +102,8 @@ lazy val util = (project in file("."))
 lazy val urls = (project in file("util-urls"))
   .settings(sharedSettings: _*)
   .settings(
-    moduleName := "util-urls"
+    moduleName := "util-urls",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
   )
 
 lazy val domain = (project in file("util-domain"))
@@ -103,6 +116,7 @@ lazy val parsers = (project in file("util-parsers"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-parsers",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     libraryDependencies ++= Seq(
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
@@ -119,6 +133,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-parsers-cats",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     libraryDependencies ++= Seq(
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
@@ -131,23 +146,11 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
     testing % Test
   )
 
-lazy val play = (project in file("util-play"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-play",
-    libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
-    )
-  ).dependsOn(
-    domain,
-    parsersCats,
-    testing % Test
-  )
-
 lazy val testing = (project in file("util-testing"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-testing",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     scalacOptions ++= Seq(
       "-language:experimental.macros"
     ),
@@ -155,7 +158,7 @@ lazy val testing = (project in file("util-testing"))
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-      "com.twitter"                      %% "util-core"                % Versions.twitterUtil,
+      "com.twitter"                      %% "util-core"                % Versions.twitterUtilVersion(scalaVersion.value),
       "org.scalatest"                    %% "scalatest"                % Versions.scalatest,
       "joda-time"                        %  "joda-time"                % Versions.joda,
       "org.joda"                         %  "joda-convert"             % Versions.jodaConvert,
@@ -167,15 +170,31 @@ lazy val testing = (project in file("util-testing"))
     macros
   )
 
+lazy val play = (project in file("util-play"))
+  .settings(sharedSettings: _*)
+  .settings(
+    moduleName := "util-play",
+    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    libraryDependencies ++= Seq(
+      "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
+    )
+  ).dependsOn(
+  domain,
+  parsersCats,
+  testing % Test
+)
+
+
 lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift",
+    crossScalaVersions := Seq("2.10.6", "2.11.8"),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) => minor
-          case _ => "10"
+          case Some((major, minor)) if minor <= 11 => minor.toString
+          case _ => "non-existing"
         }
     })),
     libraryDependencies ++= Seq(
@@ -191,6 +210,7 @@ lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-macros",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     libraryDependencies ++= Seq(
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       "org.typelevel"  %% "macro-compat" % "1.1.1",
@@ -202,6 +222,7 @@ lazy val validators = (project in file("util-validators"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-validators",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     addCompilerPlugin(
       "org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary
     ),
@@ -210,6 +231,5 @@ lazy val validators = (project in file("util-validators"))
     )
 ).dependsOn(
   parsers,
-  testing % Test,
-  lift % Test
+  testing % Test
 )

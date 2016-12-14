@@ -47,7 +47,7 @@ trait Wrappers {
   }
 
   case class Wrapper3[T1, T2, T3](v1: Nel[T1], v2: Nel[T2], v3: Nel[T3]) extends Wrapper[(T1, T2, T3)] {
-    def and[T4](v4: Nel[T4]): Wrapper4[T1, T2, T3, T4] = new Wrapper4(v1, v2, v3, v4)
+    def and[T4](v4: Nel[T4]): Wrapper4[T1, T2, T3, T4] = Wrapper4(v1, v2, v3, v4)
 
     override def map[R](fn: ((T1, T2, T3)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map3[T1, T2, T3, R](v1, v2, v3) {
@@ -58,7 +58,7 @@ trait Wrappers {
 
   case class Wrapper4[T1, T2, T3, T4](v1: Nel[T1], v2: Nel[T2], v3: Nel[T3], v4: Nel[T4])
     extends Wrapper[(T1, T2, T3, T4)] {
-    def and[T5](v5: Nel[T5]): Wrapper5[T1, T2, T3, T4, T5] = new Wrapper5(v1, v2, v3, v4, v5)
+    def and[T5](v5: Nel[T5]): Wrapper5[T1, T2, T3, T4, T5] = Wrapper5(v1, v2, v3, v4, v5)
 
     override def map[R](fn: ((T1, T2, T3, T4)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map4[T1, T2, T3, T4, R](v1, v2, v3, v4) {
@@ -75,7 +75,7 @@ trait Wrappers {
     v5: Nel[T5]
   ) extends Wrapper[(T1, T2, T3, T4, T5)] {
 
-    def and[T6](v6: Nel[T6]): Wrapper6[T1, T2, T3, T4, T5, T6] = new Wrapper6(v1, v2, v3, v4, v5, v6)
+    def and[T6](v6: Nel[T6]): Wrapper6[T1, T2, T3, T4, T5, T6] = Wrapper6(v1, v2, v3, v4, v5, v6)
 
     override def map[R](fn: ((T1, T2, T3, T4, T5)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map5[T1, T2, T3, T4, T5, R](v1, v2, v3, v4, v5) {
@@ -93,7 +93,7 @@ trait Wrappers {
     v6: Nel[T6]
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6)] {
 
-    def and[T7](v7: Nel[T7]): Wrapper7[T1, T2, T3, T4, T5, T6, T7] = new Wrapper7(v1, v2, v3, v4, v5, v6, v7)
+    def and[T7](v7: Nel[T7]): Wrapper7[T1, T2, T3, T4, T5, T6, T7] = Wrapper7(v1, v2, v3, v4, v5, v6, v7)
 
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map6[T1, T2, T3, T4, T5, T6, R](v1, v2, v3, v4, v5, v6) {
@@ -117,7 +117,7 @@ trait Wrappers {
       }
     }
 
-    def and[T8](v8: Nel[T8]): Wrapper8[T1, T2, T3, T4, T5, T6, T7, T8] = new Wrapper8(v1, v2, v3, v4, v5, v6, v7, v8)
+    def and[T8](v8: Nel[T8]): Wrapper8[T1, T2, T3, T4, T5, T6, T7, T8] = Wrapper8(v1, v2, v3, v4, v5, v6, v7, v8)
   }
 
   case class Wrapper8[T1, T2, T3, T4, T5, T6, T7, T8](

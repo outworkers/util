@@ -25,3 +25,5 @@ addSbtPlugin("com.timushev.sbt" % "sbt-updates" % "0.1.10")
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 
 addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
+
+addSbtPlugin("com.eed3si9n" % "sbt-doge" % "0.1.5")
