@@ -21,11 +21,11 @@ lazy val Versions = new {
   val finagle = "6.36.0"
   val joda = "2.9.4"
   val jodaConvert = "1.8.1"
-  val lift = "3.0-RC3"
+  val lift = "3.0"
   val twitterUtil = "6.33.0"
   val scalaz = "7.3.0-M7"
   val finagleZk = "6.24.0"
-  val scalacheck = "1.13.2"
+  val scalacheck = "1.13.4"
   val datafactory = "0.8"
   val play = "2.5.8"
 
@@ -175,7 +175,7 @@ lazy val lift = (project in file("util-lift"))
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
           case Some((major, minor)) => minor
-          case _ => "2.10"
+          case _ => "10"
         }
     })),
     libraryDependencies ++= Seq(
@@ -190,7 +190,7 @@ lazy val lift = (project in file("util-lift"))
 lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
   .settings(
-    moduleName := "util-validators",
+    moduleName := "util-macros",
     libraryDependencies ++= Seq(
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
       "org.typelevel"  %% "macro-compat" % "1.1.1",

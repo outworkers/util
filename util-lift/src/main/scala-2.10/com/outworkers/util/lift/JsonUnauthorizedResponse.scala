@@ -13,6 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.outworkers.util.lift
+
 import java.nio.charset.StandardCharsets
 
 import com.outworkers.util.domain.ApiErrorResponse

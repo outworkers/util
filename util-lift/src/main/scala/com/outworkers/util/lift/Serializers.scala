@@ -19,7 +19,7 @@ import java.util.UUID
 
 import net.liftweb.json.JsonAST.{JString, JValue}
 import net.liftweb.json._
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.reflect.ClassTag
 import scala.util.{Failure, Success, Try}
@@ -34,7 +34,7 @@ sealed class UUIDSerializer extends Serializer[UUID] {
         UUID.fromString(value)
       }  catch {
         case NonFatal(err) => {
-          val exception =  new MappingException(s"Couldn't extract an UUID from $value")
+          val exception = new MappingException(s"Couldn't extract an UUID from $value")
           exception.initCause(err)
           throw exception
         }
@@ -76,7 +76,7 @@ sealed class DateTimeSerializer extends Serializer[DateTime] {
     case (TypeInfo(DateTimeClass, _), json) => json match {
       case JString(value) =>
         Try {
-          new DateTime(value.toLong)
+          new DateTime(value.toLong, DateTimeZone.UTC)
         } match {
           case Success(dt) => dt
           case Failure(err) => {
@@ -86,7 +86,7 @@ sealed class DateTimeSerializer extends Serializer[DateTime] {
           }
         }
       case JInt(value) => {
-        Try(new DateTime(value.toLong)) match {
+        Try(new DateTime(value.toLong, DateTimeZone.UTC)) match {
           case Success(dt) => dt
           case Failure(err) => {
             val exception =  new MappingException(s"Couldn't extract a DateTime from $value")
@@ -111,13 +111,11 @@ class EnumNameSerializer[E <: Enumeration: ClassTag](enum: E)
 
   val EnumerationClass = classOf[E#Value]
 
-  def deserialize(implicit format: Formats):
-  PartialFunction[(TypeInfo, JValue), E#Value] = {
+  def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), E#Value] = {
     case (TypeInfo(EnumerationClass, _), json) => json match {
       case JString(value) if enum.values.exists(_.toString == value) =>
         enum.withName(value)
-      case value => throw new MappingException("Can't convert " +
-        value + " to "+ EnumerationClass)
+      case value => throw new MappingException(s"Can't convert $value to $EnumerationClass")
     }
   }
 

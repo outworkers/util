@@ -1,4 +1,4 @@
-package com.outworkers.validators
+package com.outworkers.util.validators
 
 import cats.Apply
 import cats.data.Validated.{Invalid, Valid}
