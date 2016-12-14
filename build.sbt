@@ -77,7 +77,8 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   )
 ) ++ GitProject.gitSettings ++
   VersionManagement.newSettings ++
-  Publishing.effectiveSettings
+  Publishing.effectiveSettings ++
+  CrossPerProjectPlugin.projectSettings
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
