@@ -24,7 +24,6 @@ import scala.util.control.NonFatal
 import scalaz.Scalaz._
 import scalaz._
 
-
 trait LiftParsers extends DefaultParsers {
 
   implicit val formats = DefaultFormats

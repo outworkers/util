@@ -1,12 +1,10 @@
 package com.outworkers.util.validators
 
-import cats.Apply
 import cats.data.Validated.{Invalid, Valid}
 import cats.data._
-import net.liftweb.json.{DefaultFormats, Extraction, pretty, render}
 import org.scalatest.{FlatSpec, Matchers}
-import com.outworkers.util.lift._
 import scala.util.Try
+import com.outworkers.util.parsers._
 
 trait Read[A] {
   def read(s: String): Option[A]
@@ -80,8 +78,8 @@ class ValidatorsTest extends FlatSpec with Matchers {
 
     personFromConfig.unwrap.isLeft shouldEqual true
     personFromConfig.unwrap match {
-      case Left(err) => info(err.asPrettyJson())
-      case Right(clz) => info(clz.asJson())
+      case Left(err) => info(err.toString)
+      case Right(clz) => info(clz.toString)
     }
   }
 }
