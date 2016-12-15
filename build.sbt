@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 import com.twitter.sbt.{GitProject, VersionManagement}
+import sbt.Keys._
 
 lazy val Versions = new {
   val scalatest = "3.0.0"
@@ -77,8 +78,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   )
 ) ++ GitProject.gitSettings ++
   VersionManagement.newSettings ++
-  Publishing.effectiveSettings ++
-  CrossPerProjectPlugin.projectSettings
+  Publishing.effectiveSettings
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
@@ -110,7 +110,8 @@ lazy val urls = (project in file("util-urls"))
 lazy val domain = (project in file("util-domain"))
   .settings(sharedSettings: _*)
   .settings(
-    moduleName := "util-domain"
+    moduleName := "util-domain",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0")
   )
 
 lazy val parsers = (project in file("util-parsers"))
