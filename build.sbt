@@ -38,7 +38,7 @@ lazy val Versions = new {
 
   val twitterUtilVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((major, minor)) if minor >= 11 && Publishing.isJdk8 => twitterUtil
+      case Some((major, minor)) if minor == 12 => twitterUtil
       case _ => twitterUtil210
     }
   }
