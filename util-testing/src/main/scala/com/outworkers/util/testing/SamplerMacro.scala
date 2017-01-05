@@ -38,7 +38,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   val prefix = q"com.outworkers.util.testing"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
 
-  object Symbols {
+  object SamplersSymbols {
     val intSymbol: c.universe.Symbol = typed[Int]
     val byteSymbol = typed[Byte]
     val stringSymbol = typed[String]
@@ -57,6 +57,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val inetSymbol = typed[InetAddress]
     val bigInt = typed[BigInt]
     val bigDecimal = typed[BigDecimal]
+    val optSymbol = typed[Option[_]]
     val buffer = typed[ByteBuffer]
     val enum = typed[Enumeration#Value]
   }
@@ -127,7 +128,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
     def unapply(arg: Accessor): Option[MapType] = {
 
-      if (arg.symbol == Symbols.mapSymbol) {
+      if (arg.symbol == SamplersSymbols.mapSymbol) {
         arg.typeArgs match {
           case keyType :: listType :: Nil =>   Some(
             MapType(
@@ -158,7 +159,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
   object CollectionType {
     def unapply(arg: Accessor): Option[CollectionType] = {
-      if (arg.symbol == Symbols.listSymbol) {
+      if (arg.symbol == SamplersSymbols.listSymbol) {
         arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
@@ -169,7 +170,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
         }
-      } else if (arg.symbol == Symbols.setSymbol) {
+      } else if (arg.symbol == SamplersSymbols.setSymbol) {
         arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
@@ -199,7 +200,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   object OptionType {
     def unapply(arg: Accessor): Option[(OptionType)] = {
 
-      if (arg.symbol == Symbols.optSymbol) {
+      if (arg.symbol == SamplersSymbols.optSymbol) {
         arg.typeArgs match {
           case head :: Nil => Some(
             OptionType(
@@ -236,10 +237,9 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   }
 
   def makeSample(
-    tpe: Type,
-    params: Seq[ValDef]
+    tpe: Type
   ): Tree = {
-    val applies = accessors(params).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
+    val applies = caseFields(tpe).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
 
     q"""
       new $prefix.Sample[$tpe] {
@@ -316,26 +316,26 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val tree = symbol match {
       case sym if sym.isClass && sym.asClass.isCaseClass => makeSample(tpe)
       case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
-      case Symbols.boolSymbol => sampler("BooleanSampler")
-      case Symbols.byteSymbol => sampler("ByteSampler")
-      case Symbols.shortSymbol => sampler("ShortSampler")
-      case Symbols.intSymbol => sampler("IntSampler")
-      case Symbols.longSymbol => sampler("LongSampler")
-      case Symbols.doubleSymbol => sampler("DoubleSampler")
-      case Symbols.floatSymbol => sampler("FloatSampler")
-      case Symbols.uuidSymbol => sampler("UUIDSampler")
-      case Symbols.stringSymbol => sampler("StringSampler")
-      case Symbols.dateSymbol => sampler("DateSampler")
-      case Symbols.dateTimeSymbol => sampler("DateTimeSampler")
-      case Symbols.jodaLocalDateSymbol => sampler("LocalDateSampler")
-      case Symbols.inetSymbol => sampler("InetAddressSampler")
-      case Symbols.bigInt => sampler("BigIntSampler")
-      case Symbols.bigDecimal => sampler("BigDecimalSampler")
-      case Symbols.buffer => sampler("ByteBufferSampler")
-      case Symbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
-      case Symbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
-      case Symbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
-      case Symbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
+      case SamplersSymbols.byteSymbol => sampler("ByteSampler")
+      case SamplersSymbols.shortSymbol => sampler("ShortSampler")
+      case SamplersSymbols.intSymbol => sampler("IntSampler")
+      case SamplersSymbols.longSymbol => sampler("LongSampler")
+      case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
+      case SamplersSymbols.floatSymbol => sampler("FloatSampler")
+      case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
+      case SamplersSymbols.stringSymbol => sampler("StringSampler")
+      case SamplersSymbols.dateSymbol => sampler("DateSampler")
+      case SamplersSymbols.dateTimeSymbol => sampler("DateTimeSampler")
+      case SamplersSymbols.jodaLocalDateSymbol => sampler("LocalDateSampler")
+      case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
+      case SamplersSymbols.bigInt => sampler("BigIntSampler")
+      case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
+      case SamplersSymbols.buffer => sampler("ByteBufferSampler")
+      case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
+      case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
+      case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
+      case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
       case _ => c.abort(c.enclosingPosition, s"Cannot find primitive implementation for $tpe")
     }
 

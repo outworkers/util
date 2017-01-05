@@ -23,6 +23,21 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
 
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
+
+  def caseFields(tpe: Type): Iterable[Accessor] = {
+    object CaseField {
+      def unapply(arg: TermSymbol): Option[(Name, Type)] = {
+        if (arg.isVal && arg.isCaseAccessor) {
+          Some(TermName(arg.name.toString.trim) -> arg.typeSignature)
+        } else {
+          None
+        }
+      }
+    }
+
+    tpe.decls.collect { case CaseField(name, fType) => Accessor(name.toTermName, fType)}
+  }
+
   object Symbols {
     val listSymbol: Symbol = typed[scala.collection.immutable.List[_]]
     val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
