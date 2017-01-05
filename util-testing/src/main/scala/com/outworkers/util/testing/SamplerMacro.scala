@@ -313,33 +313,14 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val tpe = weakTypeOf[T]
     val symbol = tpe.typeSymbol
 
-    val tree = symbol match {
+    symbol match {
       case sym if sym.isClass && sym.asClass.isCaseClass => makeSample(tpe)
       case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
-      case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
-      case SamplersSymbols.byteSymbol => sampler("ByteSampler")
-      case SamplersSymbols.shortSymbol => sampler("ShortSampler")
-      case SamplersSymbols.intSymbol => sampler("IntSampler")
-      case SamplersSymbols.longSymbol => sampler("LongSampler")
-      case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
-      case SamplersSymbols.floatSymbol => sampler("FloatSampler")
-      case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
-      case SamplersSymbols.stringSymbol => sampler("StringSampler")
-      case SamplersSymbols.dateSymbol => sampler("DateSampler")
-      case SamplersSymbols.dateTimeSymbol => sampler("DateTimeSampler")
-      case SamplersSymbols.jodaLocalDateSymbol => sampler("LocalDateSampler")
-      case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
-      case SamplersSymbols.bigInt => sampler("BigIntSampler")
-      case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
-      case SamplersSymbols.buffer => sampler("ByteBufferSampler")
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
       case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
       case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
-      case _ => c.abort(c.enclosingPosition, s"Cannot find primitive implementation for $tpe")
+      case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
-
-    Console.print(showCode(tree))
-    tree
   }
 }
