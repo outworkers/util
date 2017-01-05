@@ -62,7 +62,7 @@ private[testing] trait CommonDataSamplers {
     "sint", "sit", "sunt", "tempor", "ullamco", "ut", "velit", "veniam", "voluptate"
   )
 
-  val PrgrammingLanguages = List(
+  val ProgrammingLanguages = List(
     "C", "Java", "Objective-C", "C++", "Basic", "C#", "Python", "PHP", "Perl", "JavaScript", "Visual Basic",
     "Visual Basic .NET", "Ruby", "F#", "Pascal", "Transact-SQL", "ActionScript", "Delphi/Object Pascal",
     "Lisp", "PL/SQL", "MATLAB", "SAS", "Swift", "Assembly", "ML", "Logo", "PostScript", "D", "COBOL", "R",

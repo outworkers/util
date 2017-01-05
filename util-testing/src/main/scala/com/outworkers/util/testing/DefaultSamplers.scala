@@ -20,6 +20,7 @@ import java.util.{Date, Locale, UUID}
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
 import com.outworkers.util.domain._
+import org.fluttercode.datafactory.impl.DataFactory
 
 import scala.util.Random
 
@@ -29,102 +30,113 @@ trait Sample[T] {
 
 object Sample extends Generators {
 
-  implicit object StringSample extends Sample[String] {
-    def sample: String = Sampler.string
+  object StringSample extends Sample[String] {
+    /**
+      * Get a unique random generated string.
+      * This uses the default java GUID implementation.
+      * @return A random string with 64 bits of randomness.
+      */
+    def sample: String = UUID.randomUUID().toString
   }
 
-  implicit object ShortStringSampler extends Sample[ShortString] {
+  object ShortStringSampler extends Sample[ShortString] {
     def sample: ShortString = {
       ShortString(java.lang.Long.toHexString(java.lang.Double.doubleToLongBits(Math.random())))
     }
   }
 
-  implicit object BooleanSampler extends Sample[Boolean] {
+  object BooleanSampler extends Sample[Boolean] {
     def sample: Boolean = Random.nextBoolean()
   }
 
-  implicit object IntSample extends Sample[Int] {
-    def sample: Int = Sampler.int()
+  object IntSample extends Sample[Int] {
+    def sample: Int = Random.nextInt()
   }
 
-  implicit object DoubleSample extends Sample[Double] {
-    def sample: Double = gen[Int].toDouble / 0.3
+  object DoubleSample extends Sample[Double] {
+    def sample: Double = Random.nextDouble()
   }
 
-  implicit object FloatSample extends Sample[Float] {
-    def sample: Float = gen[Int].toFloat
+  object FloatSample extends Sample[Float] {
+    def sample: Float = Random.nextFloat()
   }
 
-  implicit object LongSample extends Sample[Long] {
-    def sample: Long = gen[Int].toLong
+  object LongSample extends Sample[Long] {
+    def sample: Long = Random.nextLong()
   }
 
-  implicit object BigDecimalSampler extends Sample[BigDecimal] {
-    def sample: BigDecimal = BigDecimal(gen[Int])
+  object BigDecimalSampler extends Sample[BigDecimal] {
+    def sample: BigDecimal = BigDecimal(gen[Float])
   }
 
-  implicit object BigIntSampler extends Sample[BigInt] {
-    def sample: BigInt = BigInt(gen[Int])
+  object BigIntSampler extends Sample[BigInt] {
+    def sample: BigInt = BigInt(gen[Long])
   }
 
-  implicit object DateSample extends Sample[Date] {
+  object DateSample extends Sample[Date] {
     def sample: Date = new Date()
   }
 
-  implicit object DateTimeSampler extends Sample[DateTime] {
+  object DateTimeSampler extends Sample[DateTime] {
     def sample: DateTime = new DateTime(DateTimeZone.UTC)
   }
 
-  implicit object LocalDateSampler extends Sample[LocalDate] {
+  object LocalDateSampler extends Sample[LocalDate] {
     def sample: LocalDate = new LocalDate()
   }
 
-  implicit object UUIDSample extends Sample[UUID] {
+  object UUIDSample extends Sample[UUID] {
     def sample: UUID = UUID.randomUUID()
   }
 
-  implicit object EmailSample extends Sample[EmailAddress] {
-    def sample: EmailAddress = EmailAddress(Sampler.email())
+  object EmailSample extends Sample[EmailAddress] {
+    def sample: EmailAddress = EmailAddress(new DataFactory().getEmailAddress)
   }
 
-  implicit object FirstNameSampler extends Sample[FirstName] {
-    def sample: FirstName = FirstName(Sampler.factory.getFirstName)
+  object FirstNameSampler extends Sample[FirstName] {
+    def sample: FirstName = FirstName(new DataFactory().getFirstName)
   }
 
-  implicit object LastNameSampler extends Sample[LastName] {
-    def sample: LastName = LastName(Sampler.factory.getLastName)
+  object LastNameSampler extends Sample[LastName] {
+    def sample: LastName = LastName(new DataFactory().getLastName)
   }
 
-  implicit object FullNameSampler extends Sample[FullName] {
-    def sample: FullName = FullName(s"${Sampler.factory.getFirstName} ${Sampler.factory.getLastName}")
+  object FullNameSampler extends Sample[FullName] {
+    def sample: FullName = FullName(s"${new DataFactory().getFirstName} ${new DataFactory().getLastName}")
   }
 
-  implicit object CountryCodeSampler extends Sample[CountryCode] {
+  object CountryCodeSampler extends Sample[CountryCode] {
     def sample: CountryCode = CountryCode(Gen.oneOf(Locale.getISOCountries).sample.get)
   }
 
-  implicit object CountrySampler extends Sample[Country] {
+  object CountrySampler extends Sample[Country] {
     def sample: Country = Country(Gen.oneOf(CommonDataSamplers.Countries).sample.get)
   }
 
-  implicit object CitySampler extends Sample[City] {
+  object CitySampler extends Sample[City] {
     def sample: City = City(Gen.oneOf(CommonDataSamplers.Cities).sample.get)
   }
 
-  implicit object ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
-    def sample: ProgrammingLanguage = ProgrammingLanguage(Gen.oneOf(CommonDataSamplers.PrgrammingLanguages).sample.get)
+  object ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
+    def sample: ProgrammingLanguage = ProgrammingLanguage(Gen.oneOf(CommonDataSamplers.ProgrammingLanguages).sample.get)
   }
 
-  implicit object LoremIpsumSampler extends Sample[LoremIpsum] {
+  object LoremIpsumSampler extends Sample[LoremIpsum] {
     def sample: LoremIpsum = LoremIpsum(Gen.oneOf(CommonDataSamplers.LoremIpsum).sample.get)
   }
 
-  implicit object UrlSampler extends Sample[Url] {
+  object UrlSampler extends Sample[Url] {
     def sample: Url = Url(
       oneOf(protocols) + "://www." + gen[ShortString].str + "." + oneOf(domains)
     )
   }
 
+  /**
+    * !! Warning !! Black magic going on. This will use the excellent macro compat
+    * library to macro materialise an instance of the required primitive based on the type argument.
+    * @tparam T The type parameter to materialise a sample for.
+    * @return A derived sampler, materialised via implicit blackbox macros.
+    */
   implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
 
   def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]

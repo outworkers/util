@@ -37,6 +37,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
   val prefix = q"com.outworkers.util.testing"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
+  val definitions = "com.outworkers.util.domain.Definitions"
 
   object SamplersSymbols {
     val intSymbol: c.universe.Symbol = typed[Int]
