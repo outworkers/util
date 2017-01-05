@@ -17,14 +17,14 @@ package com.outworkers.util.testing
 
 import java.util.UUID
 
-@sample case class User(
+case class User(
   id: UUID,
   firstName: String,
   lastName: String,
   email: String
 )
 
-@sample case class CollectionSample(
+case class CollectionSample(
   id: UUID,
   firstName: String,
   lastName: String,

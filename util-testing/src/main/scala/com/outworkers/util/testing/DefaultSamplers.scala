@@ -125,6 +125,8 @@ object Sample extends Generators {
     )
   }
 
+  implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
+
   def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]
 }
 
@@ -194,3 +196,5 @@ private[util] trait Generators extends GenerationDomain {
     oneOf(enum.values.toList)
   }
 }
+
+object Generate extends Generators

@@ -15,16 +15,51 @@
  */
 package com.outworkers.util.testing
 
+import java.net.InetAddress
+import java.nio.ByteBuffer
+import java.util.{Date, UUID}
+
 import com.outworkers.util.macros.AnnotationToolkit
+import org.joda.time.DateTime
+
+import scala.collection.concurrent.TrieMap
 
 @macrocompat.bundle
 class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extends AnnotationToolkit(c) {
 
   import c.universe._
 
+  /**
+    * Adds a caching layer for subsequent requests to materialise the same primitive type.
+    * This adds a simplistic caching layer that computes primitives based on types.
+    */
+  val treeCache: TrieMap[Symbol, Tree] = TrieMap.empty[Symbol, Tree]
+
   val prefix = q"com.outworkers.util.testing"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
-  val collectionPkg = q"scala.collection.immutable"
+
+  object Symbols {
+    val intSymbol: c.universe.Symbol = typed[Int]
+    val byteSymbol = typed[Byte]
+    val stringSymbol = typed[String]
+    val boolSymbol = typed[Boolean]
+    val shortSymbol = typed[Short]
+    val longSymbol = typed[Long]
+    val doubleSymbol = typed[Double]
+    val floatSymbol = typed[Float]
+    val dateSymbol = typed[Date]
+    val listSymbol = typed[scala.collection.immutable.List[_]]
+    val setSymbol = typed[scala.collection.immutable.Set[_]]
+    val mapSymbol = typed[scala.collection.immutable.Map[_, _]]
+    val dateTimeSymbol = typed[DateTime]
+    val uuidSymbol = typed[UUID]
+    val jodaLocalDateSymbol = typed[org.joda.time.LocalDate]
+    val inetSymbol = typed[InetAddress]
+    val bigInt = typed[BigInt]
+    val bigDecimal = typed[BigDecimal]
+    val buffer = typed[ByteBuffer]
+    val enum = typed[Enumeration#Value]
+  }
 
   // val example: String => gen[String]
   // val firstName: String => gen[FirstName].value
@@ -184,11 +219,9 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   private[this] def deriveSamplerType(accessor: Accessor): Tree = {
     accessor match {
       case MapType(col) => col.default
-      case OptionType(opt) => {
-        accessor.name match {
-          case KnownField(derived) => opt.generator(derived)
-          case _ => opt.default
-        }
+      case OptionType(opt) => accessor.name match {
+        case KnownField(derived) => opt.generator(derived)
+        case _ => opt.default
       }
       case CollectionType(col) => accessor.name match {
         case KnownField(derived) => col.generator(derived)
@@ -197,54 +230,116 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
       case _ => accessor.name match {
         case KnownField(derived) => q"$prefix.gen[$derived].value"
-        case _ => q"$prefix.gen[${accessor.typeName}]"
+        case _ => q"$prefix.gen[${accessor.paramType}]"
       }
     }
   }
 
   def makeSample(
-    typeName: c.TypeName,
-    name: c.TermName,
+    tpe: Type,
     params: Seq[ValDef]
-  ): List[Tree] = {
+  ): Tree = {
+    val applies = accessors(params).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
 
-    val fresh = c.freshName(name)
-
-    val applies = accessors(params).map { accessor => q"${accessor.name} = ${deriveSamplerType(accessor)}" }
-
-    val tree = q"""implicit object $fresh extends $prefix.Sample[$typeName] {
-      override def sample: $typeName = $name.apply(..$applies)
-    }"""
-
-    tree :: Nil
+    q"""
+      new $prefix.Sample[$tpe] {
+        override def sample: $tpe = ${tpe.typeSymbol.name.toTermName}.apply(..$applies)
+      }
+    """
   }
 
-  def macroImpl(annottees: c.Expr[Any]*): Tree = {
-    annottees.map(_.tree) match {
-      case tree@(classDef@q"$mods class $tpname[..$tparams] $ctorMods(...$params) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
-        :: Nil if mods.hasFlag(Flag.CASE) =>
-        val name = tpname.toTermName
-
+  def listSample(tpe: Type): Tree = {
+    tpe.typeArgs match {
+      case inner :: Nil => {
         q"""
-          $classDef
-          object $name {
-            ..${makeSample(tpname.toTypeName, name, params.head)}
+          new $prefix.Sample[$tpe] {
+            override def sample: $tpe = $prefix.Generate.genList[$inner]()
           }
         """
-
-      case tree@(classDef@q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
-        :: q"object $objName extends { ..$objEarlyDefs } with ..$objParents { $objSelf => ..$objDefs }"
-        :: Nil if mods.hasFlag(Flag.CASE) =>
-
-        q"""
-         $classDef
-         object $objName extends { ..$objEarlyDefs} with ..$objParents { $objSelf =>
-           ..${makeSample(tpname.toTypeName, tpname.toTermName, paramss.head)}
-           ..$objDefs
-         }
-         """
-
-      case _ => c.abort(c.enclosingPosition, "Invalid annotation target, Sample must be a case classes")
+      }
+      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
     }
+  }
+
+  def tupleSample(tpe: Type): Tree = {
+    val comp = tpe.typeSymbol.name.toTermName
+
+    val samplers = tpe.typeArgs.map(t => q"$prefix.Sample[$t].sample")
+
+    q"""
+      new $prefix.Sample[$tpe] {
+        override def sample: $tpe = $comp.apply(..$samplers)
+      }
+    """
+  }
+
+  def mapSample(tpe: Type): Tree = {
+    tpe.typeArgs match {
+      case k :: v :: Nil =>
+        q"""
+          new $prefix.Sample[$tpe] {
+            override def sample: $tpe = $prefix.Generate.genMap[$k, $v]()
+          }
+        """
+      case _ => c.abort(c.enclosingPosition, "Expected exactly two type arguments to be provided to map")
+    }
+  }
+
+  def setSample(tpe: Type): Tree = {
+    tpe.typeArgs match {
+      case inner :: Nil =>
+        q"""
+          new $prefix.Sample[$tpe] {
+           override def sample: $tpe = $prefix.Generate.getList[$inner]().toSet
+          }
+        """
+      case _ => c.abort(c.enclosingPosition, "Expected inner type to be defined")
+    }
+  }
+
+  def enumPrimitive(tpe: Type): Tree = {
+    val comp = c.parse(s"${tpe.toString.replace("#Value", "")}")
+
+    q"""
+      new $prefix.Sample[$tpe] {
+        override def sample: $tpe = $prefix.Sample.oneOf($comp)
+      }
+    """
+  }
+
+  def sampler(nm: String): Tree = q"new $prefix.Sample.${TypeName(nm)}"
+
+  def materialize[T : c.WeakTypeTag]: Tree = {
+    val tpe = weakTypeOf[T]
+    val symbol = tpe.typeSymbol
+
+    val tree = symbol match {
+      case sym if sym.isClass && sym.asClass.isCaseClass => makeSample(tpe)
+      case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
+      case Symbols.boolSymbol => sampler("BooleanSampler")
+      case Symbols.byteSymbol => sampler("ByteSampler")
+      case Symbols.shortSymbol => sampler("ShortSampler")
+      case Symbols.intSymbol => sampler("IntSampler")
+      case Symbols.longSymbol => sampler("LongSampler")
+      case Symbols.doubleSymbol => sampler("DoubleSampler")
+      case Symbols.floatSymbol => sampler("FloatSampler")
+      case Symbols.uuidSymbol => sampler("UUIDSampler")
+      case Symbols.stringSymbol => sampler("StringSampler")
+      case Symbols.dateSymbol => sampler("DateSampler")
+      case Symbols.dateTimeSymbol => sampler("DateTimeSampler")
+      case Symbols.jodaLocalDateSymbol => sampler("LocalDateSampler")
+      case Symbols.inetSymbol => sampler("InetAddressSampler")
+      case Symbols.bigInt => sampler("BigIntSampler")
+      case Symbols.bigDecimal => sampler("BigDecimalSampler")
+      case Symbols.buffer => sampler("ByteBufferSampler")
+      case Symbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
+      case Symbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
+      case Symbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
+      case Symbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case _ => c.abort(c.enclosingPosition, s"Cannot find primitive implementation for $tpe")
+    }
+
+    Console.print(showCode(tree))
+    tree
   }
 }
