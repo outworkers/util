@@ -19,6 +19,7 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.util.{Date, UUID}
 
+import com.outworkers.util.domain.Definitions
 import com.outworkers.util.macros.AnnotationToolkit
 import org.joda.time.DateTime
 
@@ -64,7 +65,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val enum: Symbol = typed[Enumeration#Value]
     val firstName: Symbol = typed[FirstName]
     val lastName: Symbol = typed[LastName]
-    val fullName: Symbol = typed[FullName]
+    val fullName: Symbol = typed[Definitions.FullName]
     val emailAddress: Symbol = typed[EmailAddress]
     val city: Symbol = typed[City]
     val country: Symbol = typed[Country]
@@ -88,7 +89,10 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       str.toLowerCase() match {
         case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
         case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "fullName" | "full_name" => extract(q"$domainPkg.FullName")
+        case "name" | "fullname" | "fullName" | "full_name" => {
+          Console.println(s"Attemping to infer full name for user with field $str")
+          extract(q"$domainPkg.FullName")
+        }
         case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
         case "country" => extract(q"$domainPkg.CountryCode")
         case _ => None
@@ -229,16 +233,19 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       }
 
       case _ => accessor.name match {
-        case KnownField(derived) => q"$prefix.gen[$derived].value"
-        case _ => q"$prefix.gen[${accessor.paramType}]"
+        case KnownField(derived) => q"$prefix.Sample.apply[$derived].sample.value"
+        case _ => q"$prefix.Sample.apply[${accessor.paramType}].sample"
       }
     }
   }
 
-  def makeSample(
+  def caseClassSample(
     tpe: Type
   ): Tree = {
     val applies = caseFields(tpe).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
+
+    Console.print("Inferring case class sampler for " + showCode(tq"$tpe"))
+    applies.foreach(i => Console.println(showCode(i)))
 
     q"""
       new $prefix.Sample[$tpe] {
@@ -313,7 +320,6 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val symbol = tpe.typeSymbol
 
     val tree = symbol match {
-      case sym if sym.isClass && sym.asClass.isCaseClass => makeSample(tpe)
       case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
@@ -335,11 +341,15 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
       case SamplersSymbols.firstName => sampler("FirstNameSampler")
       case SamplersSymbols.lastName => sampler("LastNameSampler")
-      case SamplersSymbols.fullName => sampler("FullNameSampler")
+      case SamplersSymbols.fullName =>{
+        Console.println("Matched full name symbol")
+        sampler("FullNameSampler")
+      }
       case SamplersSymbols.emailAddress => sampler("EmailAddressSampler")
       case SamplersSymbols.city => sampler("CitySampler")
       case SamplersSymbols.country => sampler("CountrySampler")
       case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
+      case sym if sym.isClass && sym.asClass.isCaseClass => caseClassSample(tpe)
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
 

@@ -101,7 +101,7 @@ object Samples extends Generators {
     def sample: UUID = UUID.randomUUID()
   }
 
-  class EmailSampler extends Sample[EmailAddress] {
+  class EmailAddressSampler extends Sample[EmailAddress] {
     def sample: EmailAddress = EmailAddress(new DataFactory().getEmailAddress)
   }
 
