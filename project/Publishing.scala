@@ -40,11 +40,11 @@ object Publishing {
   }
 
   val versionSettings = Seq(
-    version := "0.26.4",
+    version := "0.27.0",
     credentials ++= defaultCredentials
   )
 
-  lazy val pgpPass = Properties.envOrNone("pgp_passphrase").map(_.toCharArray)
+  lazy val pgpPass: Option[Array[Char]] = Properties.envOrNone("pgp_passphrase").map(_.toCharArray)
 
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),

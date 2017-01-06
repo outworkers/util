@@ -31,28 +31,28 @@ lazy val Versions = new {
 
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((major, minor)) if minor >= 11 => cats
+      case Some((_, minor)) if minor >= 11 => cats
       case _ => twitterUtil210
     }
   }
 
   val twitterUtilVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((major, minor)) if minor == 12 => twitterUtil
+      case Some((_, minor)) if minor == 12 => twitterUtil
       case _ => twitterUtil210
     }
   }
 
   val playVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((major, minor)) if minor >= 11 => play
+      case Some((_, minor)) if minor >= 11 => play
       case _ => "2.4.8"
     }
   }
 
   val liftVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((major, minor)) if minor >= 11 => lift
+      case Some((_, minor)) if minor >= 11 => lift
       case _ => "3.0-M1"
     }
   }

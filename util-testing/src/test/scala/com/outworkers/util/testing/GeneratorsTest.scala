@@ -42,7 +42,6 @@ class GeneratorsTest extends FlatSpec {
 
   it should "automatically derive generator samples for complex case classes" in {
     val sample = gen[CollectionSample]
-    Console.println(sample)
-    //info(sample.trace())
+    val user = gen[User]
   }
 }

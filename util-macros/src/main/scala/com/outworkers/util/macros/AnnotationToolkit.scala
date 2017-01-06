@@ -19,13 +19,30 @@ package com.outworkers.util.macros
 class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
   import c.universe._
 
+  val collectionPkg = q"scala.collection.immutable"
+
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
+
+  def caseFields(tpe: Type): Iterable[Accessor] = {
+    object CaseField {
+      def unapply(arg: TermSymbol): Option[(Name, Type)] = {
+        if (arg.isVal && arg.isCaseAccessor) {
+          Some(TermName(arg.name.toString.trim) -> arg.typeSignature)
+        } else {
+          None
+        }
+      }
+    }
+
+    tpe.decls.collect { case CaseField(name, fType) => Accessor(name.toTermName, fType)}
+  }
+
   object Symbols {
-    val listSymbol = typed[scala.collection.immutable.List[_]]
-    val setSymbol = typed[scala.collection.immutable.Set[_]]
-    val mapSymbol = typed[scala.collection.immutable.Map[_, _]]
-    val optSymbol = typed[scala.Option[_]]
+    val listSymbol: Symbol = typed[scala.collection.immutable.List[_]]
+    val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
+    val mapSymbol: Symbol = typed[scala.collection.immutable.Map[_, _]]
+    val optSymbol: Symbol = typed[scala.Option[_]]
   }
 
   case class Accessor(
@@ -122,4 +139,6 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
       }
     }
   }
+
+
 }

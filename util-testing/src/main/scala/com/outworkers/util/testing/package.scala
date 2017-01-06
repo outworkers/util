@@ -30,11 +30,6 @@ package object testing extends ScalaFutures
   with Generators
   with GenerationDomain {
 
-  @compileTimeOnly("Enable macro paradise to expand macro annotations")
-  class sample extends StaticAnnotation {
-    def macroTransform(annottees: Any*): Any = macro SamplerMacro.macroImpl
-  }
-
   implicit class Printer[T](val obj: T) extends AnyVal {
     def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
   }

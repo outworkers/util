@@ -15,24 +15,13 @@
  */
 package com.outworkers.util.testing
 
-import java.util.UUID
+import org.scalatest.Tag
 
-case class User(
-  id: UUID,
-  firstName: String,
-  lastName: String,
-  email: String
-)
+trait DefaultTags {
+  object DatabaseTest extends Tag("com.outworkers.testing.tags.DatabaseTest")
+  object ApiTest extends Tag("com.outworkers.testing.tags.ApiTest")
+  object RequestParserTest extends Tag("com.outworkers.testing.tags.RequestParserTest")
+  object UnstableTest extends Tag("com.outworkers.testing.tags.UnstableTest")
+}
 
-case class CollectionSample(
-  id: UUID,
-  firstName: String,
-  lastName: String,
-  name: String,
-  email: String,
-  tests: List[String],
-  sets: List[String],
-  map: Map[String, String],
-  emails: List[String],
-  opt: Option[Int]
-)
+

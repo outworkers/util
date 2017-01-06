@@ -15,16 +15,62 @@
  */
 package com.outworkers.util.testing
 
+import java.net.InetAddress
+import java.nio.ByteBuffer
+import java.util.{Date, UUID}
+
+import com.outworkers.util.domain.Definitions
 import com.outworkers.util.macros.AnnotationToolkit
+import org.joda.time.DateTime
+
+import scala.collection.concurrent.TrieMap
 
 @macrocompat.bundle
 class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extends AnnotationToolkit(c) {
 
   import c.universe._
 
+  /**
+    * Adds a caching layer for subsequent requests to materialise the same primitive type.
+    * This adds a simplistic caching layer that computes primitives based on types.
+    */
+  val treeCache: TrieMap[Symbol, Tree] = TrieMap.empty[Symbol, Tree]
+
   val prefix = q"com.outworkers.util.testing"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
-  val collectionPkg = q"scala.collection.immutable"
+  val definitions = "com.outworkers.util.domain.Definitions"
+
+  object SamplersSymbols {
+    val intSymbol: Symbol = typed[Int]
+    val byteSymbol: Symbol = typed[Byte]
+    val stringSymbol: Symbol = typed[String]
+    val boolSymbol: Symbol = typed[Boolean]
+    val shortSymbol: Symbol = typed[Short]
+    val longSymbol: Symbol = typed[Long]
+    val doubleSymbol: Symbol = typed[Double]
+    val floatSymbol: Symbol = typed[Float]
+    val dateSymbol: Symbol = typed[Date]
+    val shortString: Symbol= typed[ShortString]
+    val listSymbol: Symbol = typed[scala.collection.immutable.List[_]]
+    val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
+    val mapSymbol: Symbol = typed[scala.collection.immutable.Map[_, _]]
+    val dateTimeSymbol: Symbol = typed[DateTime]
+    val uuidSymbol: Symbol = typed[UUID]
+    val jodaLocalDateSymbol: Symbol = typed[org.joda.time.LocalDate]
+    val inetSymbol: Symbol = typed[InetAddress]
+    val bigInt: Symbol = typed[BigInt]
+    val bigDecimal: Symbol = typed[BigDecimal]
+    val optSymbol: Symbol = typed[Option[_]]
+    val buffer: Symbol = typed[ByteBuffer]
+    val enum: Symbol = typed[Enumeration#Value]
+    val firstName: Symbol = typed[FirstName]
+    val lastName: Symbol = typed[LastName]
+    val fullName: Symbol = typed[Definitions.FullName]
+    val emailAddress: Symbol = typed[EmailAddress]
+    val city: Symbol = typed[City]
+    val country: Symbol = typed[Country]
+    val countryCode: Symbol = typed[CountryCode]
+  }
 
   // val example: String => gen[String]
   // val firstName: String => gen[FirstName].value
@@ -37,23 +83,13 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   }
 
   object KnownField {
-    def unapply(nm: TermName): Option[TypeName] = {
-      val str = nm.decodedName.toString
-      str.toLowerCase() match {
-        case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
-        case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "full_name" => extract(q"$domainPkg.FullName")
-        case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
-        case "country" => extract(q"$domainPkg.CountryCode")
-        case _ => None
-      }
-    }
+    def unapply(nm: TermName): Option[TypeName] = unapply(nm.decodedName.toString)
 
     def unapply(str: String): Option[TypeName] = {
       str.toLowerCase() match {
         case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
         case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "full_name" => extract(q"$domainPkg.FullName")
+        case "name" | "fullname" | "fullName" | "full_name" => extract(q"$domainPkg.FullName")
         case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
         case "country" => extract(q"$domainPkg.CountryCode")
         case _ => None
@@ -92,7 +128,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
     def unapply(arg: Accessor): Option[MapType] = {
 
-      if (arg.symbol == Symbols.mapSymbol) {
+      if (arg.symbol == SamplersSymbols.mapSymbol) {
         arg.typeArgs match {
           case keyType :: listType :: Nil =>   Some(
             MapType(
@@ -123,7 +159,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
   object CollectionType {
     def unapply(arg: Accessor): Option[CollectionType] = {
-      if (arg.symbol == Symbols.listSymbol) {
+      if (arg.symbol == SamplersSymbols.listSymbol) {
         arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
@@ -134,7 +170,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
         }
-      } else if (arg.symbol == Symbols.setSymbol) {
+      } else if (arg.symbol == SamplersSymbols.setSymbol) {
         arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
@@ -164,7 +200,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   object OptionType {
     def unapply(arg: Accessor): Option[(OptionType)] = {
 
-      if (arg.symbol == Symbols.optSymbol) {
+      if (arg.symbol == SamplersSymbols.optSymbol) {
         arg.typeArgs match {
           case head :: Nil => Some(
             OptionType(
@@ -184,11 +220,9 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   private[this] def deriveSamplerType(accessor: Accessor): Tree = {
     accessor match {
       case MapType(col) => col.default
-      case OptionType(opt) => {
-        accessor.name match {
-          case KnownField(derived) => opt.generator(derived)
-          case _ => opt.default
-        }
+      case OptionType(opt) => accessor.name match {
+        case KnownField(derived) => opt.generator(derived)
+        case _ => opt.default
       }
       case CollectionType(col) => accessor.name match {
         case KnownField(derived) => col.generator(derived)
@@ -196,55 +230,118 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       }
 
       case _ => accessor.name match {
-        case KnownField(derived) => q"$prefix.gen[$derived].value"
-        case _ => q"$prefix.gen[${accessor.typeName}]"
+        case KnownField(derived) => q"$prefix.Sample.apply[$derived].sample.value"
+        case _ => q"$prefix.Sample.apply[${accessor.paramType}].sample"
       }
     }
   }
 
-  def makeSample(
-    typeName: c.TypeName,
-    name: c.TermName,
-    params: Seq[ValDef]
-  ): List[Tree] = {
+  def caseClassSample(
+    tpe: Type
+  ): Tree = {
+    val applies = caseFields(tpe).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
 
-    val fresh = c.freshName(name)
-
-    val applies = accessors(params).map { accessor => q"${accessor.name} = ${deriveSamplerType(accessor)}" }
-
-    val tree = q"""implicit object $fresh extends $prefix.Sample[$typeName] {
-      override def sample: $typeName = $name.apply(..$applies)
-    }"""
-
-    tree :: Nil
+    q"""
+      new $prefix.Sample[$tpe] {
+        override def sample: $tpe = ${tpe.typeSymbol.name.toTermName}.apply(..$applies)
+      }
+    """
   }
 
-  def macroImpl(annottees: c.Expr[Any]*): Tree = {
-    annottees.map(_.tree) match {
-      case tree@(classDef@q"$mods class $tpname[..$tparams] $ctorMods(...$params) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
-        :: Nil if mods.hasFlag(Flag.CASE) =>
-        val name = tpname.toTermName
-
+  def listSample(tpe: Type): Tree = {
+    tpe.typeArgs match {
+      case inner :: Nil => {
         q"""
-          $classDef
-          object $name {
-            ..${makeSample(tpname.toTypeName, name, params.head)}
+          new $prefix.Sample[$tpe] {
+            override def sample: $tpe = $prefix.Generate.genList[$inner]()
           }
         """
+      }
+      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
+    }
+  }
 
-      case tree@(classDef@q"$mods class $tpname[..$tparams] $ctorMods(...$paramss) extends { ..$earlydefns } with ..$parents { $self => ..$stats }")
-        :: q"object $objName extends { ..$objEarlyDefs } with ..$objParents { $objSelf => ..$objDefs }"
-        :: Nil if mods.hasFlag(Flag.CASE) =>
+  def tupleSample(tpe: Type): Tree = {
+    val comp = tpe.typeSymbol.name.toTermName
 
+    val samplers = tpe.typeArgs.map(t => q"$prefix.Sample[$t].sample")
+
+    q"""
+      new $prefix.Sample[$tpe] {
+        override def sample: $tpe = $comp.apply(..$samplers)
+      }
+    """
+  }
+
+  def mapSample(tpe: Type): Tree = {
+    tpe.typeArgs match {
+      case k :: v :: Nil =>
         q"""
-         $classDef
-         object $objName extends { ..$objEarlyDefs} with ..$objParents { $objSelf =>
-           ..${makeSample(tpname.toTypeName, tpname.toTermName, paramss.head)}
-           ..$objDefs
-         }
-         """
+          new $prefix.Sample[$tpe] {
+            override def sample: $tpe = $prefix.Generate.genMap[$k, $v]()
+          }
+        """
+      case _ => c.abort(c.enclosingPosition, "Expected exactly two type arguments to be provided to map")
+    }
+  }
 
-      case _ => c.abort(c.enclosingPosition, "Invalid annotation target, Sample must be a case classes")
+  def setSample(tpe: Type): Tree = {
+    tpe.typeArgs match {
+      case inner :: Nil =>
+        q"""
+          new $prefix.Sample[$tpe] {
+           override def sample: $tpe = $prefix.Generate.getList[$inner]().toSet
+          }
+        """
+      case _ => c.abort(c.enclosingPosition, "Expected inner type to be defined")
+    }
+  }
+
+  def enumPrimitive(tpe: Type): Tree = {
+    val comp = c.parse(s"${tpe.toString.replace("#Value", "")}")
+
+    q"""
+      new $prefix.Sample[$tpe] {
+        override def sample: $tpe = $prefix.Sample.oneOf($comp)
+      }
+    """
+  }
+
+  def sampler(nm: String): Tree = q"new $prefix.Samples.${TypeName(nm)}"
+
+  def materialize[T : c.WeakTypeTag]: Tree = {
+    val tpe = weakTypeOf[T]
+    val symbol = tpe.typeSymbol
+
+    symbol match {
+      case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
+      case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
+      case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
+      case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
+      case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case SamplersSymbols.stringSymbol => sampler("StringSampler")
+      case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
+      case SamplersSymbols.dateSymbol => sampler("DateSampler")
+      case SamplersSymbols.floatSymbol => sampler("FloatSampler")
+      case SamplersSymbols.longSymbol => sampler("LongSampler")
+      case SamplersSymbols.intSymbol => sampler("IntSampler")
+      case SamplersSymbols.shortString => sampler("ShortStringSampler")
+      case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
+      case SamplersSymbols.bigInt => sampler("BigIntSampler")
+      case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
+      case SamplersSymbols.dateTimeSymbol => sampler("DateTimeSampler")
+      case SamplersSymbols.jodaLocalDateSymbol => sampler("JodaLocalDateSampler")
+      case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
+      case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
+      case SamplersSymbols.firstName => sampler("FirstNameSampler")
+      case SamplersSymbols.lastName => sampler("LastNameSampler")
+      case SamplersSymbols.fullName =>sampler("FullNameSampler")
+      case SamplersSymbols.emailAddress => sampler("EmailAddressSampler")
+      case SamplersSymbols.city => sampler("CitySampler")
+      case SamplersSymbols.country => sampler("CountrySampler")
+      case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
+      case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
+      case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
   }
 }
