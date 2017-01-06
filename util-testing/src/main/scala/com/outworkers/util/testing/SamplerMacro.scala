@@ -40,27 +40,35 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   val definitions = "com.outworkers.util.domain.Definitions"
 
   object SamplersSymbols {
-    val intSymbol: c.universe.Symbol = typed[Int]
-    val byteSymbol = typed[Byte]
-    val stringSymbol = typed[String]
-    val boolSymbol = typed[Boolean]
-    val shortSymbol = typed[Short]
-    val longSymbol = typed[Long]
-    val doubleSymbol = typed[Double]
-    val floatSymbol = typed[Float]
-    val dateSymbol = typed[Date]
-    val listSymbol = typed[scala.collection.immutable.List[_]]
-    val setSymbol = typed[scala.collection.immutable.Set[_]]
-    val mapSymbol = typed[scala.collection.immutable.Map[_, _]]
-    val dateTimeSymbol = typed[DateTime]
-    val uuidSymbol = typed[UUID]
-    val jodaLocalDateSymbol = typed[org.joda.time.LocalDate]
-    val inetSymbol = typed[InetAddress]
-    val bigInt = typed[BigInt]
-    val bigDecimal = typed[BigDecimal]
-    val optSymbol = typed[Option[_]]
-    val buffer = typed[ByteBuffer]
-    val enum = typed[Enumeration#Value]
+    val intSymbol: Symbol = typed[Int]
+    val byteSymbol: Symbol = typed[Byte]
+    val stringSymbol: Symbol = typed[String]
+    val boolSymbol: Symbol = typed[Boolean]
+    val shortSymbol: Symbol = typed[Short]
+    val longSymbol: Symbol = typed[Long]
+    val doubleSymbol: Symbol = typed[Double]
+    val floatSymbol: Symbol = typed[Float]
+    val dateSymbol: Symbol = typed[Date]
+    val shortString: Symbol= typed[ShortString]
+    val listSymbol: Symbol = typed[scala.collection.immutable.List[_]]
+    val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
+    val mapSymbol: Symbol = typed[scala.collection.immutable.Map[_, _]]
+    val dateTimeSymbol: Symbol = typed[DateTime]
+    val uuidSymbol: Symbol = typed[UUID]
+    val jodaLocalDateSymbol: Symbol = typed[org.joda.time.LocalDate]
+    val inetSymbol: Symbol = typed[InetAddress]
+    val bigInt: Symbol = typed[BigInt]
+    val bigDecimal: Symbol = typed[BigDecimal]
+    val optSymbol: Symbol = typed[Option[_]]
+    val buffer: Symbol = typed[ByteBuffer]
+    val enum: Symbol = typed[Enumeration#Value]
+    val firstName: Symbol = typed[FirstName]
+    val lastName: Symbol = typed[LastName]
+    val fullName: Symbol = typed[FullName]
+    val emailAddress: Symbol = typed[EmailAddress]
+    val city: Symbol = typed[City]
+    val country: Symbol = typed[Country]
+    val countryCode: Symbol = typed[CountryCode]
   }
 
   // val example: String => gen[String]
@@ -74,23 +82,13 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   }
 
   object KnownField {
-    def unapply(nm: TermName): Option[TypeName] = {
-      val str = nm.decodedName.toString
-      str.toLowerCase() match {
-        case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
-        case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "full_name" => extract(q"$domainPkg.FullName")
-        case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
-        case "country" => extract(q"$domainPkg.CountryCode")
-        case _ => None
-      }
-    }
+    def unapply(nm: TermName): Option[TypeName] = unapply(nm.decodedName.toString)
 
     def unapply(str: String): Option[TypeName] = {
       str.toLowerCase() match {
         case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
         case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "full_name" => extract(q"$domainPkg.FullName")
+        case "name" | "fullname" | "fullName" | "full_name" => extract(q"$domainPkg.FullName")
         case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
         case "country" => extract(q"$domainPkg.CountryCode")
         case _ => None
@@ -308,20 +306,45 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     """
   }
 
-  def sampler(nm: String): Tree = q"new $prefix.Sample.${TypeName(nm)}"
+  def sampler(nm: String): Tree = q"new $prefix.Samples.${TypeName(nm)}"
 
   def materialize[T : c.WeakTypeTag]: Tree = {
     val tpe = weakTypeOf[T]
     val symbol = tpe.typeSymbol
 
-    symbol match {
+    val tree = symbol match {
       case sym if sym.isClass && sym.asClass.isCaseClass => makeSample(tpe)
       case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
       case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
       case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case SamplersSymbols.stringSymbol => sampler("StringSampler")
+      case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
+      case SamplersSymbols.dateSymbol => sampler("DateSampler")
+      case SamplersSymbols.floatSymbol => sampler("FloatSampler")
+      case SamplersSymbols.longSymbol => sampler("LongSampler")
+      case SamplersSymbols.intSymbol => sampler("IntSampler")
+      case SamplersSymbols.shortString => sampler("ShortStringSampler")
+      case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
+      case SamplersSymbols.bigInt => sampler("BigIntSampler")
+      case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
+      case SamplersSymbols.dateTimeSymbol => sampler("DateTimeSampler")
+      case SamplersSymbols.jodaLocalDateSymbol => sampler("JodaLocalDateSampler")
+      case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
+      case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
+      case SamplersSymbols.firstName => sampler("FirstNameSampler")
+      case SamplersSymbols.lastName => sampler("LastNameSampler")
+      case SamplersSymbols.fullName => sampler("FullNameSampler")
+      case SamplersSymbols.emailAddress => sampler("EmailAddressSampler")
+      case SamplersSymbols.city => sampler("CitySampler")
+      case SamplersSymbols.country => sampler("CountrySampler")
+      case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
+
+    print("Sampler for: " + showCode(tq"$tpe"))
+    println(showCode(tree))
+    tree
   }
 }
