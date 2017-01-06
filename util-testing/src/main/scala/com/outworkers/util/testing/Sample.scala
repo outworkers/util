@@ -85,7 +85,7 @@ object Samples extends Generators {
     def sample: BigInt = BigInt(Random.nextLong())
   }
 
-  class DateSample extends Sample[Date] {
+  class DateSampler extends Sample[Date] {
     def sample: Date = new Date()
   }
 
