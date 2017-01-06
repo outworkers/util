@@ -89,10 +89,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       str.toLowerCase() match {
         case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
         case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "fullName" | "full_name" => {
-          Console.println(s"Attemping to infer full name for user with field $str")
-          extract(q"$domainPkg.FullName")
-        }
+        case "name" | "fullname" | "fullName" | "full_name" => extract(q"$domainPkg.FullName")
         case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
         case "country" => extract(q"$domainPkg.CountryCode")
         case _ => None
@@ -243,9 +240,6 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     tpe: Type
   ): Tree = {
     val applies = caseFields(tpe).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
-
-    Console.print("Inferring case class sampler for " + showCode(tq"$tpe"))
-    applies.foreach(i => Console.println(showCode(i)))
 
     q"""
       new $prefix.Sample[$tpe] {
