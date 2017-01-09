@@ -102,7 +102,7 @@ object Samples extends Generators {
     def sample: DateTime = new DateTime(DateTimeZone.UTC)
   }
 
-  class LocalDateSampler extends Sample[LocalDate] {
+  class JodaLocalDateSampler extends Sample[LocalDate] {
     def sample: LocalDate = new LocalDate()
   }
 
