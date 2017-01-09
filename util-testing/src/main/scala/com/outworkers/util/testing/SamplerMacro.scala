@@ -167,7 +167,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
             CollectionType(
               source = sourceTpe,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.List, $tpe]"
+              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.List, $tpe].sample"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -178,7 +178,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
             CollectionType(
               source = sourceTpe,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.Set, $tpe]"
+              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.Set, $tpe].sample"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -208,7 +208,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
             OptionType(
               source = head,
               applier = applied => TypeName(s"scala.Option[$applied]"),
-              generator = tpe => q"""$prefix.genOpt[$head]"""
+              generator = t => q"""$prefix.genOpt[$t]"""
             )
           )
           case _ => c.abort(c.enclosingPosition, s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead")
