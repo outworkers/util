@@ -40,3 +40,5 @@ case class CollectionSample(
 )
 
 case class TupleRecord(id: UUID, tp: (String, Long))
+
+case class TupleCollectionRecord(id: UUID, tuples: List[(Int, String)])

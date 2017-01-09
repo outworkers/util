@@ -46,6 +46,7 @@ class GeneratorsTest extends FlatSpec {
     val sample = gen[CollectionSample]
     val user = gen[User]
     val tp = gen[TupleRecord]
+    val tpColl = gen[TupleCollectionRecord]
   }
 
 

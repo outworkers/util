@@ -22,6 +22,8 @@ import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
 import org.fluttercode.datafactory.impl.DataFactory
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
 import scala.util.Random
 
 trait Sample[T] {
@@ -38,11 +40,23 @@ object Sample {
     */
   implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
 
+  def collection[M[X] <: TraversableOnce[X], T : Sample](implicit cbf: CanBuildFrom[Nothing, T, M[T]]): Sample[M[T]] = {
+    new Sample[M[T]] {
+      override def sample: M[T] = {
+        val builder = cbf()
+        builder.sizeHint(com.outworkers.util.testing.defaultGeneration)
+        for (_ <- 1 to 5) builder += gen[T]
+        builder.result()
+      }
+    }
+  }
+
   def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]
 }
 
 
 object Samples extends Generators {
+
   class StringSampler extends Sample[String] {
     /**
       * Get a unique random generated string.

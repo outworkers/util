@@ -167,7 +167,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
             CollectionType(
               source = sourceTpe,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.genList[$tpe]($prefix.defaultGeneration)"
+              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.List, $tpe]"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -178,7 +178,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
             CollectionType(
               source = sourceTpe,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.genSet[$tpe]($prefix.defaultGeneration)"
+              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.Set, $tpe]"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -257,7 +257,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case inner :: Nil => {
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generate.genList[$inner]()
+            override def sample: $tpe = $prefix.Generate.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
           }
         """
       }
@@ -317,7 +317,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val tpe = weakTypeOf[T]
     val symbol = tpe.typeSymbol
 
-    symbol match {
+    val tree = symbol match {
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
@@ -351,5 +351,8 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
+
+    println(showCode(tree))
+    tree
   }
 }

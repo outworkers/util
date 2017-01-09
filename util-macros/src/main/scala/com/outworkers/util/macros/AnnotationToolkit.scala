@@ -35,7 +35,10 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
       }
     }
 
-    tpe.decls.collect { case CaseField(name, fType) => Accessor(name.toTermName, fType)}
+    tpe.decls.collect { case CaseField(name, fType) => {
+      Console.println(showCode(q"${name.toTermName}") + ":" + showCode(tq"$fType"))
+      Accessor(name.toTermName, fType)
+    }}
   }
 
 
