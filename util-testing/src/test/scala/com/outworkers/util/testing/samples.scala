@@ -28,6 +28,7 @@ case class CollectionSample(
   id: UUID,
   firstName: String,
   lastName: String,
+  sh: Short,
   name: String,
   email: String,
   tests: List[String],
