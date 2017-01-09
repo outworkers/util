@@ -29,6 +29,7 @@ case class CollectionSample(
   firstName: String,
   lastName: String,
   sh: Short,
+  b: Byte,
   name: String,
   email: String,
   tests: List[String],

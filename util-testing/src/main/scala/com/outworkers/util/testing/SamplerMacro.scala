@@ -270,17 +270,11 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
     val samplers = tpe.typeArgs.map(t => q"$prefix.Sample[$t].sample")
 
-    Console.println(s"Tuple types length: ${tpe.typeArgs.size}")
-    Console.println(showCode(tq"$tpe"))
-    Console.println(tpe.typeArgs.map(t => tq"$t").mkString("\n"))
-
-    val tree = q"""
+    q"""
       new $prefix.Sample[$tpe] {
         override def sample: $tpe = $comp.apply(..$samplers)
       }
     """
-    println(showCode(tree))
-    tree
   }
 
   def mapSample(tpe: Type): Tree = {
@@ -332,6 +326,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
       case SamplersSymbols.shortSymbol => sampler("ShortSampler")
       case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
+      case SamplersSymbols.byteSymbol => sampler("ByteSampler")
       case SamplersSymbols.dateSymbol => sampler("DateSampler")
       case SamplersSymbols.floatSymbol => sampler("FloatSampler")
       case SamplersSymbols.longSymbol => sampler("LongSampler")

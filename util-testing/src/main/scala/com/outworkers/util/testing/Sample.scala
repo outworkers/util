@@ -58,6 +58,10 @@ object Samples extends Generators {
     }
   }
 
+  class ByteSampler extends Sample[Byte] {
+    def sample: Byte = Random.nextInt(127).toByte
+  }
+
   class BooleanSampler extends Sample[Boolean] {
     def sample: Boolean = Random.nextBoolean()
   }
