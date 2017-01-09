@@ -70,6 +70,8 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val city: Symbol = typed[City]
     val country: Symbol = typed[Country]
     val countryCode: Symbol = typed[CountryCode]
+    val programmingLanguage: Symbol = typed[ProgrammingLanguage]
+    val url: Symbol = typed[Url]
   }
 
   // val example: String => gen[String]
@@ -239,7 +241,9 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   def caseClassSample(
     tpe: Type
   ): Tree = {
-    val applies = caseFields(tpe).map { a => q"${a.name} = ${deriveSamplerType(a)}" }
+    val applies = caseFields(tpe).map { a => {
+      q"${a.name} = ${deriveSamplerType(a)}"
+    } }
 
     q"""
       new $prefix.Sample[$tpe] {
@@ -266,11 +270,17 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
 
     val samplers = tpe.typeArgs.map(t => q"$prefix.Sample[$t].sample")
 
-    q"""
+    Console.println(s"Tuple types length: ${tpe.typeArgs.size}")
+    Console.println(showCode(tq"$tpe"))
+    Console.println(tpe.typeArgs.map(t => tq"$t").mkString("\n"))
+
+    val tree = q"""
       new $prefix.Sample[$tpe] {
         override def sample: $tpe = $comp.apply(..$samplers)
       }
     """
+    println(showCode(tree))
+    tree
   }
 
   def mapSample(tpe: Type): Tree = {
@@ -314,12 +324,13 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val symbol = tpe.typeSymbol
 
     symbol match {
-      case sym if sym.name.toTypeName.decodedName.toString.contains("Tuple") => tupleSample(tpe)
+      case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
       case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
       case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
+      case SamplersSymbols.shortSymbol => sampler("ShortSampler")
       case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
       case SamplersSymbols.dateSymbol => sampler("DateSampler")
       case SamplersSymbols.floatSymbol => sampler("FloatSampler")
@@ -340,6 +351,8 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case SamplersSymbols.city => sampler("CitySampler")
       case SamplersSymbols.country => sampler("CountrySampler")
       case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
+      case SamplersSymbols.programmingLanguage => sampler("ProgrammingLanguageSampler")
+      case SamplersSymbols.url => sampler("UrlSampler")
       case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }

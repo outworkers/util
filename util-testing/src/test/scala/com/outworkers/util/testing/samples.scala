@@ -36,3 +36,5 @@ case class CollectionSample(
   emails: List[String],
   opt: Option[Int]
 )
+
+case class TupleRecord(id: UUID, tp: (String, Long))

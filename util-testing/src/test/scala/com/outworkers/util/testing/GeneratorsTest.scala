@@ -15,6 +15,8 @@
  */
 package com.outworkers.util.testing
 
+import java.util.UUID
+
 import org.scalatest.FlatSpec
 
 class GeneratorsTest extends FlatSpec {
@@ -43,5 +45,8 @@ class GeneratorsTest extends FlatSpec {
   it should "automatically derive generator samples for complex case classes" in {
     val sample = gen[CollectionSample]
     val user = gen[User]
+    val tp = gen[TupleRecord]
   }
+
+
 }

@@ -15,6 +15,7 @@
  */
 package com.outworkers.util.testing
 
+import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
@@ -63,6 +64,10 @@ object Samples extends Generators {
 
   class IntSampler extends Sample[Int] {
     def sample: Int = Random.nextInt()
+  }
+
+  class ShortSampler extends Sample[Short] {
+    def sample: Short = Random.nextInt(256).toShort
   }
 
   class DoubleSampler extends Sample[Double] {
@@ -127,6 +132,21 @@ object Samples extends Generators {
 
   class CitySampler extends Sample[City] {
     def sample: City = City(Gen.oneOf(CommonDataSamplers.Cities).sample.get)
+  }
+
+  class InetAddressSampler extends Sample[InetAddress] {
+    def sample: InetAddress = {
+
+      val r = new Random()
+      val source = List[Byte](
+        r.nextInt(256).toByte,
+        r.nextInt(256).toByte,
+        r.nextInt(256).toByte,
+        r.nextInt(256).toByte
+      ).toArray
+
+      InetAddress.getByAddress(source)
+    }
   }
 
   class ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {

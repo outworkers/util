@@ -27,7 +27,9 @@ private[util] trait Generators extends GenerationDomain {
 
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
 
-  def genList[T : Sample](size: Int = defaultGeneration): List[T] = List.tabulate(size)(i => gen[T])
+  def genList[T : Sample](size: Int = defaultGeneration): List[T] = List.tabulate(size)(_ => gen[T])
+
+  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = genList[T](size).toSet[T]
 
   def genMap[T : Sample](size: Int = defaultGeneration): Map[String, T] = {
     genList[T](size).map(item => (item.toString, item)).toMap

@@ -38,6 +38,11 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
     tpe.decls.collect { case CaseField(name, fType) => Accessor(name.toTermName, fType)}
   }
 
+
+  def isTuple(tpe: Type): Boolean = {
+    tpe.typeSymbol.fullName startsWith "scala.Tuple"
+  }
+
   object Symbols {
     val listSymbol: Symbol = typed[scala.collection.immutable.List[_]]
     val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
