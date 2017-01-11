@@ -159,7 +159,7 @@ object Samples extends Generators {
 
   class InetAddressSampler extends Sample[InetAddress] {
     def sample: InetAddress = {
-      InetAddress.getByAddress(genList[Byte](inetBlock).toArray)
+      InetAddress.getByAddress(List.tabulate(inetBlock)(_ => new ByteSampler().sample).toArray)
     }
   }
 
