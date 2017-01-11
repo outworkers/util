@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 if [ "${TRAVIS_SCALA_VERSION}" == "2.11.8" ] && [ "${TRAVIS_JDK_VERSION}" == "oraclejdk8" ];
 then
