@@ -45,7 +45,7 @@ object Sample {
       override def sample: M[T] = {
         val builder = cbf()
         builder.sizeHint(com.outworkers.util.testing.defaultGeneration)
-        for (_ <- 1 to 5) builder += gen[T]
+        for (_ <- 1 to defaultGeneration) builder += gen[T]
         builder.result()
       }
     }
@@ -56,6 +56,11 @@ object Sample {
 
 
 object Samples extends Generators {
+
+
+  private[this] val byteLimit = 127
+  private[this] val shortLimit = 256
+  private[this] val inetBlock = 4
 
   class StringSampler extends Sample[String] {
     /**
@@ -85,7 +90,7 @@ object Samples extends Generators {
   }
 
   class ShortSampler extends Sample[Short] {
-    def sample: Short = Random.nextInt(256).toShort
+    def sample: Short = Random.nextInt(shortLimit).toShort
   }
 
   class DoubleSampler extends Sample[Double] {
@@ -117,7 +122,7 @@ object Samples extends Generators {
   }
 
   class JodaLocalDateSampler extends Sample[LocalDate] {
-    def sample: LocalDate = new LocalDate()
+    def sample: LocalDate = new LocalDate(DateTimeZone.UTC)
   }
 
   class UUIDSampler extends Sample[UUID] {
@@ -154,16 +159,7 @@ object Samples extends Generators {
 
   class InetAddressSampler extends Sample[InetAddress] {
     def sample: InetAddress = {
-
-      val r = new Random()
-      val source = List[Byte](
-        r.nextInt(256).toByte,
-        r.nextInt(256).toByte,
-        r.nextInt(256).toByte,
-        r.nextInt(256).toByte
-      ).toArray
-
-      InetAddress.getByAddress(source)
+      InetAddress.getByAddress(genList[Byte](inetBlock).toArray)
     }
   }
 

@@ -168,10 +168,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     def unapply(arg: Accessor): Option[CollectionType] = {
       if (arg.symbol == SamplersSymbols.listSymbol) {
         arg.typeArgs match {
-          case sourceTpe :: Nil =>
-            Console.println(showCode(tq"$sourceTpe"))
-
-            Some(
+          case sourceTpe :: Nil => Some(
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
@@ -321,7 +318,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val tpe = weakTypeOf[T]
     val symbol = tpe.typeSymbol
 
-    val tree = symbol match {
+    symbol match {
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
@@ -355,8 +352,5 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
-
-    println(showCode(tree))
-    tree
   }
 }
