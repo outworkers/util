@@ -28,6 +28,8 @@ case class CollectionSample(
   id: UUID,
   firstName: String,
   lastName: String,
+  sh: Short,
+  b: Byte,
   name: String,
   email: String,
   tests: List[String],
@@ -36,3 +38,7 @@ case class CollectionSample(
   emails: List[String],
   opt: Option[Int]
 )
+
+case class TupleRecord(id: UUID, tp: (String, Long))
+
+case class TupleCollectionRecord(id: UUID, tuples: List[(Int, String)])

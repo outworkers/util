@@ -36,7 +36,7 @@ private[util] object Definitions {
   case class ShortString(str: String) extends GeneratedValue(str)
 }
 
-private[util] trait GenerationDomain {
+trait GenerationDomain {
   type EmailAddress = Definitions.EmailAddress
   val EmailAddress = Definitions.EmailAddress
 
@@ -74,4 +74,4 @@ private[util] trait GenerationDomain {
   val ShortString = Definitions.ShortString
 }
 
-private[util] object GenerationDomain extends GenerationDomain
+object GenerationDomain extends GenerationDomain

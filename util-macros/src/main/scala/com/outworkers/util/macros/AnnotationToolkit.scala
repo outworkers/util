@@ -23,7 +23,6 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
 
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
-
   def caseFields(tpe: Type): Iterable[Accessor] = {
     object CaseField {
       def unapply(arg: TermSymbol): Option[(Name, Type)] = {
@@ -35,7 +34,14 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
       }
     }
 
-    tpe.decls.collect { case CaseField(name, fType) => Accessor(name.toTermName, fType)}
+    tpe.decls.collect { case CaseField(name, fType) => {
+      Accessor(name.toTermName, fType)
+    }}
+  }
+
+
+  def isTuple(tpe: Type): Boolean = {
+    tpe.typeSymbol.fullName startsWith "scala.Tuple"
   }
 
   object Symbols {

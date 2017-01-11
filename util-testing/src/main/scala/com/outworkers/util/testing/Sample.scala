@@ -15,12 +15,15 @@
  */
 package com.outworkers.util.testing
 
+import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
 import org.fluttercode.datafactory.impl.DataFactory
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
 import scala.util.Random
 
 trait Sample[T] {
@@ -37,11 +40,28 @@ object Sample {
     */
   implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
 
+  def collection[M[X] <: TraversableOnce[X], T : Sample](implicit cbf: CanBuildFrom[Nothing, T, M[T]]): Sample[M[T]] = {
+    new Sample[M[T]] {
+      override def sample: M[T] = {
+        val builder = cbf()
+        builder.sizeHint(com.outworkers.util.testing.defaultGeneration)
+        for (_ <- 1 to defaultGeneration) builder += gen[T]
+        builder.result()
+      }
+    }
+  }
+
   def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]
 }
 
 
 object Samples extends Generators {
+
+
+  private[this] val byteLimit = 127
+  private[this] val shortLimit = 256
+  private[this] val inetBlock = 4
+
   class StringSampler extends Sample[String] {
     /**
       * Get a unique random generated string.
@@ -57,12 +77,20 @@ object Samples extends Generators {
     }
   }
 
+  class ByteSampler extends Sample[Byte] {
+    def sample: Byte = Random.nextInt(byteLimit).toByte
+  }
+
   class BooleanSampler extends Sample[Boolean] {
     def sample: Boolean = Random.nextBoolean()
   }
 
   class IntSampler extends Sample[Int] {
     def sample: Int = Random.nextInt()
+  }
+
+  class ShortSampler extends Sample[Short] {
+    def sample: Short = Random.nextInt(shortLimit).toShort
   }
 
   class DoubleSampler extends Sample[Double] {
@@ -93,8 +121,8 @@ object Samples extends Generators {
     def sample: DateTime = new DateTime(DateTimeZone.UTC)
   }
 
-  class LocalDateSampler extends Sample[LocalDate] {
-    def sample: LocalDate = new LocalDate()
+  class JodaLocalDateSampler extends Sample[LocalDate] {
+    def sample: LocalDate = new LocalDate(DateTimeZone.UTC)
   }
 
   class UUIDSampler extends Sample[UUID] {
@@ -127,6 +155,12 @@ object Samples extends Generators {
 
   class CitySampler extends Sample[City] {
     def sample: City = City(Gen.oneOf(CommonDataSamplers.Cities).sample.get)
+  }
+
+  class InetAddressSampler extends Sample[InetAddress] {
+    def sample: InetAddress = {
+      InetAddress.getByAddress(List.tabulate(inetBlock)(_ => new ByteSampler().sample).toArray)
+    }
   }
 
   class ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
