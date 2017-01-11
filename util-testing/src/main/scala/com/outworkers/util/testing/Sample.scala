@@ -78,7 +78,7 @@ object Samples extends Generators {
   }
 
   class ByteSampler extends Sample[Byte] {
-    def sample: Byte = Random.nextInt(127).toByte
+    def sample: Byte = Random.nextInt(byteLimit).toByte
   }
 
   class BooleanSampler extends Sample[Boolean] {
