@@ -80,23 +80,36 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   // val emails: List[String] => genList[EmailAddress].map(_.value)
   // val sample: List[String] => genList[String]
 
-  def extract(exp: Tree): Option[TypeName] = {
-    Some(c.typecheck(exp, c.TYPEmode).tpe.typeSymbol.name.toTypeName)
+  def extract(exp: Tree): Option[Type] = {
+    Some(c.typecheck(exp, c.TYPEmode).tpe)
   }
 
   object KnownField {
-    def unapply(nm: TermName): Option[TypeName] = unapply(nm.decodedName.toString)
+    def unapply(nm: TermName): Option[Type] = unapply(nm.decodedName.toString)
 
-    def unapply(str: String): Option[TypeName] = {
+    def unapply(str: String): Option[Type] = {
       str.toLowerCase() match {
-        case "first_name" | "firstname" => extract(q"$domainPkg.FirstName")
-        case "last_name" | "lastname" => extract(q"$domainPkg.LastName")
-        case "name" | "fullname" | "fullName" | "full_name" => extract(q"$domainPkg.FullName")
-        case "email" | "email_address" | "emailaddress" => extract(q"$domainPkg.EmailAddress")
-        case "country" => extract(q"$domainPkg.CountryCode")
+        case "first_name" | "firstname" => extract(tq"$domainPkg.FirstName")
+        case "last_name" | "lastname" => extract(tq"$domainPkg.LastName")
+        case "name" | "fullname" | "fullName" | "full_name" => extract(tq"$domainPkg.FullName")
+        case "email" | "email_address" | "emailaddress" => extract(tq"$domainPkg.EmailAddress")
+        case "country" => extract(tq"$domainPkg.CountryCode")
         case _ => None
       }
     }
+  }
+
+  trait TypeExtractor {
+
+    def sources: List[Type]
+
+    def applier: List[Type] => TypeName
+
+    def infer: TypeName = applier(sources)
+
+    def generator: List[Type] => Tree
+
+    def default: Tree = generator(sources)
   }
 
   /**
@@ -114,18 +127,14 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   case class MapType(
     sources: List[Type],
     applier: List[Type] => TypeName,
-    generator: List[TypeName] => Tree
-  ) {
-    def infer: TypeName = applier(sources)
-
-    def default: Tree = generator(sources.map(sym => sym.typeSymbol.name.toTypeName))
-  }
+    generator: List[Type] => Tree
+  ) extends TypeExtractor
 
   object MapType {
     def apply(
       source: Type,
       applier: List[Type] => TypeName,
-      generator: List[TypeName] => Tree
+      generator: List[Type] => Tree
     ): Option[MapType] = Some(new MapType(source :: Nil, applier, generator))
 
     def unapply(arg: Accessor): Option[MapType] = {
@@ -150,24 +159,23 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   }
 
   case class CollectionType(
-    source: Type,
-    applier: Type => TypeName,
-    generator: TypeName => Tree
-  ) {
-    def infer: TypeName = applier(source)
-
-    def default: Tree = generator(source.typeSymbol.name.toTypeName)
-  }
+    sources: List[Type],
+    applier: List[Type] => TypeName,
+    generator: List[Type] => Tree
+  ) extends TypeExtractor
 
   object CollectionType {
     def unapply(arg: Accessor): Option[CollectionType] = {
       if (arg.symbol == SamplersSymbols.listSymbol) {
         arg.typeArgs match {
-          case sourceTpe :: Nil => Some(
+          case sourceTpe :: Nil =>
+            Console.println(showCode(tq"$sourceTpe"))
+
+            Some(
             CollectionType(
-              source = sourceTpe,
+              sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.List, $tpe].sample"
+              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.List, ..$tpe].sample"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -176,9 +184,9 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
         arg.typeArgs match {
           case sourceTpe :: Nil => Some(
             CollectionType(
-              source = sourceTpe,
+              sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.Set, $tpe].sample"
+              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.Set, ..$tpe].sample"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -190,14 +198,10 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
   }
 
   case class OptionType(
-    source: Type,
-    applier: Type => TypeName,
-    generator: TypeName => Tree
-  ) {
-    def infer: TypeName = applier(source)
-
-    def default: Tree = generator(source.typeSymbol.name.toTypeName)
-  }
+    sources: List[Type],
+    applier: List[Type] => TypeName,
+    generator: List[Type] => Tree
+  ) extends TypeExtractor
 
   object OptionType {
     def unapply(arg: Accessor): Option[(OptionType)] = {
@@ -206,9 +210,9 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
         arg.typeArgs match {
           case head :: Nil => Some(
             OptionType(
-              source = head,
-              applier = applied => TypeName(s"scala.Option[$applied]"),
-              generator = t => q"""$prefix.genOpt[$t]"""
+              sources = head :: Nil,
+              applier = applied => TypeName(s"scala.Option[..$applied]"),
+              generator = t => q"""$prefix.genOpt[..$t]"""
             )
           )
           case _ => c.abort(c.enclosingPosition, s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead")
@@ -223,11 +227,11 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     accessor match {
       case MapType(col) => col.default
       case OptionType(opt) => accessor.name match {
-        case KnownField(derived) => opt.generator(derived)
+        case KnownField(derived) => opt.generator(derived :: Nil)
         case _ => opt.default
       }
       case CollectionType(col) => accessor.name match {
-        case KnownField(derived) => col.generator(derived)
+        case KnownField(derived) => col.generator(derived :: Nil)
         case _ => col.default
       }
 
