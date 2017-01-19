@@ -3,6 +3,9 @@ package com.outworkers.util.testing
 import com.outworkers.util.domain.GenerationDomain
 import org.scalacheck.Gen
 
+import scala.collection.generic.CanBuildFrom
+import scala.collection.mutable
+
 private[util] trait Generators extends GenerationDomain {
 
   protected[this] val domains = List("net", "com", "org", "io", "biz", "co.uk", "co.za")
@@ -17,19 +20,29 @@ private[util] trait Generators extends GenerationDomain {
    */
   def gen[T : Sample]: T = implicitly[Sample[T]].sample
 
-  /**
-   * Generates a tuple of the given type arguments, using the implicit samplers in scope.
-   * @tparam X The first type of the tuple to be sampled.
-   * @tparam Y The second type of the type to be sampled.
-   * @return A Tuple2[X, Y] generated using the implicit samplers.
-   */
-  def gen[X: Sample, Y: Sample]: (X, Y) = (gen[X], gen[Y])
-
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
 
-  def genList[T : Sample](size: Int = defaultGeneration): List[T] = List.tabulate(size)(_ => gen[T])
+  def genList[T : Sample](size: Int = defaultGeneration): List[T] = gen[List, T](size)
 
-  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = genList[T](size).toSet[T]
+  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = gen[Set, T](size)
+
+  /**
+    * Generates a list of elements based on an input collection type.
+    * @param size The number of elements to generate
+    * @param cbf The implicit builder
+    * @tparam M
+    * @tparam T
+    * @return
+    */
+  def gen[M[X] <: TraversableOnce[X], T](size: Int = defaultGeneration)(
+    implicit cbf: CanBuildFrom[Nothing, T, M[T]],
+    sampler: Sample[T]
+  ): M[T] = {
+    val builder = cbf()
+    builder.sizeHint(size)
+    for (_ <- 1 to size) builder += gen[T]
+    builder.result()
+  }
 
   def genMap[T : Sample](size: Int = defaultGeneration): Map[String, T] = {
     genList[T](size).map(item => (item.toString, item)).toMap
