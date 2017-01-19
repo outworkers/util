@@ -22,17 +22,13 @@ private[util] trait Generators extends GenerationDomain {
 
   def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
 
-  def genList[T : Sample](size: Int = defaultGeneration): List[T] = gen[List, T](size)
-
-  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = gen[Set, T](size)
-
   /**
     * Generates a list of elements based on an input collection type.
     * @param size The number of elements to generate
     * @param cbf The implicit builder
-    * @tparam M
-    * @tparam T
-    * @return
+    * @tparam M The type of collection to build
+    * @tparam T The type of the underlying sampled type.
+    * @return A Collection of "size" elements with type T.
     */
   def gen[M[X] <: TraversableOnce[X], T](size: Int = defaultGeneration)(
     implicit cbf: CanBuildFrom[Nothing, T, M[T]],
@@ -44,8 +40,15 @@ private[util] trait Generators extends GenerationDomain {
     builder.result()
   }
 
-  def genMap[T : Sample](size: Int = defaultGeneration): Map[String, T] = {
-    genList[T](size).map(item => (item.toString, item)).toMap
+  def genList[T : Sample](size: Int = defaultGeneration): List[T] = gen[List, T](size)
+
+  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = gen[Set, T](size)
+
+  def genMap[T, A1, A2](size: Int = defaultGeneration)(
+    implicit ev: T <:< (A1, A2),
+    sampler: Sample[T]
+  ): Map[A1, A2] = {
+    gen[List, T](size).toMap[A1, A2]
   }
 
   /**
@@ -56,31 +59,10 @@ private[util] trait Generators extends GenerationDomain {
    * @return A key -> value map generated using the pre-defined samples for Key and Value.
    */
   def genMap[Key : Sample, Value : Sample](size: Int): Map[Key, Value] = {
-    List.tabulate(size)(i => (gen[Key], gen[Value])).toMap
-  }
-
-  /**
-   * Generates a map using a Sampler for the key and a function Key -> Value for the value.
-   * Useful when the value of a key can be inferred by knowing the key itself.
-   *
-   * The implementation uses the value during mapping as the genMap function called with
-   * a single type argument will generate a Map[String, Type].
-   *
-   * @param size The size of the map to generate.
-   * @param producer The function used to generate the value from a key.
-   * @tparam Key The type of the Key to generate, needs to have a Sample available in scope.
-   * @tparam Value The type of the Value to generate.
-   * @return A map of the given size with sampled keys and values inferred by the producer function.
-   */
-  def genMap[Key : Sample, Value](size: Int, producer: Key => Value): Map[Key, Value] = {
-    genMap[Key](size) map {
-      case (k, v) => (v, producer(v))
-    }
+    gen[List, (Key, Value)](size).toMap
   }
 
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
 
-  def oneOf[T <: Enumeration](enum: T): T#Value = {
-    oneOf(enum.values.toList)
-  }
+  def oneOf[T <: Enumeration](enum: T): T#Value = oneOf(enum.values.toList)
 }
