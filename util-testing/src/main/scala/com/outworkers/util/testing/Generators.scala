@@ -50,17 +50,6 @@ private[util] trait Generators extends GenerationDomain {
     gen[List, T](size).toMap[A1, A2]
   }
 
-  /**
-   * Generates a map of known key -> value types using implicit samplers.
-   * @param size The number of elements to generate in the map.
-   * @tparam Key The type of the key the generated map should have. Needs a Sample[Key] in scope.
-   * @tparam Value The type of the value the generated map should have. Needs a Sample[Value] in scope.
-   * @return A key -> value map generated using the pre-defined samples for Key and Value.
-   */
-  def genMap[Key : Sample, Value : Sample](size: Int): Map[Key, Value] = {
-    gen[List, (Key, Value)](size).toMap
-  }
-
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
 
   def oneOf[T <: Enumeration](enum: T): T#Value = oneOf(enum.values.toList)
