@@ -258,7 +258,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case inner :: Nil => {
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generate.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
+            override def sample: $tpe = $prefix.Generators.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
           }
         """
       }
@@ -283,7 +283,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case k :: v :: Nil =>
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generate.genMap[$k, $v]()
+            override def sample: $tpe = $prefix.Generators.genMap[$k, $v]()
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected exactly two type arguments to be provided to map")
@@ -295,7 +295,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case inner :: Nil =>
         q"""
           new $prefix.Sample[$tpe] {
-           override def sample: $tpe = $prefix.Generate.getList[$inner]().toSet
+           override def sample: $tpe = $prefix.Generators.getList[$inner]().toSet
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected inner type to be defined")

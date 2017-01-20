@@ -11,11 +11,11 @@ package object tags {
   }
 
   implicit class TagfOps[F[_], A](val fa: F[A]) extends AnyVal {
-    def tagf[T]: F[A @@ T] = Tag.wrapf[F, A, T](fa)
+    def tagf[T]: F[A @@ T] =  macro Tags.wrapfMacro[F, A, T](fa)
   }
 
   implicit class UntagfOps[F[_], A, T](val fat: F[A @@ T]) {
-    def untagf: F[A] = Tag.unwrapf[F, A, T](fat)
+    def untagf: F[A] = macro Tags.unwrapfMacro[F, A, T](fat)
   }
 
 }

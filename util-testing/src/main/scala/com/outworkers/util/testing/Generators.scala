@@ -4,7 +4,6 @@ import com.outworkers.util.domain.GenerationDomain
 import org.scalacheck.Gen
 
 import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
 
 private[util] trait Generators extends GenerationDomain {
 
@@ -66,3 +65,5 @@ private[util] trait Generators extends GenerationDomain {
 
   def oneOf[T <: Enumeration](enum: T): T#Value = oneOf(enum.values.toList)
 }
+
+object Generators extends Generators

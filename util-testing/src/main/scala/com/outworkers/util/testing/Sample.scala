@@ -129,10 +129,6 @@ object Samples extends Generators {
     def sample: UUID = UUID.randomUUID()
   }
 
-  class TimeUUIDSampler extends Sample[UUID @@ TimeUUIDTag] {
-    override def sample: UUID @@ TimeUUIDTag = UUIDs.
-  }
-
   class EmailAddressSampler extends Sample[EmailAddress] {
     def sample: EmailAddress = EmailAddress(new DataFactory().getEmailAddress)
   }
