@@ -15,7 +15,8 @@
  */
 package com.outworkers.util
 
-package object tags {
+package object tags extends DefaultTaggedTypes {
+
   type @@[A, T] = Tags.Aux[A, T]
 
   implicit class TagOps[A](a: A) {

@@ -57,7 +57,7 @@ object Sample {
 }
 
 
-object Samples extends Generators with DefaultTaggedTypes {
+object Samples extends Generators {
 
   def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
     override def sample: T1 = fn(gen[T])
