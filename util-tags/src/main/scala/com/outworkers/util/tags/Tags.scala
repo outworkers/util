@@ -63,13 +63,4 @@ object Tags {
 
   def wrap[A, T](a: A): A @@ T = macro Tags.wrapMacro[A, T]
   def unwrap[A, T](at: A @@ T): A = macro Tags.unwrapMacro[A, T]
-
-  implicit class TagOps[A](a: A) {
-    def tag[T]: A @@ T = macro Tags.tagMacro[A, T]
-  }
-
-  implicit class UntagOps[A, T](at: A @@ T) {
-    def untag: A = macro Tags.untagMacro[A, T]
-  }
-
 }
