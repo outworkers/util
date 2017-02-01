@@ -29,12 +29,12 @@ class GeneratorsTest extends FlatSpec {
   it should "generate a sized map based on the given size argument" in {
     val limit = 10
 
-    assert(genMap[String](limit).size == limit)
+    assert(genMap[String, String](limit).size == limit)
   }
 
   it should "generate a sized map of known key and value types" in {
     val limit = 10
-    assert(genMap[Int, Int](limit).size == limit)
+    assert(genMap[String, String](limit).size == limit)
   }
 
   it should "automatically derive valid samples" in {

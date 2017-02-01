@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.UUID
-
 import com.twitter.sbt.{GitProject, VersionManagement}
 import sbt.Keys._
 
@@ -30,6 +28,7 @@ lazy val Versions = new {
   val scalacheck = "1.13.4"
   val datafactory = "0.8"
   val play = "2.5.8"
+  val shapeless = "2.3.2"
 
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
@@ -90,6 +89,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   validators,
   testing,
   macros,
+  tags,
   urls
 )
 
@@ -150,6 +150,27 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
     testing % Test
   )
 
+lazy val tags = (project in file("util-tags"))
+  .settings(sharedSettings: _*)
+  .settings(
+    moduleName := "util-tags",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
+    scalacOptions ++= Seq(
+      "-language:experimental.macros"
+    ),
+    libraryDependencies ++= Seq(
+      "com.eaio.uuid" % "uuid" % "3.2",
+      "org.typelevel" %% "macro-compat" % "1.1.1",
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      "org.scalatest"                    %% "scalatest"                % Versions.scalatest % Test,
+      "org.fluttercode.datafactory"      %  "datafactory"              % Versions.datafactory % Test
+    )
+  ).dependsOn(
+  domain,
+  macros
+)
+
 lazy val testing = (project in file("util-testing"))
   .settings(sharedSettings: _*)
   .settings(
@@ -171,6 +192,7 @@ lazy val testing = (project in file("util-testing"))
     )
   ).dependsOn(
     domain,
+    tags,
     macros
   )
 

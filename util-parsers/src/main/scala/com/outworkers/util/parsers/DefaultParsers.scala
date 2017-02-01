@@ -151,7 +151,7 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
      * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
      */
     override def parse(str: String): ValidationNel[String, Long] = {
-      Try(str.toLong).asValidation
+      Try(java.lang.Long.parseLong(str)).asValidation
     }
 }
 
@@ -301,7 +301,7 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
 
   final def enum[T <: Enumeration](obj: String, enum: T): ValidationNel[String, T#Value] = {
     Try(enum.withName(obj)).toOption
-      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(item => item.successNel[String])
+      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(_.successNel[String])
   }
 
 }

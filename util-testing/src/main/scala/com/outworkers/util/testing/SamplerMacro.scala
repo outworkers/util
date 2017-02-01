@@ -24,6 +24,7 @@ import com.outworkers.util.macros.AnnotationToolkit
 import org.joda.time.DateTime
 
 import scala.collection.concurrent.TrieMap
+import com.outworkers.util.tags._
 
 @macrocompat.bundle
 class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extends AnnotationToolkit(c) {
@@ -56,6 +57,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val mapSymbol: Symbol = typed[scala.collection.immutable.Map[_, _]]
     val dateTimeSymbol: Symbol = typed[DateTime]
     val uuidSymbol: Symbol = typed[UUID]
+    val timeUuidSymbol: Symbol = typed[UUID @@ TimeUUIDTag]
     val jodaLocalDateSymbol: Symbol = typed[org.joda.time.LocalDate]
     val inetSymbol: Symbol = typed[InetAddress]
     val bigInt: Symbol = typed[BigInt]
@@ -258,7 +260,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case inner :: Nil => {
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generate.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
+            override def sample: $tpe = $prefix.Generators.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
           }
         """
       }
@@ -283,7 +285,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case k :: v :: Nil =>
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generate.genMap[$k, $v]()
+            override def sample: $tpe = $prefix.Generators.genMap[$k, $v]()
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected exactly two type arguments to be provided to map")
@@ -295,7 +297,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case inner :: Nil =>
         q"""
           new $prefix.Sample[$tpe] {
-           override def sample: $tpe = $prefix.Generate.getList[$inner]().toSet
+           override def sample: $tpe = $prefix.Generators.getList[$inner]().toSet
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected inner type to be defined")
@@ -324,6 +326,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
       case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
       case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case SamplersSymbols.timeUuidSymbol => sampler("TimeUUIDSampler")
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
       case SamplersSymbols.shortSymbol => sampler("ShortSampler")
       case SamplersSymbols.boolSymbol => sampler("BooleanSampler")

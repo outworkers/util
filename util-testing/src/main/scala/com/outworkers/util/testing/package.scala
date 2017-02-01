@@ -16,19 +16,19 @@
 package com.outworkers.util
 
 import com.outworkers.util.domain.GenerationDomain
+import com.outworkers.util.tags.DefaultTaggedTypes
 import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 
-import scala.annotation.{StaticAnnotation, compileTimeOnly}
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures
-  with DefaultTags
   with ScalaTestHelpers
   with Generators
-  with GenerationDomain {
+  with GenerationDomain
+  with DefaultTaggedTypes {
 
   implicit class Printer[T](val obj: T) extends AnyVal {
     def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
@@ -41,9 +41,7 @@ package object testing extends ScalaFutures
   }
 
   implicit class TwitterBlockHelper[T](val f: Future[T]) extends AnyVal {
-    def block(duration: com.twitter.util.Duration): T = {
-      Await.result(f, duration)
-    }
+    def block(duration: com.twitter.util.Duration): T = Await.result(f, duration)
   }
 
   /**
@@ -74,13 +72,10 @@ package object testing extends ScalaFutures
     def failing[T  <: Throwable]()(implicit mf: Manifest[T], timeout: PatienceConfiguration.Timeout): Unit = {
       val w = new Waiter
 
-      f onSuccess  {
-        res => w.dismiss()
-      }
+      f onSuccess  { _ => w.dismiss()}
 
-      f onFailure {
-        e => w(throw e); w.dismiss()
-      }
+      f onFailure { e => w(throw e); w.dismiss() }
+
       intercept[T] {
         w.await(timeout, dismissals(1))
       }
@@ -92,7 +87,7 @@ package object testing extends ScalaFutures
         case Throw(er) =>
           w(intercept[T](er))
           w.dismiss()
-        case Return(data) => w.dismiss()
+        case Return(_) => w.dismiss()
       })
       w.await()
     }
@@ -145,7 +140,7 @@ package object testing extends ScalaFutures
       val w = new Waiter
 
       f onComplete {
-        case Success(data) => w.dismiss()
+        case Success(_) => w.dismiss()
         case Failure(e) => w(throw e); w.dismiss()
       }
 
@@ -160,7 +155,7 @@ package object testing extends ScalaFutures
         case Failure(er) =>
           w(intercept[T](er))
           w.dismiss()
-        case Success(data) => w.dismiss()
+        case Success(_) => w.dismiss()
       })
       w.await()
     }

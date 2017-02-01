@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
+package com.outworkers.util
 
-import org.scalatest.Tag
+package object tags extends DefaultTaggedTypes {
 
-trait DefaultTags {
-  object DatabaseTest extends Tag("com.outworkers.testing.tags.DatabaseTest")
-  object ApiTest extends Tag("com.outworkers.testing.tags.ApiTest")
-  object RequestParserTest extends Tag("com.outworkers.testing.tags.RequestParserTest")
-  object UnstableTest extends Tag("com.outworkers.testing.tags.UnstableTest")
+  type @@[A, T] = Tags.Aux[A, T]
+
+  implicit class TagOps[A](a: A) {
+    def tag[T]: A @@ T = macro Tags.tagMacro[A, T]
+  }
+
+  implicit class UntagOps[A, T](at: A @@ T) {
+    def untag: A = macro Tags.untagMacro[A, T]
+  }
 }
-
-

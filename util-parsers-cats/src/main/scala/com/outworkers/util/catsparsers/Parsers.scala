@@ -146,7 +146,7 @@ trait CatsImplicitParsers extends GenerationDomain {
       * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
       */
     override def parse(str: String): ValidatedNel[String, Long] = {
-      Try(str.toLong).asValidation
+      Try(java.lang.Long.parseLong(str)).asValidation
     }
   }
 
