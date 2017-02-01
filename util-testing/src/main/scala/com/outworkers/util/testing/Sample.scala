@@ -19,7 +19,6 @@ import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
 import com.eaio.uuid.UUIDGen
-import com.outworkers.util.tags.{DefaultTaggedTypes, Tags}
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
 import org.fluttercode.datafactory.impl.DataFactory
