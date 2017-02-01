@@ -32,7 +32,6 @@ class Tags(val c: blackbox.Context) {
   }
 
   def wrapMacro[A: c.WeakTypeTag, T: c.WeakTypeTag](a: c.Expr[A]): c.Expr[Tags.Aux[A, T]] = {
-    import c.universe._
     val A = weakTypeOf[A]
     val T = weakTypeOf[T]
     val AT = weakTypeOf[Tags.Aux[A, T]]
@@ -40,7 +39,6 @@ class Tags(val c: blackbox.Context) {
   }
 
   def unwrapMacro[A: c.WeakTypeTag, T](at: c.Expr[Tags.Aux[A, T]]): c.Expr[A] = {
-    import c.universe._
     val A = weakTypeOf[A]
     c.Expr[A](q"$at.asInstanceOf[$A]")
   }
@@ -48,7 +46,6 @@ class Tags(val c: blackbox.Context) {
   def wrapfMacro[F[_], A: c.WeakTypeTag, T: c.WeakTypeTag](fa: c.Expr[F[A]])(
     implicit F: c.WeakTypeTag[F[_]]
   ): c.Expr[F[Tags.Aux[A, T]]] = {
-    import c.universe._
     val AT = appliedType(typeOf[Tags.Aux[_, _]], List(weakTypeOf[A], weakTypeOf[T]))
     val FAT = appliedType(F.tpe.typeConstructor, AT :: Nil)
     val t = q"$fa.asInstanceOf[$FAT]"
@@ -58,7 +55,6 @@ class Tags(val c: blackbox.Context) {
   def unwrapfMacro[F[_], A: c.WeakTypeTag, T](fat: c.Expr[F[Tags.Aux[A, T]]])(
     implicit F: c.WeakTypeTag[F[_]]
   ): c.Expr[F[A]] = {
-    import c.universe._
     val FA = appliedType(F.tpe.typeConstructor, weakTypeOf[A] :: Nil)
     c.Expr[F[A]](q"$fat.asInstanceOf[$FA]")
   }
