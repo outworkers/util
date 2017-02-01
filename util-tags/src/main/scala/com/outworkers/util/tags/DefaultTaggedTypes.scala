@@ -1,4 +1,4 @@
-package com.outworkers.util.testing.tags
+package com.outworkers.util.tags
 
 trait DefaultTaggedTypes {
 

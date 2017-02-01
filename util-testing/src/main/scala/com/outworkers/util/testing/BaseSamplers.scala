@@ -15,7 +15,7 @@
  */
 package com.outworkers.util.testing
 
-private[testing] trait CommonDataSamplers {
+private[testing] trait BaseSamplers {
   val Names = List(
     "Aleksandar", "Alexander", "Ali", "Amar", "Andrei", "Aron", "Artem", "Artyom", "Ben", "Bence", "Charlie",
     "Davit ", "Dylan", "Emil", "Filip", "Francesco", "Gabriel", "Georgi ", "Georgios", "Giorgi", "Hugo",
@@ -82,4 +82,4 @@ private[testing] trait CommonDataSamplers {
 }
 
 
-private[testing] object CommonDataSamplers extends CommonDataSamplers
+private[testing] object BaseSamplers extends BaseSamplers

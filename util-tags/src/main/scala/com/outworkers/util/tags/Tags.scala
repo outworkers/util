@@ -1,6 +1,4 @@
-package com.outworkers.util.testing.tags
-
-import com.outworkers.util.testing._
+package com.outworkers.util.tags
 
 import scala.reflect.macros.blackbox
 
@@ -9,7 +7,7 @@ class Tags(val c: blackbox.Context) {
 
   import c.universe._
 
-  private[this] val pkg = q"com.outworkers.util.testing.tags"
+  private[this] val pkg = q"com.outworkers.util.tags"
 
   def tagMacro[A: c.WeakTypeTag, T: c.WeakTypeTag]: c.Expr[Tags.Aux[A, T]] = {
     import c.universe._
@@ -35,7 +33,7 @@ class Tags(val c: blackbox.Context) {
     val A = weakTypeOf[A]
     val T = weakTypeOf[T]
     val AT = weakTypeOf[Tags.Aux[A, T]]
-    c.Expr[Tags.Aux[A, T]](q"$a.asInstanceOf[$pkg.Tags.Tagged[$A, $T]]")
+    c.Expr[Tags.Aux[A, T]](q"$a.asInstanceOf[$pkg.Tags.Aux[$A, $T]]")
   }
 
   def unwrapMacro[A: c.WeakTypeTag, T](at: c.Expr[Tags.Aux[A, T]]): c.Expr[A] = {
@@ -63,7 +61,8 @@ class Tags(val c: blackbox.Context) {
 object Tags {
   type Aux[A, T] = { type Data = A; type Tag = T }
 
-  type @@[A, T] = Tags.Aux[A, T]
+  def wrap[A, T](a: A): A @@ T = macro Tags.wrapMacro[A, T]
+  def unwrap[A, T](at: A @@ T): A = macro Tags.unwrapMacro[A, T]
 
   implicit class TagOps[A](a: A) {
     def tag[T]: A @@ T = macro Tags.tagMacro[A, T]

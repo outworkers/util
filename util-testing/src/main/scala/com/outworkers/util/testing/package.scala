@@ -16,7 +16,7 @@
 package com.outworkers.util
 
 import com.outworkers.util.domain.GenerationDomain
-import com.outworkers.util.testing.tags.{DefaultTaggedTypes, Tags}
+import com.outworkers.util.tags.DefaultTaggedTypes
 import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
@@ -25,7 +25,6 @@ import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaF
 import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures
-  with DefaultTags
   with ScalaTestHelpers
   with Generators
   with GenerationDomain
@@ -42,9 +41,7 @@ package object testing extends ScalaFutures
   }
 
   implicit class TwitterBlockHelper[T](val f: Future[T]) extends AnyVal {
-    def block(duration: com.twitter.util.Duration): T = {
-      Await.result(f, duration)
-    }
+    def block(duration: com.twitter.util.Duration): T = Await.result(f, duration)
   }
 
   /**

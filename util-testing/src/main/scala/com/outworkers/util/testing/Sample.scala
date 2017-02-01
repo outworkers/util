@@ -18,13 +18,15 @@ package com.outworkers.util.testing
 import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
+import com.eaio.uuid.UUIDGen
+import com.outworkers.util.tags.{DefaultTaggedTypes, Tags}
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
 import org.fluttercode.datafactory.impl.DataFactory
 
 import scala.collection.generic.CanBuildFrom
-import scala.collection.mutable
 import scala.util.Random
+import com.outworkers.util.tags._
 
 trait Sample[T] {
   def sample: T
@@ -55,7 +57,7 @@ object Sample {
 }
 
 
-object Samples extends Generators {
+object Samples extends Generators with DefaultTaggedTypes {
 
   def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
     override def sample: T1 = fn(gen[T])
@@ -132,6 +134,12 @@ object Samples extends Generators {
     def sample: UUID = UUID.randomUUID()
   }
 
+  class TimeUUIDSampler extends Sample[UUID @@ TimeUUIDTag] {
+    override def sample: UUID @@ TimeUUIDTag = {
+      Tags.wrap[UUID, TimeUUIDTag](new UUID(UUIDGen.newTime(), new Random().nextLong()))
+    }
+  }
+
   class EmailAddressSampler extends Sample[EmailAddress] {
     def sample: EmailAddress = EmailAddress(new DataFactory().getEmailAddress)
   }
@@ -153,11 +161,11 @@ object Samples extends Generators {
   }
 
   class CountrySampler extends Sample[Country] {
-    def sample: Country = Country(Gen.oneOf(CommonDataSamplers.Countries).sample.get)
+    def sample: Country = Country(Gen.oneOf(BaseSamplers.Countries).sample.get)
   }
 
   class CitySampler extends Sample[City] {
-    def sample: City = City(Gen.oneOf(CommonDataSamplers.Cities).sample.get)
+    def sample: City = City(Gen.oneOf(BaseSamplers.Cities).sample.get)
   }
 
   class InetAddressSampler extends Sample[InetAddress] {
@@ -167,11 +175,11 @@ object Samples extends Generators {
   }
 
   class ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
-    def sample: ProgrammingLanguage = ProgrammingLanguage(Gen.oneOf(CommonDataSamplers.ProgrammingLanguages).sample.get)
+    def sample: ProgrammingLanguage = ProgrammingLanguage(Gen.oneOf(BaseSamplers.ProgrammingLanguages).sample.get)
   }
 
   class LoremIpsumSampler extends Sample[LoremIpsum] {
-    def sample: LoremIpsum = LoremIpsum(Gen.oneOf(CommonDataSamplers.LoremIpsum).sample.get)
+    def sample: LoremIpsum = LoremIpsum(Gen.oneOf(BaseSamplers.LoremIpsum).sample.get)
   }
 
   class UrlSampler extends Sample[Url] {
