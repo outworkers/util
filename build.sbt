@@ -13,8 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import java.util.UUID
-
 import com.twitter.sbt.{GitProject, VersionManagement}
 import sbt.Keys._
 
@@ -30,6 +28,7 @@ lazy val Versions = new {
   val scalacheck = "1.13.4"
   val datafactory = "0.8"
   val play = "2.5.8"
+  val shapeless = "2.3.2"
 
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
@@ -159,6 +158,7 @@ lazy val testing = (project in file("util-testing"))
       "-language:experimental.macros"
     ),
     libraryDependencies ++= Seq(
+      "com.chuusai" %% "shapeless" % Versions.shapeless,
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
