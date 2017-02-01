@@ -31,8 +31,6 @@ package object testing extends ScalaFutures
   with GenerationDomain
   with DefaultTaggedTypes {
 
-  type @@[A, T] = Tags#Tagged[A, T]
-
   implicit class Printer[T](val obj: T) extends AnyVal {
     def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
   }

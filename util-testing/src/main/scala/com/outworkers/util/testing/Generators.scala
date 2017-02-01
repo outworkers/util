@@ -43,11 +43,15 @@ private[util] trait Generators extends GenerationDomain {
 
   def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = gen[Set, T](size)
 
-  def genMap[T, A1, A2](size: Int = defaultGeneration)(
-    implicit ev: T <:< (A1, A2),
-    sampler: Sample[T]
+  def genMap[A1 : Sample, A2 : Sample](size: Int = defaultGeneration)(
+    implicit cbf: CanBuildFrom[Nothing, (A1, A2), Map[A1, A2]]
   ): Map[A1, A2] = {
-    gen[List, T](size).toMap[A1, A2]
+    val builder = cbf()
+    builder.sizeHint(size)
+
+    for (_ <- 1 to size) builder += gen[A1] -> gen[A2]
+
+    builder.result()
   }
 
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
