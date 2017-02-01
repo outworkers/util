@@ -89,6 +89,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   validators,
   testing,
   macros,
+  tags,
   urls
 )
 
