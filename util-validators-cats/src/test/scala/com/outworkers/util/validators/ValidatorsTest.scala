@@ -1,10 +1,13 @@
 package com.outworkers.util.validators
 
-import cats.data.Validated.{Invalid, Valid}
-import cats.data._
 import org.scalatest.{FlatSpec, Matchers}
+
 import scala.util.Try
-import com.outworkers.util.parsers._
+import cats.data.ValidatedNel
+import cats.data.Validated.{Invalid, Valid}
+import com.outworkers.util.testing._
+import com.outworkers.util.validators.dsl._
+import com.outworkers.util.catsparsers._
 
 trait Read[A] {
   def read(s: String): Option[A]

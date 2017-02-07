@@ -15,7 +15,7 @@
  */
 package com.outworkers.util
 
-import com.outworkers.util.validators.cats.ValidatorImplicits
+import com.outworkers.util.validators.ValidatorImplicits
 
 package object validators extends ScalazImplicits with ValidatorImplicits
 

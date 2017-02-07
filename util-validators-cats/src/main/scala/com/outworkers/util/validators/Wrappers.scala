@@ -1,5 +1,4 @@
-package com.outworkers.util.validators.cats
-
+package com.outworkers.util.validators
 
 import cats.Apply
 import cats.data.ValidatedNel

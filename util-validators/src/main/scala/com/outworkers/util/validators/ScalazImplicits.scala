@@ -1,14 +1,24 @@
 package com.outworkers.util.validators
 
-import cats.data._
-import com.outworkers.util.validators.cats.ValidatorImplicits
+import _root_.cats.data._
+import _root_.cats.data.Validated._
+import _root_.cats.data.NonEmptyList
+import com.outworkers.util.validators.dsl._
 
 import scalaz.{Validation, _}
 
 trait ScalazImplicits extends ValidatorImplicits {
 
-  implicit class ValidatedNelAugmenter[T](val v1: Nel[T]) {
-    def and[T2](v2: Nel[T2]): Wrapper2[T, T2] = Wrapper2[T, T2](v1, v2)
+  implicit class ScalazToCatsValidationNel[X, T](val vd: ValidationNel[X, T]) {
+
+    def prop(str: String): ValidatedNel[(String, X), T] = {
+      vd.cats.leftMap(f => NonEmptyList(str -> f.head, Nil))
+    }
+
+    def cats: ValidatedNel[X, T] = vd.fold(
+      fail => Invalid(NonEmptyList(fail.head, fail.tail.toList)),
+      valid => Valid(valid)
+    )
   }
 
   implicit class ScalazToCatsValidation[X, T](val vd: Validation[X, T]) {
@@ -18,16 +28,6 @@ trait ScalazImplicits extends ValidatorImplicits {
     )
   }
 
-  /**
-    * Augments cats validators with prop labelling.
-    * @param vd The validation to augment.
-    * @tparam T The underlying type of a successful validation.
-    */
-  implicit class CatsPropAugmenter[T](val vd: Validated[String, T]) {
-    def prop(str: String): ValidatedNel[(String, String), T] = {
-      vd.leftMap(f => str -> f).toValidatedNel
-    }
-  }
 
   implicit class ScalazStringVdToCatsValidation[T](val vd: Validation[String, T]){
     def prop(str: String): ValidatedNel[(String, String), T] = {

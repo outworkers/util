@@ -1,14 +1,17 @@
-package com.outworkers.util.validators.cats
-
+package com.outworkers.util.validators
 
 import cats.data.Validated.{Invalid, Valid}
-import cats.data.{NonEmptyList, Validated, _}
-import cats.{Applicative, Semigroup, SemigroupK, _}
-import com.outworkers.util.validators.cats
+import cats.{Applicative, Semigroup, SemigroupK}
+import cats.data.{NonEmptyList, Validated, ValidatedNel}
 
-import scalaz._
+trait ValidatorImplicits extends Wrappers {
 
-trait ValidatorImplicits {
+  implicit class CatsPropValidation[X, T](val vd: ValidatedNel[X, T]) {
+    def prop(str: String): ValidatedNel[(String, X), T] = {
+      vd.leftMap(f => NonEmptyList(str -> f.head, Nil))
+    }
+  }
+
   implicit class ValidatedApiError[T](val valid: Validated[Map[String, List[String]], T]) {
     def unwrap: Either[ValidationError, T] = {
       valid.fold(
@@ -29,6 +32,17 @@ trait ValidatorImplicits {
   }
 
 
+  /**
+    * Augments cats validators with prop labelling.
+    * @param vd The validation to augment.
+    * @tparam T The underlying type of a successful validation.
+    */
+  implicit class CatsPropAugmenter[T](val vd: Validated[String, T]) {
+    def prop(str: String): ValidatedNel[(String, String), T] = {
+      vd.leftMap(f => str -> f).toValidatedNel
+    }
+  }
+
   implicit def validatedApplicative[E : Semigroup]: Applicative[Validated[E, ?]] =
     new Applicative[Validated[E, ?]] {
       def ap[A, B](f: Validated[E, A => B])(fa: Validated[E, A]): Validated[E, B] =
@@ -45,15 +59,9 @@ trait ValidatorImplicits {
   implicit val nelSemigroup: Semigroup[NonEmptyList[(String, String)]] =
     SemigroupK[NonEmptyList].algebra[(String, String)]
 
-  implicit class ScalazToCatsValidationNel[X, T](val vd: ValidationNel[X, T]) {
 
-    def prop(str: String): ValidatedNel[(String, X), T] = {
-      vd.cats.leftMap(f => NonEmptyList(str -> f.head, Nil))
-    }
-
-    def cats: ValidatedNel[X, T] = vd.fold(
-      fail => Invalid(NonEmptyList(fail.head, fail.tail.toList)),
-      valid => Valid(valid)
-    )
+  implicit class ValidatedNelAugmenter[T](val v1: Nel[T]) {
+    def and[T2](v2: Nel[T2]): Wrapper2[T, T2] = Wrapper2[T, T2](v1, v2)
   }
+
 }
