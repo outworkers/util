@@ -15,13 +15,7 @@
  */
 package com.outworkers.util
 
-import cats.data.Validated.{Invalid, Valid}
-import cats.data.{NonEmptyList, Validated, ValidatedNel}
-import cats.{Applicative, SemigroupK, _}
+import com.outworkers.util.validators.cats.ValidatorImplicits
 
-import scalaz.{Validation, ValidationNel}
+package object validators extends ScalazImplicits with ValidatorImplicits
 
-package object validators extends Wrappers with ValidatorImplicits {
-
-
-}

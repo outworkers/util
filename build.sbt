@@ -270,7 +270,7 @@ lazy val validators = (project in file("util-validators"))
       "org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary
     ),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats" % Versions.cats
+      "org.scalaz" %% "scalaz-core" % Versions.scalaz
     )
   ).dependsOn(
     validatorsCats,
