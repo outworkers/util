@@ -1,22 +1,8 @@
-/*
- * Copyright 2013 - 2017 Outworkers Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.outworkers.util.validators
 
 import cats.Apply
 import cats.data.ValidatedNel
+import shapeless.Generic
 
 case class ParseError(property: String, messages: List[String])
 
@@ -32,6 +18,8 @@ trait Wrappers {
 
   trait Wrapper[TP <: Product] {
     type In = TP
+
+    def as[R](obj: TP)(implicit gen: Generic.Aux[TP, R]): Nel[R] = map[R](source => gen to source)
 
     def map[R](fn: (TP) => R): Nel[R]
   }
@@ -97,7 +85,7 @@ trait Wrappers {
 
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map6[T1, T2, T3, T4, T5, T6, R](v1, v2, v3, v4, v5, v6) {
-        case tp => fn(tp)
+        case x => fn(x)
       }
     }
   }
@@ -113,7 +101,7 @@ trait Wrappers {
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7)] {
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map7[T1, T2, T3, T4, T5, T6, T7, R](v1, v2, v3, v4, v5, v6, v7) {
-        case tp => fn(tp)
+        case x => fn(x)
       }
     }
 
@@ -132,8 +120,100 @@ trait Wrappers {
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8)] {
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8)) => R): Nel[R] = {
       Apply[ValidatedNel[(String, String), ?]].map8[T1, T2, T3, T4, T5, T6, T7, T8, R](v1, v2, v3, v4, v5, v6, v7, v8) {
-        case tp => fn(tp)
+        case x => fn(x)
       }
+    }
+
+    def and[T9](v9: Nel[T9]): Wrapper9[T1, T2, T3, T4, T5, T6, T7, T8, T9] = Wrapper9(v1, v2, v3, v4, v5, v6, v7, v8, v9)
+  }
+
+  case class Wrapper9[T1, T2, T3, T4, T5, T6, T7, T8, T9](
+    v1: Nel[T1],
+    v2: Nel[T2],
+    v3: Nel[T3],
+    v4: Nel[T4],
+    v5: Nel[T5],
+    v6: Nel[T6],
+    v7: Nel[T7],
+    v8: Nel[T8],
+    v9: Nel[T9]
+  ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9)] {
+    override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8, T9)) => R): Nel[R] = {
+      Apply[ValidatedNel[(String, String), ?]].map9[T1, T2, T3, T4, T5, T6, T7, T8, T9, R](
+        v1, v2, v3, v4, v5, v6, v7, v8, v9
+      ) { case x => fn(x) }
+    }
+
+    def and[T10](v10: Nel[T10]): Wrapper10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10] = {
+      Wrapper10(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10)
+    }
+  }
+
+  case class Wrapper10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10](
+    v1: Nel[T1],
+    v2: Nel[T2],
+    v3: Nel[T3],
+    v4: Nel[T4],
+    v5: Nel[T5],
+    v6: Nel[T6],
+    v7: Nel[T7],
+    v8: Nel[T8],
+    v9: Nel[T9],
+    v10: Nel[T10]
+  ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)] {
+    override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10)) => R): Nel[R] = {
+      Apply[ValidatedNel[(String, String), ?]].map10[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, R](
+        v1, v2, v3, v4, v5, v6, v7, v8, v9, v10
+      ) { case x => fn(x) }
+    }
+
+    def and[T11](v11: Nel[T11]): Wrapper11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11] = {
+      Wrapper11(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11)
+    }
+  }
+
+  case class Wrapper11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11](
+    v1: Nel[T1],
+    v2: Nel[T2],
+    v3: Nel[T3],
+    v4: Nel[T4],
+    v5: Nel[T5],
+    v6: Nel[T6],
+    v7: Nel[T7],
+    v8: Nel[T8],
+    v9: Nel[T9],
+    v10: Nel[T10],
+    v11: Nel[T11]
+  ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)] {
+    override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11)) => R): Nel[R] = {
+      Apply[ValidatedNel[(String, String), ?]].map11[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, R](
+        v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11
+      ) { case x => fn(x) }
+    }
+
+    def and[T12](v12: Nel[T12]): Wrapper12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12] = {
+      Wrapper12(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12)
+    }
+  }
+
+  case class Wrapper12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12](
+    v1: Nel[T1],
+    v2: Nel[T2],
+    v3: Nel[T3],
+    v4: Nel[T4],
+    v5: Nel[T5],
+    v6: Nel[T6],
+    v7: Nel[T7],
+    v8: Nel[T8],
+    v9: Nel[T9],
+    v10: Nel[T10],
+    v11: Nel[T11],
+    v12: Nel[T12]
+  ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)] {
+    override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12)) => R): Nel[R] = {
+      Apply[ValidatedNel[(String, String), ?]].map12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12,R](
+        v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12
+      ) { case x => fn(x) }
     }
   }
 }
