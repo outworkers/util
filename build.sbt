@@ -29,6 +29,8 @@ lazy val Versions = new {
   val datafactory = "0.8"
   val play = "2.5.8"
   val shapeless = "2.3.2"
+  val kindProjector = "0.9.3"
+  val paradise = "2.1.0"
 
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
@@ -163,9 +165,9 @@ lazy val tags = (project in file("util-tags"))
       "com.eaio.uuid" % "uuid" % "3.2",
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-      "org.scalatest"                    %% "scalatest"                % Versions.scalatest % Test,
-      "org.fluttercode.datafactory"      %  "datafactory"              % Versions.datafactory % Test
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
+      "org.fluttercode.datafactory" %  "datafactory" % Versions.datafactory % Test
     )
   ).dependsOn(
   domain,
@@ -183,13 +185,13 @@ lazy val testing = (project in file("util-testing"))
     libraryDependencies ++= Seq(
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
-      "com.twitter"                      %% "util-core"                % Versions.twitterUtilVersion(scalaVersion.value),
-      "org.scalatest"                    %% "scalatest"                % Versions.scalatest,
-      "joda-time"                        %  "joda-time"                % Versions.joda,
-      "org.joda"                         %  "joda-convert"             % Versions.jodaConvert,
-      "org.scalacheck"                   %% "scalacheck"               % Versions.scalacheck,
-      "org.fluttercode.datafactory"      %  "datafactory"              % Versions.datafactory
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value),
+      "org.scalatest" %% "scalatest" % Versions.scalatest,
+      "joda-time" % "joda-time" % Versions.joda,
+      "org.joda" % "joda-convert" % Versions.jodaConvert,
+      "org.scalacheck" %% "scalacheck" % Versions.scalacheck,
+      "org.fluttercode.datafactory" %  "datafactory" % Versions.datafactory
     )
   ).dependsOn(
     domain,
@@ -210,7 +212,6 @@ lazy val play = (project in file("util-play"))
   parsersCats,
   testing % Test
 )
-
 
 lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
@@ -238,7 +239,7 @@ lazy val macros = (project in file("util-macros"))
     moduleName := "util-macros",
     crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     libraryDependencies ++= Seq(
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
       "org.typelevel"  %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
     )
@@ -250,7 +251,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     moduleName := "util-validators-cats",
     crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     addCompilerPlugin(
-      "org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary
+      "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
@@ -267,7 +268,7 @@ lazy val validators = (project in file("util-validators"))
     moduleName := "util-validators",
     crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
     addCompilerPlugin(
-      "org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary
+      "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
     ),
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % Versions.scalaz
