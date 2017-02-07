@@ -86,6 +86,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   lift,
   parsers,
   parsersCats,
+  validatorsCats,
   validators,
   testing,
   macros,
@@ -231,7 +232,6 @@ lazy val lift = (project in file("util-lift"))
     testing % Test
   )
 
-
 lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
   .settings(
@@ -242,6 +242,23 @@ lazy val macros = (project in file("util-macros"))
       "org.typelevel"  %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
     )
+  )
+
+lazy val validatorsCats = (project in file("util-validators-cats"))
+  .settings(sharedSettings: _*)
+  .settings(
+    moduleName := "util-validators-cats",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
+    addCompilerPlugin(
+      "org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary
+    ),
+    libraryDependencies ++= Seq(
+      "com.chuusai" %% "shapeless" % Versions.shapeless,
+      "org.typelevel" %% "cats" % Versions.cats
+    )
+  ).dependsOn(
+    parsersCats,
+    testing % Test
   )
 
 lazy val validators = (project in file("util-validators"))
@@ -255,7 +272,8 @@ lazy val validators = (project in file("util-validators"))
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats" % Versions.cats
     )
-).dependsOn(
-  parsers,
-  testing % Test
-)
+  ).dependsOn(
+    validatorsCats,
+    parsers,
+    testing % Test
+  )
