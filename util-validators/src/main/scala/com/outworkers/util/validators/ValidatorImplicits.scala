@@ -54,6 +54,17 @@ trait ValidatorImplicits {
     )
   }
 
+  /**
+    * Augments cats validators with prop labelling.
+    * @param vd The validation to augment.
+    * @tparam T The underlying type of a successful validation.
+    */
+  implicit class CatsPropAugmenter[T](val vd: Validated[String, T]) {
+    def prop(str: String): ValidatedNel[(String, String), T] = {
+      vd.leftMap(f => str -> f).toValidatedNel
+    }
+  }
+
   implicit class ScalazStringVdToCatsValidation[T](val vd: Validation[String, T]){
     def prop(str: String): ValidatedNel[(String, String), T] = {
       vd.leftMap(f => str -> f).cats.toValidatedNel
