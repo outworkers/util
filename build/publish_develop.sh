@@ -57,7 +57,7 @@ then
         fi
 
         COMMIT_MSG=$(git log -1 --pretty=%B 2>&1)
-        COMMIT_SKIP_MESSAGE = "[version skip]"
+        COMMIT_SKIP_MESSAGE="[version skip]"
 
         echo "Last commit message $COMMIT_MSG"
 
