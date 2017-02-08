@@ -25,7 +25,7 @@ import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.util.{Failure, Success, Try}
 
-sealed trait CatsBiParser[X, T] {
+trait BiParser[X, T] {
 
   final def optional(str: Option[X])(f: X => ValidatedNel[String, T]): ValidatedNel[String, Option[T]] = {
     str.fold(Option.empty[T].invalid("Option was not defined")) { s =>
@@ -66,17 +66,17 @@ sealed trait CatsBiParser[X, T] {
   }
 }
 
-trait CatsParser[T] extends CatsBiParser[String, T]
+trait Parser[T] extends BiParser[String, T]
 
 trait CatsImplicitParsers extends GenerationDomain {
 
-  implicit object UUIDParser extends CatsParser[UUID] {
+  implicit object UUIDParser extends Parser[UUID] {
     override def parse(str: String): ValidatedNel[String, UUID] = {
       Try(UUID.fromString(str)).asValidation
     }
   }
 
-  implicit object BooleanParser extends CatsParser[Boolean] {
+  implicit object BooleanParser extends Parser[Boolean] {
 
     override def parse(str: String): ValidatedNel[String, Boolean] = {
       val obj = str match {
@@ -90,7 +90,7 @@ trait CatsImplicitParsers extends GenerationDomain {
 
   }
 
-  implicit object TimestampParser extends CatsParser[DateTime] {
+  implicit object TimestampParser extends Parser[DateTime] {
     /**
       * A basic way to parse known types from options.
       *
@@ -102,7 +102,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit object IntParser extends CatsParser[Int] {
+  implicit object IntParser extends Parser[Int] {
     /**
       * A basic way to parse known types from options.
       *
@@ -114,7 +114,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit object DoubleParser extends CatsParser[Double] {
+  implicit object DoubleParser extends Parser[Double] {
     /**
       * A basic way to parse known types from options.
       *
@@ -126,7 +126,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit object FloatParser extends CatsParser[Float] {
+  implicit object FloatParser extends Parser[Float] {
     /**
       * A basic way to parse known types from options.
       *
@@ -138,7 +138,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit object LongParser extends CatsParser[Long] {
+  implicit object LongParser extends Parser[Long] {
     /**
       * A basic way to parse known types from options.
       *
@@ -150,7 +150,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit object URLParser extends CatsParser[URL] {
+  implicit object URLParser extends Parser[URL] {
     /**
       * A basic way to parse known types from options.
       *
@@ -162,7 +162,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit object EmailParser extends CatsParser[EmailAddress] {
+  implicit object EmailParser extends Parser[EmailAddress] {
     override def parse(str: String): ValidatedNel[String, EmailAddress] = {
       val block: Try[EmailAddress] = if (EmailValidator.getInstance().isValid(str)) {
         Success(EmailAddress(str))
@@ -174,7 +174,7 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  implicit class EnumParser[T <: Enumeration](enum: T) extends CatsParser[T#Value] {
+  implicit class EnumParser[T <: Enumeration](enum: T) extends Parser[T#Value] {
 
     /**
       * A basic way to parse known types from options.
@@ -190,37 +190,37 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  def tryParse[T : CatsParser](str: String): Try[T] = implicitly[CatsParser[T]].tryParse(str)
+  def tryParse[T : Parser](str: String): Try[T] = implicitly[Parser[T]].tryParse(str)
 
-  def parse[T : CatsParser](str: String): ValidatedNel[String, T] = implicitly[CatsParser[T]].parse(str)
+  def parse[T : Parser](str: String): ValidatedNel[String, T] = implicitly[Parser[T]].parse(str)
 
-  def parse[T : CatsParser](obj: Option[String]): ValidatedNel[String, T] = implicitly[CatsParser[T]].parse(obj)
+  def parse[T : Parser](obj: Option[String]): ValidatedNel[String, T] = implicitly[Parser[T]].parse(obj)
 
-  def parseOpt[T : CatsParser](obj: String): Option[T] = implicitly[CatsParser[T]].parseOpt(obj)
+  def parseOpt[T : Parser](obj: String): Option[T] = implicitly[Parser[T]].parseOpt(obj)
 
-  def parseNonEmpty[T: CatsParser](obj: Option[String]): ValidatedNel[String, Option[T]] = implicitly[CatsParser[T]].parseIfExists(obj)
+  def parseNonEmpty[T: Parser](obj: Option[String]): ValidatedNel[String, Option[T]] = implicitly[Parser[T]].parseIfExists(obj)
 
-  def biparse[A, B](obj: A)(implicit p: CatsBiParser[A, B]): ValidatedNel[String, B] = {
-    implicitly[CatsBiParser[A, B]].parse(obj)
+  def biparse[A, B](obj: A)(implicit p: BiParser[A, B]): ValidatedNel[String, B] = {
+    implicitly[BiParser[A, B]].parse(obj)
   }
 
-  def biparse[A, B](obj: Option[A])(implicit p: CatsBiParser[A, B]): ValidatedNel[String, B] = {
-    implicitly[CatsBiParser[A, B]].parse(obj)
+  def biparse[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidatedNel[String, B] = {
+    implicitly[BiParser[A, B]].parse(obj)
   }
 
-  def biparseOpt[A, B](obj: A)(implicit p: CatsBiParser[A, B]): Option[B] = {
-    implicitly[CatsBiParser[A, B]].parseOpt(obj)
+  def biparseOpt[A, B](obj: A)(implicit p: BiParser[A, B]): Option[B] = {
+    implicitly[BiParser[A, B]].parseOpt(obj)
   }
 
-  def biparseNonEmpty[A, B](obj: Option[A])(implicit p: CatsBiParser[A, B]): ValidatedNel[String, Option[B]] = {
-    implicitly[CatsBiParser[A, B]].parseIfExists(obj)
+  def biparseNonEmpty[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidatedNel[String, Option[B]] = {
+    implicitly[BiParser[A, B]].parseIfExists(obj)
   }
 }
 
 trait DefaultParsers extends CatsImplicitParsers {
 
   implicit class OptionDelegation[T](val option: Option[T]) {
-    def delegate[Y]()(implicit bi: CatsBiParser[T, Y]): ValidatedNel[String, Y] = {
+    def delegate[Y]()(implicit bi: BiParser[T, Y]): ValidatedNel[String, Y] = {
       option.fold(
         "Option was empty, couldn't delegate to biparser".invalidNel[Y])(
         x => bi.parse(x)
