@@ -215,6 +215,10 @@ trait Wrappers {
         v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12
       ) { case x => fn(x) }
     }
+
+    def and[T13](v13: Nel[T13]): Wrapper13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13] = {
+      Wrapper13(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13)
+    }
   }
 
   case class Wrapper13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13](
@@ -233,9 +237,13 @@ trait Wrappers {
     v13: Nel[T13]
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)] {
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13)) => R): Nel[R] = {
-      Apply[ValidatedNel[(String, String), ?]].map12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R](
+      Apply[ValidatedNel[(String, String), ?]].map13[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, R](
         v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13
       ) { case x => fn(x) }
+    }
+
+    def and[T14](v14: Nel[T14]): Wrapper14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14] = {
+      Wrapper14(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14)
     }
   }
 
@@ -256,9 +264,13 @@ trait Wrappers {
     v14: Nel[T14]
   ) extends Wrapper[(T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)] {
     override def map[R](fn: ((T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14)) => R): Nel[R] = {
-      Apply[ValidatedNel[(String, String), ?]].map12[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R](
+      Apply[ValidatedNel[(String, String), ?]].map14[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, R](
         v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14
       ) { case x => fn(x) }
+    }
+
+    def and[T15](v15: Nel[T15]): Wrapper15[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15] = {
+      Wrapper15(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15)
     }
   }
 
@@ -284,6 +296,10 @@ trait Wrappers {
         v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15
       ) { case x => fn(x) }
     }
+
+    def and[T16](v16: Nel[T16]): Wrapper16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16] = {
+      Wrapper16(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16)
+    }
   }
 
   case class Wrapper16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16](
@@ -308,6 +324,10 @@ trait Wrappers {
       Apply[ValidatedNel[(String, String), ?]].map16[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, R](
         v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16
       ) { case x => fn(x) }
+    }
+
+    def and[T17](v17: Nel[T17]): Wrapper17[T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17] = {
+      Wrapper17(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14, v15, v16, v17)
     }
   }
 
