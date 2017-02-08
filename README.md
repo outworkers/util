@@ -1,4 +1,4 @@
-# util[![Build Status](https://travis-ci.org/outworkers/util.svg?branch=develop)](https://travis-ci.org/outworkers/util) [![Coverage Status](https://coveralls.io/repos/github/outworkers/util/badge.svg?branch=develop)](https://coveralls.io/github/outworkers/util?branch=develop) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11)   [ ![Bintray](https://api.bintray.com/packages/outworkers/oss-releases/util/images/download.svg) ](https://bintray.com/outworkers/oss-releases/util-domain/_latestVersion) [![ScalaDoc](http://javadoc-badge.appspot.com/com.outworkers/util_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.outworkers/util_2.11) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/outworkers/util?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+# util[![Build Status](https://travis-ci.org/outworkers/util.svg?branch=develop)](https://travis-ci.org/outworkers/util) [![Coverage Status](https://coveralls.io/repos/github/outworkers/util/badge.svg?branch=develop)](https://coveralls.io/github/outworkers/util?branch=develop) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11)   [ ![Bintray](https://api.bintray.com/packages/outworkers/oss-releases/util/images/download.svg) ](https://bintray.com/outworkers/oss-releases/util-lift/_latestVersion) [![ScalaDoc](http://javadoc-badge.appspot.com/com.outworkers/util_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.outworkers/util-lift_2.11) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/outworkers/util?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
 
 This library is available on Maven Central and on our public Bintray repository, found at: `https://dl.bintray.com/outworkers/oss-releases/`.
 
@@ -70,6 +70,7 @@ libraryDependencies ++= Seq(
   "com.outworkers" %% "util-parsers" % Versions.util,
   "com.outworkers" %% "util-parsers-cats" % Versions.util,
   "com.outworkers" %% "util-validators" % Versions.util,
+  "com.outworkers" %% "util-validators-cats" % Versions.util,
   "com.outworkers" %% "util-play" % Versions.util,
   "com.outworkers" %% "util-urls" % Versions.util,
   "com.outworkers" %% "util-testing" % Versions.util
