@@ -190,15 +190,25 @@ trait CatsImplicitParsers extends GenerationDomain {
     }
   }
 
-  def tryParse[T : Parser](str: String): Try[T] = implicitly[Parser[T]].tryParse(str)
+  def tryParse[T](str: String)(
+    implicit parser: BiParser[String, T]
+  ): Try[T] = implicitly[BiParser[String, T]].tryParse(str)
 
-  def parse[T : Parser](str: String): ValidatedNel[String, T] = implicitly[Parser[T]].parse(str)
+  def parse[T](str: String)(
+    implicit parser: BiParser[String, T]
+  ): ValidatedNel[String, T] = implicitly[BiParser[String, T]].parse(str)
 
-  def parse[T : Parser](obj: Option[String]): ValidatedNel[String, T] = implicitly[Parser[T]].parse(obj)
+  def parse[T](obj: Option[String])(
+    implicit parser: BiParser[String, T]
+  ): ValidatedNel[String, T] = implicitly[BiParser[String, T]].parse(obj)
 
-  def parseOpt[T : Parser](obj: String): Option[T] = implicitly[Parser[T]].parseOpt(obj)
+  def parseOpt[T](obj: String)(
+    implicit parser: BiParser[String, T]
+  ): Option[T] = implicitly[BiParser[String, T]].parseOpt(obj)
 
-  def parseNonEmpty[T: Parser](obj: Option[String]): ValidatedNel[String, Option[T]] = implicitly[Parser[T]].parseIfExists(obj)
+  def parseNonEmpty[T](obj: Option[String])(
+    implicit parser: BiParser[String, T]
+  ): ValidatedNel[String, Option[T]] = implicitly[BiParser[String, T]].parseIfExists(obj)
 
   def biparse[A, B](obj: A)(implicit p: BiParser[A, B]): ValidatedNel[String, B] = {
     implicitly[BiParser[A, B]].parse(obj)
