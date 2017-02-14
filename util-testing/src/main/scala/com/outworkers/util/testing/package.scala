@@ -16,6 +16,7 @@
 package com.outworkers.util
 
 import com.outworkers.util.domain.GenerationDomain
+import com.outworkers.util.samplers.Generators
 import com.outworkers.util.tags.DefaultTaggedTypes
 import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalatest.Assertions

@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
+package com.outworkers.util.samplers
 
-private[testing] trait BaseSamplers {
+trait BaseSamplers {
   val Names = List(
     "Aleksandar", "Alexander", "Ali", "Amar", "Andrei", "Aron", "Artem", "Artyom", "Ben", "Bence", "Charlie",
     "Davit ", "Dylan", "Emil", "Filip", "Francesco", "Gabriel", "Georgi ", "Georgios", "Giorgi", "Hugo",
@@ -82,4 +82,4 @@ private[testing] trait BaseSamplers {
 }
 
 
-private[testing] object BaseSamplers extends BaseSamplers
+object BaseSamplers extends BaseSamplers

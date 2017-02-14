@@ -13,15 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
+package com.outworkers.util.samplers
 
 import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
-import com.eaio.uuid.UUIDGen
-import org.joda.time.{DateTime, DateTimeZone, LocalDate}
-import org.scalacheck.Gen
-import org.fluttercode.datafactory.impl.DataFactory
+import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.generic.CanBuildFrom
 import scala.util.Random
@@ -29,6 +26,8 @@ import com.outworkers.util.tags._
 
 trait Sample[T] {
   def sample: T
+
+  def arbitrary: Arbitrary[T] = Arbitrary(sample)
 }
 
 object Sample {

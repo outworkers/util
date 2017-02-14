@@ -31,6 +31,7 @@ lazy val Versions = new {
   val shapeless = "2.3.2"
   val kindProjector = "0.9.3"
   val paradise = "2.1.0"
+  val macroCompat = "1.1.1"
 
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
@@ -90,6 +91,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   parsersCats,
   validatorsCats,
   validators,
+  samplers,
   testing,
   macros,
   tags,
@@ -174,6 +176,27 @@ lazy val tags = (project in file("util-tags"))
   macros
 )
 
+lazy val samplers = (project in file("util-samplers"))
+  .settings(sharedSettings: _*)
+  .settings(
+    moduleName := "util-samplers",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
+    scalacOptions ++= Seq(
+      "-language:experimental.macros"
+    ),
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "macro-compat" % Versions.macroCompat,
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      "org.scalatest" %% "scalatest" % Versions.scalatest,
+      "org.scalacheck" %% "scalacheck" % Versions.scalacheck
+    )
+  ).dependsOn(
+    domain,
+    tags,
+    macros
+  )
+
 lazy val testing = (project in file("util-testing"))
   .settings(sharedSettings: _*)
   .settings(
@@ -183,7 +206,7 @@ lazy val testing = (project in file("util-testing"))
       "-language:experimental.macros"
     ),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % "1.1.1",
+      "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
       "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value),
@@ -196,7 +219,8 @@ lazy val testing = (project in file("util-testing"))
   ).dependsOn(
     domain,
     tags,
-    macros
+    macros,
+    samplers
   )
 
 lazy val play = (project in file("util-play"))
