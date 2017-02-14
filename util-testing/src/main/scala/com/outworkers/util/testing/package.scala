@@ -16,8 +16,9 @@
 package com.outworkers.util
 
 import com.outworkers.util.domain.GenerationDomain
-import com.outworkers.util.samplers.Generators
+import com.outworkers.util.samplers.{Generators, Sample}
 import com.outworkers.util.tags.DefaultTaggedTypes
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 import org.scalatest.exceptions.TestFailedException
@@ -28,18 +29,21 @@ import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures with Generators with GenerationDomain with DefaultTaggedTypes {
 
-  def shouldNotThrow[T](pf: => T): Unit = {
-    try {
-      pf
-    } catch {
-      case NonFatal(e) => {
-        if (e.isInstanceOf[TestFailedException]) {
-          throw e
-        } else {
-          Assertions.fail(s"Expected no errors to be thrown but got ${e.getMessage}")
-        }
+  implicit object DateTimeSampler extends Sample[DateTime] {
+    def sample: DateTime = new DateTime(DateTimeZone.UTC)
+  }
+
+  implicit object JodaLocalDateSampler extends Sample[LocalDate] {
+    def sample: LocalDate = new LocalDate(DateTimeZone.UTC)
+  }
+
+  def shouldNotThrow[T](pf: => T): Unit = try pf catch {
+    case NonFatal(e) =>
+      if (e.isInstanceOf[TestFailedException]) {
+        throw e
+      } else {
+        Assertions.fail(s"Expected no errors to be thrown but got ${e.getMessage}")
       }
-    }
   }
 
   def mustNotThrow[T](pf: => T): Unit = shouldNotThrow[T](pf)
