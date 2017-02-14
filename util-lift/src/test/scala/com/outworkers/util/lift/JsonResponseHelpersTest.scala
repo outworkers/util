@@ -15,7 +15,7 @@
  */
 package com.outworkers.util.lift
 
-import com.outworkers.util.testing._
+import com.outworkers.util.samplers._
 
 class JsonResponseHelpersTest extends LiftTest {
 

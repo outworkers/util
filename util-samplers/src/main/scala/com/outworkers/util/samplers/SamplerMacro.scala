@@ -1,5 +1,3 @@
-package com.outworkers.util.samplers
-
 /*
  * Copyright 2013 - 2017 Outworkers Ltd.
  *
@@ -15,15 +13,14 @@ package com.outworkers.util.samplers
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
+package com.outworkers.util.samplers
 
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.util.{Date, UUID}
 
-import com.outworkers.util.domain.Definitions
-import com.outworkers.util.macros.AnnotationToolkit
-import org.joda.time.DateTime
+import _root_.com.outworkers.util.domain.Definitions
+import _root_.com.outworkers.util.macros.AnnotationToolkit
 
 import scala.collection.concurrent.TrieMap
 import com.outworkers.util.tags._
@@ -39,7 +36,7 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     */
   val treeCache: TrieMap[Symbol, Tree] = TrieMap.empty[Symbol, Tree]
 
-  val prefix = q"com.outworkers.util.testing"
+  val prefix = q"com.outworkers.util.samplers"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
   val definitions = "com.outworkers.util.domain.Definitions"
 
@@ -57,10 +54,8 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val listSymbol: Symbol = typed[scala.collection.immutable.List[_]]
     val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
     val mapSymbol: Symbol = typed[scala.collection.immutable.Map[_, _]]
-    val dateTimeSymbol: Symbol = typed[DateTime]
     val uuidSymbol: Symbol = typed[UUID]
     val timeUuidSymbol: Symbol = typed[UUID @@ TimeUUIDTag]
-    val jodaLocalDateSymbol: Symbol = typed[org.joda.time.LocalDate]
     val inetSymbol: Symbol = typed[InetAddress]
     val bigInt: Symbol = typed[BigInt]
     val bigDecimal: Symbol = typed[BigDecimal]
@@ -341,8 +336,6 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
       case SamplersSymbols.bigInt => sampler("BigIntSampler")
       case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
-      case SamplersSymbols.dateTimeSymbol => sampler("DateTimeSampler")
-      case SamplersSymbols.jodaLocalDateSymbol => sampler("JodaLocalDateSampler")
       case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
       case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
       case SamplersSymbols.firstName => sampler("FirstNameSampler")

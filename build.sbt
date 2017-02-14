@@ -93,6 +93,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   validators,
   samplers,
   testing,
+  testingTwitter,
   macros,
   tags,
   urls
@@ -168,13 +169,12 @@ lazy val tags = (project in file("util-tags"))
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
-      "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
-      "org.fluttercode.datafactory" %  "datafactory" % Versions.datafactory % Test
+      "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     )
   ).dependsOn(
-  domain,
-  macros
-)
+    domain,
+    macros
+  )
 
 lazy val samplers = (project in file("util-samplers"))
   .settings(sharedSettings: _*)
@@ -185,6 +185,7 @@ lazy val samplers = (project in file("util-samplers"))
       "-language:experimental.macros"
     ),
     libraryDependencies ++= Seq(
+      "org.fluttercode.datafactory" %  "datafactory" % Versions.datafactory,
       "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
@@ -209,18 +210,27 @@ lazy val testing = (project in file("util-testing"))
       "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
-      "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value),
       "org.scalatest" %% "scalatest" % Versions.scalatest,
       "joda-time" % "joda-time" % Versions.joda,
       "org.joda" % "joda-convert" % Versions.jodaConvert,
-      "org.scalacheck" %% "scalacheck" % Versions.scalacheck,
-      "org.fluttercode.datafactory" %  "datafactory" % Versions.datafactory
+      "org.scalacheck" %% "scalacheck" % Versions.scalacheck
     )
   ).dependsOn(
     domain,
     tags,
     macros,
     samplers
+  )
+
+lazy val testingTwitter = (project in file("util-testing-twitter"))
+  .settings(sharedSettings: _*)
+  .settings(
+    moduleName := "util-testing-twitter",
+    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0"),
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % Versions.scalatest,
+      "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value)
+    )
   )
 
 lazy val play = (project in file("util-play"))

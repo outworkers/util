@@ -22,7 +22,8 @@ import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.generic.CanBuildFrom
 import scala.util.Random
-import com.outworkers.util.tags._
+import _root_.com.outworkers.util.tags._
+import com.eaio.uuid.UUIDGen
 
 trait Sample[T] {
   def sample: T
@@ -44,7 +45,7 @@ object Sample {
     new Sample[M[T]] {
       override def sample: M[T] = {
         val builder = cbf()
-        builder.sizeHint(com.outworkers.util.testing.defaultGeneration)
+        builder.sizeHint(com.outworkers.util.samplers.defaultGeneration)
         for (_ <- 1 to defaultGeneration) builder += gen[T]
         builder.result()
       }
@@ -118,14 +119,6 @@ object Samples extends Generators {
 
   class DateSampler extends Sample[Date] {
     def sample: Date = new Date()
-  }
-
-  class DateTimeSampler extends Sample[DateTime] {
-    def sample: DateTime = new DateTime(DateTimeZone.UTC)
-  }
-
-  class JodaLocalDateSampler extends Sample[LocalDate] {
-    def sample: LocalDate = new LocalDate(DateTimeZone.UTC)
   }
 
   class UUIDSampler extends Sample[UUID] {

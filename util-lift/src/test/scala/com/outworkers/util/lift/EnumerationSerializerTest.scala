@@ -17,7 +17,7 @@ package com.outworkers.util.lift
 
 import net.liftweb.json._
 import org.scalatest.{Matchers, FlatSpec}
-import com.outworkers.util.testing._
+import com.outworkers.util.samplers._
 
 class EnumerationSerializerTest extends FlatSpec with Matchers {
 
