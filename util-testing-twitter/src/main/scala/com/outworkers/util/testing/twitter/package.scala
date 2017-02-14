@@ -29,7 +29,6 @@ package object twitter {
   }
 
   implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with Waiters {
-
     def asTwitter()(implicit ec: ExecutionContext): com.twitter.util.Future[A] = {
       val promise = com.twitter.util.Promise[A]()
 
