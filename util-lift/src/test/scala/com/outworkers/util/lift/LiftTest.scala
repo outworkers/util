@@ -15,7 +15,9 @@
  */
 package com.outworkers.util.lift
 
+import com.outworkers.util.samplers.Sample
 import org.scalatest.{FlatSpec, Matchers}
+import com.outworkers.util.testing._
 
 case class Test(name: String, amount: Int)
 

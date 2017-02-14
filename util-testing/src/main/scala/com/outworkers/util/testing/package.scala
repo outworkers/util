@@ -20,23 +20,35 @@ import com.outworkers.util.samplers.Generators
 import com.outworkers.util.tags.DefaultTaggedTypes
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
+import org.scalatest.exceptions.TestFailedException
 
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
+import scala.util.control.NonFatal
 import scala.util.{Failure, Success}
 
-package object testing extends ScalaFutures
-  with ScalaTestHelpers
-  with Generators
-  with GenerationDomain
-  with DefaultTaggedTypes {
+package object testing extends ScalaFutures with Generators with GenerationDomain with DefaultTaggedTypes {
+
+  def shouldNotThrow[T](pf: => T): Unit = {
+    try {
+      pf
+    } catch {
+      case NonFatal(e) => {
+        if (e.isInstanceOf[TestFailedException]) {
+          throw e
+        } else {
+          Assertions.fail(s"Expected no errors to be thrown but got ${e.getMessage}")
+        }
+      }
+    }
+  }
+
+  def mustNotThrow[T](pf: => T): Unit = shouldNotThrow[T](pf)
 
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {
       ScalaAwait.result(future, duration)
     }
   }
-
-
 
   /**
    * Augmentation to allow asynchronous assertions of a @code {scala.concurrent.Future}.
@@ -56,7 +68,7 @@ package object testing extends ScalaFutures
       val w = new Waiter
 
       f onComplete {
-        case Success(_) => w.dismiss()§
+        case Success(_) => w.dismiss()
         case Failure(e) => w(throw e); w.dismiss()
       }
 

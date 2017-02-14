@@ -18,6 +18,7 @@ package com.outworkers.util.catsparsers
 import cats.implicits._
 import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Failure, Try}
+import com.outworkers.util.testing._
 
 class DefaultParsersTest extends FlatSpec with Matchers {
 

@@ -24,14 +24,15 @@ import scala.collection.generic.CanBuildFrom
 import scala.util.Random
 import _root_.com.outworkers.util.tags._
 import com.eaio.uuid.UUIDGen
+import org.scalacheck.Gen.R
 
 trait Sample[T] {
   def sample: T
-
-  def arbitrary: Arbitrary[T] = Arbitrary(sample)
 }
 
 object Sample {
+
+  def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(Gen.delay(gen[T]))
 
   /**
     * !! Warning !! Black magic going on. This will use the excellent macro compat
