@@ -185,7 +185,6 @@ lazy val samplers = (project in file("util-samplers"))
       "-language:experimental.macros"
     ),
     libraryDependencies ++= Seq(
-      "org.fluttercode.datafactory" %  "datafactory" % Versions.datafactory,
       "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),

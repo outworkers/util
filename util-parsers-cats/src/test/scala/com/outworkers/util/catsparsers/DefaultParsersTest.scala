@@ -16,7 +16,6 @@
 package com.outworkers.util.catsparsers
 
 import cats.implicits._
-import com.outworkers.util.samplers._
 import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Failure, Try}
 

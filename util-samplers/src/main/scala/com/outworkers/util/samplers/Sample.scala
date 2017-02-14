@@ -132,19 +132,35 @@ object Samples extends Generators {
   }
 
   class EmailAddressSampler extends Sample[EmailAddress] {
-    def sample: EmailAddress = EmailAddress(new DataFactory().getEmailAddress)
+    def sample: EmailAddress = {
+      val random = new Random
+      val test = random.nextInt(100)
+      var email: String = ""
+      if (test < 50) {
+        // name and initial
+        email = Generators.oneOf(NameValues.firstNames).charAt(0) +  Generators.oneOf(NameValues.lastNames)
+      }
+      else {
+        // 2 words
+        email = Generators.oneOf(ContentDataValues.words) + Generators.oneOf(ContentDataValues.words)
+      }
+
+      if (random.nextInt(100) > 80) email = email + random.nextInt(100)
+      email = email + "@" + Generators.oneOf(ContentDataValues.emailHosts) + "." + Generators.oneOf(ContentDataValues.tlds)
+      EmailAddress(email.toLowerCase)
+    }
   }
 
   class FirstNameSampler extends Sample[FirstName] {
-    def sample: FirstName = FirstName(new DataFactory().getFirstName)
+    def sample: FirstName = FirstName(Generators.oneOf(NameValues.firstNames))
   }
 
   class LastNameSampler extends Sample[LastName] {
-    def sample: LastName = LastName(new DataFactory().getLastName)
+    def sample: LastName = LastName(Generators.oneOf(NameValues.lastNames))
   }
 
   class FullNameSampler extends Sample[FullName] {
-    def sample: FullName = FullName(s"${new DataFactory().getFirstName} ${new DataFactory().getLastName}")
+    def sample: FullName = FullName(s"${Gen.oneOf(NameValues.firstNames).sample.get} ${Gen.oneOf(NameValues.lastNames).sample.get}")
   }
 
   class CountryCodeSampler extends Sample[CountryCode] {
@@ -156,7 +172,7 @@ object Samples extends Generators {
   }
 
   class CitySampler extends Sample[City] {
-    def sample: City = City(Gen.oneOf(BaseSamplers.Cities).sample.get)
+    def sample: City = City(Gen.oneOf(BaseSamplers.cities).sample.get)
   }
 
   class InetAddressSampler extends Sample[InetAddress] {

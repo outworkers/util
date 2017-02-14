@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.samplers
+package com.outworkers.util.testing
 
 import org.scalatest.Assertions
 import org.scalatest.exceptions.TestFailedException

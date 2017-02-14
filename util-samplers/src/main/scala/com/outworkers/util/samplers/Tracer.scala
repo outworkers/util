@@ -16,6 +16,7 @@
 package com.outworkers.util.samplers
 
 import scala.annotation.implicitNotFound
+import scala.reflect.macros.blackbox
 
 @implicitNotFound("Could not emit trace for type")
 trait Tracer[T] {
@@ -29,7 +30,7 @@ object Tracer {
 }
 
 @macrocompat.bundle
-class TracerMacro(val c: scala.reflect.macros.blackbox.Context) {
+class TracerMacro(val c: blackbox.Context) {
   import c.universe._
 
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
@@ -50,7 +51,7 @@ class TracerMacro(val c: scala.reflect.macros.blackbox.Context) {
     val mapSymbol = typed[scala.collection.immutable.Map[_, _]]
   }
 
-  val packagePrefix = q"com.outworkers.util.testing"
+  val packagePrefix = q"com.outworkers.util.samplers"
 
   /**
     * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.

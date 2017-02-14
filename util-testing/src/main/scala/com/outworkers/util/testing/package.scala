@@ -18,22 +18,17 @@ package com.outworkers.util
 import com.outworkers.util.domain.GenerationDomain
 import com.outworkers.util.samplers.Generators
 import com.outworkers.util.tags.DefaultTaggedTypes
-
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.{Failure, Success}
 
-package object samplers extends ScalaFutures
+package object testing extends ScalaFutures
   with ScalaTestHelpers
   with Generators
   with GenerationDomain
   with DefaultTaggedTypes {
-
-  implicit class Printer[T](val obj: T) extends AnyVal {
-    def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
-  }
 
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {
@@ -49,17 +44,6 @@ package object samplers extends ScalaFutures
    * @tparam A The underlying type of the computation.
    */
   implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with Waiters {
-
-    def asTwitter()(implicit ec: ExecutionContext): com.twitter.util.Future[A] = {
-      val promise = com.twitter.util.Promise[A]()
-
-      f onComplete {
-        case Failure(er) => promise raise er
-        case Success(data) => promise become Future.value(data)
-      }
-
-      promise
-    }
 
     /**
      * Use this to assert an expected asynchronous failure of a @code {com.twitter.util.Future}

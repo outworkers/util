@@ -19,10 +19,27 @@ import com.twitter.util.{Await, Future, Return, Throw}
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, Waiters}
 
+import scala.concurrent.{ExecutionContext, Future => ScalaFuture }
+import scala.util.{Failure, Success}
+
 package object twitter {
 
   implicit class TwitterBlockHelper[T](val f: Future[T]) extends AnyVal {
     def block(duration: com.twitter.util.Duration): T = Await.result(f, duration)
+  }
+
+  implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with Waiters {
+
+    def asTwitter()(implicit ec: ExecutionContext): com.twitter.util.Future[A] = {
+      val promise = com.twitter.util.Promise[A]()
+
+      f onComplete {
+        case Failure(er) => promise raise er
+        case Success(data) => promise become Future.value(data)
+      }
+
+      promise
+    }
   }
 
   /**

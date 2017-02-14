@@ -15,7 +15,6 @@
  */
 package com.outworkers.util.lift
 
-import com.outworkers.util.samplers._
 import net.liftweb.json.{DefaultFormats, JsonParser}
 import org.scalatest.{FlatSpec, Matchers}
 

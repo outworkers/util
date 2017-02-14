@@ -15,8 +15,6 @@
  */
 package com.outworkers.util.lift
 
-import com.outworkers.util.samplers._
-
 class JsonResponseHelpersTest extends LiftTest {
 
   it should "create a 204 response from an empty product list" in {
