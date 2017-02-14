@@ -188,6 +188,7 @@ lazy val samplers = (project in file("util-samplers"))
       "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
       "org.scalacheck" %% "scalacheck" % Versions.scalacheck
     )
   ).dependsOn(
