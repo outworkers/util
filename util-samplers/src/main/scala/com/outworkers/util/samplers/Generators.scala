@@ -1,11 +1,13 @@
-package com.outworkers.util.testing
+package com.outworkers.util.samplers
 
-import com.outworkers.util.domain.GenerationDomain
 import org.scalacheck.Gen
 
 import scala.collection.generic.CanBuildFrom
+import _root_.com.outworkers.util.domain.GenerationDomain
 
-private[util] trait Generators extends GenerationDomain {
+import scala.util.Random
+
+trait Generators extends GenerationDomain {
 
   protected[this] val domains = List("net", "com", "org", "io", "biz", "co.uk", "co.za")
   protected[this] val protocols = List("http", "https")

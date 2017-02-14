@@ -15,11 +15,11 @@
  */
 package com.outworkers.util.parsers
 
-import com.outworkers.util.testing._
 import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Try}
 import scalaz.Scalaz._
+import com.outworkers.util.testing._
 
 class DefaultParsersTest extends FlatSpec with Matchers {
 

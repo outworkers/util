@@ -13,9 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
-
-import java.util.UUID
+package com.outworkers.util.samplers
 
 import org.scalatest.FlatSpec
 

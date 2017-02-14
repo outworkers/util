@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 package com.outworkers.util.lift
-
 import com.outworkers.util.testing._
 
 class JsonResponseHelpersTest extends LiftTest {

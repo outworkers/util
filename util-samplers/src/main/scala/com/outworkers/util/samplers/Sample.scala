@@ -13,25 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
+package com.outworkers.util.samplers
 
 import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
-import com.eaio.uuid.UUIDGen
-import org.joda.time.{DateTime, DateTimeZone, LocalDate}
-import org.scalacheck.Gen
-import org.fluttercode.datafactory.impl.DataFactory
+import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.generic.CanBuildFrom
 import scala.util.Random
-import com.outworkers.util.tags._
+import _root_.com.outworkers.util.tags._
+import com.eaio.uuid.UUIDGen
+import org.scalacheck.Gen.R
 
 trait Sample[T] {
   def sample: T
 }
 
 object Sample {
+
+  def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(Gen.delay(gen[T]))
 
   /**
     * !! Warning !! Black magic going on. This will use the excellent macro compat
@@ -45,7 +46,7 @@ object Sample {
     new Sample[M[T]] {
       override def sample: M[T] = {
         val builder = cbf()
-        builder.sizeHint(com.outworkers.util.testing.defaultGeneration)
+        builder.sizeHint(com.outworkers.util.samplers.defaultGeneration)
         for (_ <- 1 to defaultGeneration) builder += gen[T]
         builder.result()
       }
@@ -121,14 +122,6 @@ object Samples extends Generators {
     def sample: Date = new Date()
   }
 
-  class DateTimeSampler extends Sample[DateTime] {
-    def sample: DateTime = new DateTime(DateTimeZone.UTC)
-  }
-
-  class JodaLocalDateSampler extends Sample[LocalDate] {
-    def sample: LocalDate = new LocalDate(DateTimeZone.UTC)
-  }
-
   class UUIDSampler extends Sample[UUID] {
     def sample: UUID = UUID.randomUUID()
   }
@@ -140,19 +133,35 @@ object Samples extends Generators {
   }
 
   class EmailAddressSampler extends Sample[EmailAddress] {
-    def sample: EmailAddress = EmailAddress(new DataFactory().getEmailAddress)
+    def sample: EmailAddress = {
+      val random = new Random
+      val test = random.nextInt(100)
+      var email: String = ""
+      if (test < 50) {
+        // name and initial
+        email = Generators.oneOf(NameValues.firstNames).charAt(0) +  Generators.oneOf(NameValues.lastNames)
+      }
+      else {
+        // 2 words
+        email = Generators.oneOf(ContentDataValues.words) + Generators.oneOf(ContentDataValues.words)
+      }
+
+      if (random.nextInt(100) > 80) email = email + random.nextInt(100)
+      email = email + "@" + Generators.oneOf(ContentDataValues.emailHosts) + "." + Generators.oneOf(ContentDataValues.tlds)
+      EmailAddress(email.toLowerCase)
+    }
   }
 
   class FirstNameSampler extends Sample[FirstName] {
-    def sample: FirstName = FirstName(new DataFactory().getFirstName)
+    def sample: FirstName = FirstName(Generators.oneOf(NameValues.firstNames))
   }
 
   class LastNameSampler extends Sample[LastName] {
-    def sample: LastName = LastName(new DataFactory().getLastName)
+    def sample: LastName = LastName(Generators.oneOf(NameValues.lastNames))
   }
 
   class FullNameSampler extends Sample[FullName] {
-    def sample: FullName = FullName(s"${new DataFactory().getFirstName} ${new DataFactory().getLastName}")
+    def sample: FullName = FullName(s"${Gen.oneOf(NameValues.firstNames).sample.get} ${Gen.oneOf(NameValues.lastNames).sample.get}")
   }
 
   class CountryCodeSampler extends Sample[CountryCode] {
@@ -164,7 +173,7 @@ object Samples extends Generators {
   }
 
   class CitySampler extends Sample[City] {
-    def sample: City = City(Gen.oneOf(BaseSamplers.Cities).sample.get)
+    def sample: City = City(Gen.oneOf(BaseSamplers.cities).sample.get)
   }
 
   class InetAddressSampler extends Sample[InetAddress] {

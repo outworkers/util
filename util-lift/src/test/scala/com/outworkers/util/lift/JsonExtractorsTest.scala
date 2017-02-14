@@ -15,9 +15,9 @@
  */
 package com.outworkers.util.lift
 
-import com.outworkers.util.testing._
 import net.liftweb.json.{DefaultFormats, JsonParser}
 import org.scalatest.{FlatSpec, Matchers}
+import com.outworkers.util.testing._
 
 class JsonExtractorsTest extends FlatSpec with Matchers {
 

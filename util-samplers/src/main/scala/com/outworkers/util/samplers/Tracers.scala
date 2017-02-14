@@ -13,29 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.testing
+package com.outworkers.util.samplers
 
-import org.scalatest.Assertions
-import org.scalatest.exceptions.TestFailedException
+object Tracers {
 
-import scala.util.control.NonFatal
-
-trait ScalaTestHelpers {
-
-  def shouldNotThrow[T](pf: => T): Unit = {
-    try {
-      pf
-    } catch {
-      case NonFatal(e) => {
-        if (e.isInstanceOf[TestFailedException]) {
-          throw e
-        } else {
-          Assertions.fail(s"Expected no errors to be thrown but got ${e.getMessage}")
-        }
-      }
-    }
+  class StringTracer[T] extends Tracer[T] {
+    override def trace(instance: T): String = instance.toString
   }
 
-  def mustNotThrow[T](pf: => T): Unit = shouldNotThrow[T](pf)
 }
-
