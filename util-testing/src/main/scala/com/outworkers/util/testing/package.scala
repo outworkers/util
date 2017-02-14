@@ -56,7 +56,7 @@ package object testing extends ScalaFutures
       val w = new Waiter
 
       f onComplete {
-        case Success(_) => w.dismiss()
+        case Success(_) => w.dismiss()§
         case Failure(e) => w(throw e); w.dismiss()
       }
 
