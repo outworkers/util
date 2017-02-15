@@ -22,9 +22,6 @@ import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.generic.CanBuildFrom
 import scala.util.Random
-import _root_.com.outworkers.util.tags._
-import com.eaio.uuid.UUIDGen
-import org.scalacheck.Gen.R
 
 trait Sample[T] {
   def sample: T
@@ -124,12 +121,6 @@ object Samples extends Generators {
 
   class UUIDSampler extends Sample[UUID] {
     def sample: UUID = UUID.randomUUID()
-  }
-
-  class TimeUUIDSampler extends Sample[UUID @@ TimeUUIDTag] {
-    override def sample: UUID @@ TimeUUIDTag = {
-      Tags.wrap[UUID, TimeUUIDTag](new UUID(UUIDGen.newTime(), new Random().nextLong()))
-    }
   }
 
   class EmailAddressSampler extends Sample[EmailAddress] {

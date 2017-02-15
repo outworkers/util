@@ -23,7 +23,6 @@ import _root_.com.outworkers.util.domain.Definitions
 import _root_.com.outworkers.util.macros.AnnotationToolkit
 
 import scala.collection.concurrent.TrieMap
-import com.outworkers.util.tags._
 
 @macrocompat.bundle
 class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extends AnnotationToolkit(c) {
@@ -55,7 +54,6 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
     val setSymbol: Symbol = typed[scala.collection.immutable.Set[_]]
     val mapSymbol: Symbol = typed[scala.collection.immutable.Map[_, _]]
     val uuidSymbol: Symbol = typed[UUID]
-    val timeUuidSymbol: Symbol = typed[UUID @@ TimeUUIDTag]
     val inetSymbol: Symbol = typed[InetAddress]
     val bigInt: Symbol = typed[BigInt]
     val bigDecimal: Symbol = typed[BigDecimal]
@@ -323,7 +321,6 @@ class SamplerMacro(override val c: scala.reflect.macros.blackbox.Context) extend
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
       case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
       case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
-      case SamplersSymbols.timeUuidSymbol => sampler("TimeUUIDSampler")
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
       case SamplersSymbols.shortSymbol => sampler("ShortSampler")
       case SamplersSymbols.boolSymbol => sampler("BooleanSampler")

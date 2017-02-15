@@ -193,7 +193,6 @@ lazy val samplers = (project in file("util-samplers"))
     )
   ).dependsOn(
     domain,
-    tags,
     macros
   )
 
