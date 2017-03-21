@@ -3,12 +3,26 @@ package com.outworkers.util.validators
 import cats.data.Validated.{Invalid, Valid}
 import cats.{Applicative, Semigroup, SemigroupK}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import com.outworkers.util.domain.ApiError
+
+import scala.concurrent.{ExecutionContext, Future}
 
 trait ValidatorImplicits extends Wrappers {
 
   implicit class CatsPropValidation[X, T](val vd: ValidatedNel[X, T]) {
     def prop(str: String): ValidatedNel[(String, X), T] = {
       vd.leftMap(f => NonEmptyList(str -> f.head, Nil))
+    }
+  }
+
+  implicit class CatsErrorHelper[X, T](val vd: ValidatedNel[String, Future[T]]) {
+    def mapSuccess(
+      errorCode: Int = ApiError.defaultErrorCode
+    )(implicit ctx: ExecutionContext): Future[Validated[ApiError, T]] = {
+      vd.fold(
+        nel => Future.successful(Invalid(ApiError.fromArgs(errorCode, nel.toList))),
+        future => future.map(Valid.apply)
+      )
     }
   }
 
@@ -25,8 +39,8 @@ trait ValidatorImplicits extends Wrappers {
 
   implicit class ValidationNelAugmenter[T](val valid: ValidatedNel[(String, String), T]) {
     def unwrap: Either[ValidationError, T] = {
-      valid.leftMap(nel => nel.toList.groupBy(_._1).map {
-        case (label, errors) => label -> errors.map(_._2)
+      valid.leftMap(nel => nel.toList.groupBy { case (a, b) => a } map {
+        case (label, errors) => label -> errors.map { case (a, b) => b }
       }).unwrap
     }
   }
