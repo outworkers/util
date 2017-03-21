@@ -6,6 +6,7 @@ import cats.data.{NonEmptyList, Validated, ValidatedNel}
 import com.outworkers.util.domain.ApiError
 
 import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NoStackTrace
 
 trait ValidatorImplicits extends Wrappers {
 
@@ -15,7 +16,16 @@ trait ValidatorImplicits extends Wrappers {
     }
   }
 
-  implicit class CatsErrorHelper[X, T](val vd: ValidatedNel[String, Future[T]]) {
+  implicit def catsErrorConvert[T](vd: ValidatedNel[String, Future[T]])(
+    implicit ctx: ExecutionContext
+  ): Future[Validated[ApiError, T]] = {
+    vd.fold(
+      nel => Future.successful(Invalid(ApiError.fromArgs(ApiError.defaultErrorCode, nel.toList))),
+      future => future.map(Valid.apply)
+    )
+  }
+
+  implicit class CatsErrorHelper[T](val vd: ValidatedNel[String, Future[T]]) {
     def mapSuccess(
       errorCode: Int = ApiError.defaultErrorCode
     )(implicit ctx: ExecutionContext): Future[Validated[ApiError, T]] = {
@@ -23,6 +33,26 @@ trait ValidatorImplicits extends Wrappers {
         nel => Future.successful(Invalid(ApiError.fromArgs(errorCode, nel.toList))),
         future => future.map(Valid.apply)
       )
+    }
+
+    def response(jsonFunc: ApiError => String)(
+      implicit ctx: ExecutionContext
+    ): Future[T] = vd.fold(
+      nel => {
+        val err = ApiError.fromArgs(ApiError.defaultErrorCode, nel.toList)
+        Future.failed(new RuntimeException(jsonFunc(err)) with NoStackTrace)
+      },
+      identity
+    )
+
+  }
+
+  implicit class FutureErrorConverter[T](val f: Future[Validated[ApiError, T]]) {
+    def response(jsonFunc: ApiError => String)(
+      implicit ctx: ExecutionContext
+    ): Future[T] = f map {
+      case Valid(s) => s
+      case Invalid(err) => throw new RuntimeException(jsonFunc(err)) with NoStackTrace
     }
   }
 
