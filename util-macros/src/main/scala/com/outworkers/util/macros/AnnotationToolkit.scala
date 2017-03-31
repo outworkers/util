@@ -59,9 +59,45 @@ trait AnnotationToolkit {
     }}
   }
 
+  def printType(tpe: Type): String = {
+    showCode(tq"${tpe.dealias}")
+  }
+
+  def tupleFields(tpe: Type): Iterable[Accessor] = {
+    val sourceTerm = TermName("source")
+
+    tpe.typeArgs.zipWithIndex.map {
+      case (argTpe, i) =>
+        val currentTerm = TermName(s"tp${i + 1}")
+        val tupleRef = TermName("_" + (i + 1).toString)
+        Accessor(tupleRef, argTpe)
+    }
+  }
+
+  def fields(tpe: Type): Iterable[Accessor] = {
+    if (isCaseClass(tpe)) {
+      caseFields(tpe)
+    } else if (isTuple(tpe)) {
+      tupleFields(tpe)
+    } else {
+      c.abort(c.enclosingPosition, "")
+    }
+  }
+
+  def isCaseClass(tpe: Type): Boolean = {
+    tpe.typeSymbol.isClass && tpe.typeSymbol.asClass.isCaseClass
+  }
+
+  def isCaseClass(sym: Symbol): Boolean = {
+    sym.isClass && sym.asClass.isCaseClass
+  }
 
   def isTuple(tpe: Type): Boolean = {
     tpe.typeSymbol.fullName startsWith "scala.Tuple"
+  }
+
+  def isTuple(sym: Symbol): Boolean = {
+    sym.fullName startsWith "scala.Tuple"
   }
 
   object Symbols {
@@ -80,65 +116,9 @@ trait AnnotationToolkit {
 
     def typeArgs: List[Type] = paramType.typeArgs
 
-    def tpe: TypeName = symbol.name.toTypeName
+    def tpe: Type = paramType
 
     def symbol: Symbol = paramType.typeSymbol
-  }
-
-  case class ListAccessor(
-    accessor: Accessor
-  )
-
-  object ListAccessor {
-    def unapply(arg: Accessor): Option[ListAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.listSymbol) {
-        Some(ListAccessor(arg))
-      } else {
-        None
-      }
-    }
-  }
-
-  case class SetAccessor(
-    accessor: Accessor
-  )
-
-  object SetAccessor {
-    def unapply(arg: Accessor): Option[SetAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.setSymbol) {
-        Some(SetAccessor(arg))
-      } else {
-        None
-      }
-    }
-  }
-
-  case class OptionAccessor(
-    accessor: Accessor
-  )
-
-  object OptionAccessor {
-    def unapply(arg: Accessor): Option[OptionAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.optSymbol) {
-        Some(OptionAccessor(arg))
-      } else {
-        None
-      }
-    }
-  }
-
-  case class MapAccessor(
-    accessor: Accessor
-  )
-
-  object MapAccessor {
-    def unapply(arg: Accessor): Option[MapAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.mapSymbol) {
-        Some(MapAccessor(arg))
-      } else {
-        None
-      }
-    }
   }
 
   /**
@@ -165,6 +145,4 @@ trait AnnotationToolkit {
       }
     }
   }
-
-
 }

@@ -21,4 +21,10 @@ object Tracers {
     override def trace(instance: T): String = instance.toString
   }
 
+  class TraversableTracers[M[X] <: TraversableOnce[X], RR]()(
+    implicit tracer: Tracer[RR]
+  ) extends Tracer[M[RR]] {
+    override def trace(instance: M[RR]): String = instance.map(e => tracer.trace(e)).mkString("\n")
+  }
+
 }

@@ -37,22 +37,28 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   val packagePrefix = q"_root_.com.outworkers.util.samplers"
 
   def macroImpl[T : WeakTypeTag]: Tree = {
-    val sym = weakTypeOf[T].typeSymbol
+    val tpe = weakTypeOf[T]
+    val sym = tpe.typeSymbol
 
-    if (sym.isClass && sym.asClass.isCaseClass) {
-      caseClassImpl[T]
-    } else {
-      q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
+    sym match {
+      case s if isCaseClass(s) | isTuple(s) => fieldTracer(tpe, fields(tpe))
+
+      case s if tpe <:< typeOf[TraversableOnce[_]] =>
+        val tree = q"""new $packagePrefix.Tracers.TraversableTracers[$sym, (..${tpe.typeArgs})]"""
+        Console.println(showCode(tree))
+        tree
+      case _ =>
+        q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
     }
   }
 
-  def caseClassImpl[T : WeakTypeTag]: Tree = {
-    val tpe = weakTypeOf[T]
-    val flds = caseFields(tpe)
+  def fieldTracer(tpe: Type, fields: Iterable[Accessor]): Tree = {
     val cmp = tpe.typeSymbol.name
 
-    val appliers = flds.map { accessor =>
-      q""" "  " + ${accessor.toString} + "= " + $packagePrefix.Tracer[${accessor.paramType}].trace(${c.parse(s"instance.${accessor.name}")})"""
+    val appliers = fields.map { accessor =>
+      q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.paramType}].trace(
+        ${c.parse(s"instance.${accessor.name}"
+      )})"""
     }
 
     q"""
