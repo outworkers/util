@@ -15,9 +15,9 @@
  */
 package com.outworkers.util.samplers
 
-import org.scalatest.FlatSpec
+import org.scalatest.{ FlatSpec, Matchers }
 
-class GeneratorsTest extends FlatSpec {
+class GeneratorsTest extends FlatSpec with Matchers {
 
   it should "generate a sized list based on the given argument" in {
     val limit = 10
@@ -45,6 +45,11 @@ class GeneratorsTest extends FlatSpec {
     val user = gen[User]
     val tp = gen[TupleRecord]
     val tpColl = gen[TupleCollectionRecord]
+  }
+
+  it should "automatically derive a sample for a nested case class" in {
+    val sample = gen[NestedUser]
+    sample shouldEqual sample
   }
 
 

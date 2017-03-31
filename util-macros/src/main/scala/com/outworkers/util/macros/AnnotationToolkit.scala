@@ -15,19 +15,39 @@
  */
 package com.outworkers.util.macros
 
+import scala.reflect.macros.blackbox
+
 @macrocompat.bundle
-class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
+trait AnnotationToolkit {
+
+  val c: blackbox.Context
+
   import c.universe._
 
-  val collectionPkg = q"scala.collection.immutable"
+  val collectionPkg = q"_root_.scala.collection.immutable"
 
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
+  /**
+    * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.
+    * For every single field in a case class, a reference to the string name and string type of the field are returned.
+    *
+    * Example:
+    *
+    * {{{
+    *   case class Test(id: UUID, name: String, age: Int)
+    *
+    *   accessors(Test) = Iterable("id" -> "UUID", "name" -> "String", age: "Int")
+    * }}}
+    *
+    * @param tpe The input type of the case class definition.
+    * @return An iterable of tuples where each tuple encodes the string name and string type of a field.
+    */
   def caseFields(tpe: Type): Iterable[Accessor] = {
     object CaseField {
       def unapply(arg: TermSymbol): Option[(Name, Type)] = {
         if (arg.isVal && arg.isCaseAccessor) {
-          Some(TermName(arg.name.toString.trim) -> arg.typeSignature)
+          Some(TermName(arg.name.toString.trim) -> arg.typeSignature.dealias)
         } else {
           None
         }

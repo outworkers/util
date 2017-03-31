@@ -17,6 +17,7 @@ package com.outworkers.util.samplers
 
 import scala.annotation.implicitNotFound
 import scala.reflect.macros.blackbox
+import com.outworkers.util.macros.AnnotationToolkit
 
 @implicitNotFound("Could not emit trace for type")
 trait Tracer[T] {
@@ -30,47 +31,10 @@ object Tracer {
 }
 
 @macrocompat.bundle
-class TracerMacro(val c: blackbox.Context) {
+class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   import c.universe._
 
-  def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
-
-  object CaseField {
-    def unapply(sym: TermSymbol): Option[(Name, Type)] = {
-      if (sym.isVal && sym.isCaseAccessor) {
-        Some(sym.name -> sym.typeSignature)
-      } else {
-        None
-      }
-    }
-  }
-
-  object Symbols {
-    val listSymbol = typed[scala.collection.immutable.List[_]]
-    val setSymbol = typed[scala.collection.immutable.Set[_]]
-    val mapSymbol = typed[scala.collection.immutable.Map[_, _]]
-  }
-
-  val packagePrefix = q"com.outworkers.util.samplers"
-
-  /**
-    * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.
-    * For every single field in a case class, a reference to the string name and string type of the field are returned.
-    *
-    * Example:
-    *
-    * {{{
-    *   case class Test(id: UUID, name: String, age: Int)
-    *
-    *   accessors(Test) = Iterable("id" -> "UUID", "name" -> "String", age: "Int")
-    * }}}
-    *
-    * @param tpe The input type of the case class definition.
-    * @return An iterable of tuples where each tuple encodes the string name and string type of a field.
-    */
-  def fields(tpe: Type): Iterable[(Name, Type)] = {
-    tpe.decls.collect { case CaseField(nm, tp) => nm -> tp }
-  }
+  val packagePrefix = q"_root_.com.outworkers.util.samplers"
 
   def macroImpl[T : WeakTypeTag]: Tree = {
     val sym = weakTypeOf[T].typeSymbol
@@ -84,11 +48,11 @@ class TracerMacro(val c: blackbox.Context) {
 
   def caseClassImpl[T : WeakTypeTag]: Tree = {
     val tpe = weakTypeOf[T]
-    val flds = fields(tpe)
+    val flds = caseFields(tpe)
     val cmp = tpe.typeSymbol.name
 
-    val appliers = flds.map {
-      case (nm, tp) => q""" "  " + ${nm.toString} + "= " + $packagePrefix.Tracer[$tp].trace(${c.parse(s"instance.$nm")})"""
+    val appliers = flds.map { accessor =>
+      q""" "  " + ${accessor.toString} + "= " + $packagePrefix.Tracer[${accessor.paramType}].trace(${c.parse(s"instance.${accessor.name}")})"""
     }
 
     q"""
