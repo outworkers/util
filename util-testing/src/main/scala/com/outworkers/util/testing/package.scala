@@ -19,23 +19,44 @@ import com.outworkers.util.domain.GenerationDomain
 import com.outworkers.util.samplers.{Generators, Sample}
 import com.outworkers.util.tags.DefaultTaggedTypes
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
+import org.scalacheck.Gen
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 import org.scalatest.exceptions.TestFailedException
 
+import scala.collection.JavaConverters._
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.control.NonFatal
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Random}
 
-package object testing extends ScalaFutures with Generators with GenerationDomain with DefaultTaggedTypes {
+package object testing extends ScalaFutures
+  with Generators
+  with GenerationDomain
+  with DefaultTaggedTypes {
 
   implicit object DateTimeSampler extends Sample[DateTime] {
-    def sample: DateTime = new DateTime(DateTimeZone.UTC)
+    val limit = 10000
+    def sample: DateTime = {
+      // may the gods of code review forgive me for me sins
+      val offset = Gen.choose(-limit, limit).sample.get
+      val now = new DateTime(DateTimeZone.UTC)
+      now.plusSeconds(offset)
+    }
   }
 
   implicit object JodaLocalDateSampler extends Sample[LocalDate] {
-    def sample: LocalDate = new LocalDate(DateTimeZone.UTC)
+    val limit = 10000
+    def sample: LocalDate = {
+      // may the gods of code review forgive me for me sins
+      val offset = Gen.choose(-limit, limit).sample.get
+      val zone = Generators.oneOf(DateTimeZone.getAvailableIDs().asScala.toList)
+      new LocalDate(DateTimeSampler.sample.getMillis, DateTimeZone.forID(zone))
+    }
   }
+
+  type Sample[R] = com.outworkers.util.samplers.Sample[R]
+  val Sample = com.outworkers.util.samplers.Sample
+  val Generators = com.outworkers.util.samplers.Generators
 
   def shouldNotThrow[T](pf: => T): Unit = try pf catch {
     case NonFatal(e) =>
@@ -97,6 +118,7 @@ package object testing extends ScalaFutures with Generators with GenerationDomai
      * @param x The computation inside the future to await. This waiting is asynchronous.
      * @param timeout The timeout of the future.
      */
+    @deprecated("Use ScalaTest AsyncAssertions trait instead", "0.31.0")
     def successful(x: A => Unit)(implicit timeout: PatienceConfiguration.Timeout, ec: ExecutionContext) : Unit = {
       val w = new Waiter
 
