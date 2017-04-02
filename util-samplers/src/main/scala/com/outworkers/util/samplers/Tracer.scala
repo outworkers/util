@@ -40,16 +40,22 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val tpe = weakTypeOf[T]
     val sym = tpe.typeSymbol
 
-    sym match {
+    val tree = sym match {
       case s if isCaseClass(s) | isTuple(s) => fieldTracer(tpe, fields(tpe))
 
+      case s if tpe <:< typeOf[Option[_]] =>
+        q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
+
       case s if tpe <:< typeOf[TraversableOnce[_]] =>
-        val tree = q"""new $packagePrefix.Tracers.TraversableTracers[$sym, (..${tpe.typeArgs})]"""
-        Console.println(showCode(tree))
-        tree
+        if (tpe.typeArgs.size == 2) {
+           q"new $packagePrefix.Tracers.MapLikeTracer[$sym, (..${tpe.typeArgs}), ..${tpe.typeArgs}]"
+        } else {
+          q"new $packagePrefix.Tracers.TraversableTracers[$sym, (..${tpe.typeArgs})]"
+        }
       case _ =>
         q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
     }
+    tree
   }
 
   def fieldTracer(tpe: Type, fields: Iterable[Accessor]): Tree = {
