@@ -36,12 +36,27 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
 
   val packagePrefix = q"_root_.com.outworkers.util.samplers"
 
+  override def tupleFields(tpe: Type): Iterable[Accessor] = {
+    tpe.typeParams.zipWithIndex.map {
+      case (tp, i) =>
+        Console.println(s"Tuple type ${printType(tpe)}: ${printType(tp.typeSignature)}")
+        Accessor(tupleTerm(i), tp.typeSignature)
+    }
+  }
+
   def macroImpl[T : WeakTypeTag]: Tree = {
     val tpe = weakTypeOf[T]
     val sym = tpe.typeSymbol
 
     val tree = sym match {
-      case s if isCaseClass(s) | isTuple(s) => fieldTracer(tpe, fields(tpe))
+      case s if isCaseClass(s) => fieldTracer(tpe, fields(tpe))
+      case s if isTuple(s) => {
+        val fields = tupleFields(tpe)
+        Console.println("This should be a tupled type")
+        val str = fields.map(acc => printType(acc.paramType)).mkString("\n")
+        Console.println(str)
+        q"new $packagePrefix.Tracers.StringTracer[$sym]"
+      }
 
       case s if tpe <:< typeOf[Option[_]] =>
         q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
@@ -55,16 +70,25 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       case _ =>
         q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
     }
+
     tree
   }
 
   def fieldTracer(tpe: Type, fields: Iterable[Accessor]): Tree = {
     val cmp = tpe.typeSymbol.name
 
+    val str = fields.map(acc => s"${acc.name.toString}: ${printType(acc.paramType)}").mkString("\n")
+    Console.println(s"Field destructuring ${printType(tpe)}")
+
+    val tupleTree = tq"(..${tpe.typeArgs})"
+    Console.println(s"Tupled type, ${showCode(tupleTree)}")
+
+    Console.println(str)
+
     val appliers = fields.map { accessor =>
       q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.paramType}].trace(
-        ${c.parse(s"instance.${accessor.name}"
-      )})"""
+        instance.${accessor.name}
+      )"""
     }
 
     q"""

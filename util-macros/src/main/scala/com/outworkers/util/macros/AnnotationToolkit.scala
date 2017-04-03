@@ -59,18 +59,15 @@ trait AnnotationToolkit {
     }}
   }
 
-  def printType(tpe: Type): String = {
-    showCode(tq"${tpe.dealias}")
-  }
+  def printType(tpe: Type): String = showCode(tq"${tpe.dealias}")
+
+  def tupleTerm(i: Int): TermName = TermName("_" + (i + 1).toString)
 
   def tupleFields(tpe: Type): Iterable[Accessor] = {
-    val sourceTerm = TermName("source")
-
-    tpe.typeArgs.zipWithIndex.map {
-      case (argTpe, i) =>
-        val currentTerm = TermName(s"tp${i + 1}")
-        val tupleRef = TermName("_" + (i + 1).toString)
-        Accessor(tupleRef, argTpe)
+    tpe.decls.zipWithIndex.map {
+      case (symbol, i) =>
+        Console.println(s"Tuple type ${printType(tpe)}: ${printType(symbol.typeSignatureIn(tpe))}")
+        Accessor(tupleTerm(i), symbol.typeSignatureIn(tpe))
     }
   }
 
@@ -80,21 +77,20 @@ trait AnnotationToolkit {
     } else if (isTuple(tpe)) {
       tupleFields(tpe)
     } else {
-      c.abort(c.enclosingPosition, "")
+      c.abort(
+        c.enclosingPosition,
+        "Attempted to retrieve fields from non case class or tuple fields"
+      )
     }
   }
 
-  def isCaseClass(tpe: Type): Boolean = {
-    tpe.typeSymbol.isClass && tpe.typeSymbol.asClass.isCaseClass
-  }
+  def isCaseClass(tpe: Type): Boolean = isCaseClass(tpe.typeSymbol)
 
   def isCaseClass(sym: Symbol): Boolean = {
     sym.isClass && sym.asClass.isCaseClass
   }
 
-  def isTuple(tpe: Type): Boolean = {
-    tpe.typeSymbol.fullName startsWith "scala.Tuple"
-  }
+  def isTuple(tpe: Type): Boolean = isTuple(tpe.typeSymbol)
 
   def isTuple(sym: Symbol): Boolean = {
     sym.fullName startsWith "scala.Tuple"
