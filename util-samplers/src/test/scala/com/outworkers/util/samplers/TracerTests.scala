@@ -38,8 +38,11 @@ class TracerTests extends FlatSpec with Matchers {
   }
 
   it should "automatically derive a tracer for a nested tuple collection type" in {
+
+    implicit val mapTracer = new Tracers.MapLikeTracer[Map, String, String]()
+
     val sample = gen[TupleCollectionRecord]
-    sample.trace()
+    //sample.trace()
     """sample.trace()""" should compile
   }
 

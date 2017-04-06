@@ -28,16 +28,14 @@ object Tracers {
   }
 
   class MapLikeTracer[
-    M[Source] <: TraversableOnce[Source],
-    ColType,
+    M[A, B] <: TraversableOnce[(A, B)],
     Key,
     Value
   ]()(
-    implicit ev: ColType <:< (Key, Value),
-    kTracer: Tracer[Key],
+    implicit kTracer: Tracer[Key],
     vTracer: Tracer[Value]
-  ) extends Tracer[M[(Key, Value)]] {
-    override def trace(m: M[(Key, Value)]): String = m.map { case (key, value) =>
+  ) extends Tracer[M[Key, Value]] {
+    override def trace(m: M[Key, Value]): String = m.map { case (key, value) =>
       Tracer[Key].trace(key) + " " + Tracer[Value].trace(value)
     } mkString("\n")
   }

@@ -64,10 +64,10 @@ trait AnnotationToolkit {
   def tupleTerm(i: Int): TermName = TermName("_" + (i + 1).toString)
 
   def tupleFields(tpe: Type): Iterable[Accessor] = {
-    tpe.decls.zipWithIndex.map {
-      case (symbol, i) =>
-        Console.println(s"Tuple type ${printType(tpe)}: ${printType(symbol.typeSignatureIn(tpe))}")
-        Accessor(tupleTerm(i), symbol.typeSignatureIn(tpe))
+    tpe.typeArgs.zipWithIndex.map {
+      case (tp, i) =>
+        Console.println(s"Tuple type ${printType(tpe)}: ${printType(tp)}")
+        Accessor(tupleTerm(i), tp)
     }
   }
 

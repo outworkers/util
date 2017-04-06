@@ -28,6 +28,10 @@ object Tracer {
   implicit def macroMaterialize[T]: Tracer[T] = macro TracerMacro.macroImpl[T]
 
   def apply[T : Tracer]: Tracer[T] = implicitly[Tracer[T]]
+
+  def tupled(traces: Seq[String]*): String = {
+    "(" + traces.mkString(", ") + ")"
+  }
 }
 
 @macrocompat.bundle
@@ -35,55 +39,51 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   import c.universe._
 
   val packagePrefix = q"_root_.com.outworkers.util.samplers"
-
-  override def tupleFields(tpe: Type): Iterable[Accessor] = {
-    tpe.typeParams.zipWithIndex.map {
-      case (tp, i) =>
-        Console.println(s"Tuple type ${printType(tpe)}: ${printType(tp.typeSignature)}")
-        Accessor(tupleTerm(i), tp.typeSignaturepackage.scala)
-    }
-  }
+  private[this] val stringType = tq"java.lang.String"
 
   def macroImpl[T : WeakTypeTag]: Tree = {
     val tpe = weakTypeOf[T]
     val sym = tpe.typeSymbol
 
-    val tree = sym match {
-      case s if isCaseClass(s) => fieldTracer(tpe, fields(tpe))
-      case s if isTuple(s) => {
+    tpe match {
+      case t if isCaseClass(t) => fieldTracer(tpe, fields(tpe))
+      case t if isTuple(t) => {
         val fields = tupleFields(tpe)
-        Console.println("This should be a tupled type")
-        val str = fields.map(acc => printType(acc.paramType)).mkString("\n")
-        Console.println(str)
-        q"new $packagePrefix.Tracers.StringTracer[$sym]"
+        Console.println(s"Tuple ${printType(tpe)} has ${fields.size} entries.")
+        val args = fields.map(acc => q"$packagePrefix.Tracer[${acc.paramType}].trace(${acc.name})")
+        val code = q"""
+          new $packagePrefix.Tracer[$tpe] {
+            override def trace(instance: $tpe): $stringType = {
+              $packagePrefix.Tracer.tupled(..$args)
+            }
+          }
+        """
+        Console.println(showCode(code))
+        code
       }
 
-      case s if tpe <:< typeOf[Option[_]] =>
+      case t if tpe <:< typeOf[Option[_]] =>
         q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
 
-      case s if tpe <:< typeOf[TraversableOnce[_]] =>
-        if (tpe.typeArgs.size == 2) {
-           q"new $packagePrefix.Tracers.MapLikeTracer[$sym, (..${tpe.typeArgs}), ..${tpe.typeArgs}]"
-        } else {
-          q"new $packagePrefix.Tracers.TraversableTracers[$sym, (..${tpe.typeArgs})]"
-        }
-      case _ =>
-        q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
-    }
+      case t if tpe <:< typeOf[TraversableOnce[_]] =>
+        tpe.typeArgs match {
+          case Nil =>
+            q"new $packagePrefix.Tracers.StringTracer[$tpe]"
+          case head :: Nil =>
+            Console.println(s"Found collection inner type ${printType(head)}")
+            q"new $packagePrefix.Tracers.TraversableTracers[$sym, ${head}]"
+          case first :: second :: Nil =>
+            q"new $packagePrefix.Tracers.MapLikeTracer[$sym, $first, $second]"
+          case _ =>
+            q"new $packagePrefix.Tracers.StringTracer[$tpe]"
+      }
 
-    tree
+      case _ => q"new $packagePrefix.Tracers.StringTracer[$tpe]"
+    }
   }
 
   def fieldTracer(tpe: Type, fields: Iterable[Accessor]): Tree = {
     val cmp = tpe.typeSymbol.name
-
-    val str = fields.map(acc => s"${acc.name.toString}: ${printType(acc.paramType)}").mkString("\n")
-    Console.println(s"Field destructuring ${printType(tpe)}")
-
-    val tupleTree = tq"(..${tpe.typeArgs})"
-    Console.println(s"Tupled type, ${showCode(tupleTree)}")
-
-    Console.println(str)
 
     val appliers = fields.map { accessor =>
       q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.paramType}].trace(
@@ -93,8 +93,10 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
 
     q"""
       new $packagePrefix.Tracer[$tpe] {
-        def trace(instance: $tpe): String = {
-          ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(..$appliers).mkString("\n") + "\n)"
+        def trace(instance: $tpe): $stringType = {
+          ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(
+            ..$appliers
+          ).mkString("\n") + "\n)"
         }
       }
     """
