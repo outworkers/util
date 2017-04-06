@@ -29,7 +29,9 @@ trait Sample[T] {
 
 object Sample {
 
-  def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(Gen.delay(gen[T]))
+  def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(generator[T])
+
+  def generator[T : Sample]: Gen[T] = Gen.delay(gen[T])
 
   /**
     * !! Warning !! Black magic going on. This will use the excellent macro compat
@@ -39,7 +41,9 @@ object Sample {
     */
   implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
 
-  def collection[M[X] <: TraversableOnce[X], T : Sample](implicit cbf: CanBuildFrom[Nothing, T, M[T]]): Sample[M[T]] = {
+  def collection[M[X] <: TraversableOnce[X], T : Sample](
+    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
+  ): Sample[M[T]] = {
     new Sample[M[T]] {
       override def sample: M[T] = {
         val builder = cbf()
@@ -189,5 +193,3 @@ object Samples extends Generators {
   }
 
 }
-
-

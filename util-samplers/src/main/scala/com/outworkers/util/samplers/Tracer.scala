@@ -40,7 +40,7 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     tpe.typeParams.zipWithIndex.map {
       case (tp, i) =>
         Console.println(s"Tuple type ${printType(tpe)}: ${printType(tp.typeSignature)}")
-        Accessor(tupleTerm(i), tp.typeSignature)
+        Accessor(tupleTerm(i), tp.typeSignaturepackage.scala)
     }
   }
 
