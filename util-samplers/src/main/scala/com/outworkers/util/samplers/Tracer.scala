@@ -48,18 +48,17 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     tpe match {
       case t if isCaseClass(t) => fieldTracer(tpe, fields(tpe))
       case t if isTuple(t) => {
+
         val fields = tupleFields(tpe)
         Console.println(s"Tuple ${printType(tpe)} has ${fields.size} entries.")
         val args = fields.map(acc => q"$packagePrefix.Tracer[${acc.paramType}].trace(${acc.name})")
-        val code = q"""
+        q"""
           new $packagePrefix.Tracer[$tpe] {
             override def trace(instance: $tpe): $stringType = {
               $packagePrefix.Tracer.tupled(..$args)
             }
           }
         """
-        Console.println(showCode(code))
-        code
       }
 
       case t if tpe <:< typeOf[Option[_]] =>
@@ -91,7 +90,11 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       )"""
     }
 
-    q"""
+    val t = q"""scala.collection.immutable.List.apply(
+      ..$appliers
+    )"""
+
+    val code = q"""
       new $packagePrefix.Tracer[$tpe] {
         def trace(instance: $tpe): $stringType = {
           ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(
@@ -100,5 +103,7 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
         }
       }
     """
+    // Console.println(showCode(code))
+    code
   }
 }
