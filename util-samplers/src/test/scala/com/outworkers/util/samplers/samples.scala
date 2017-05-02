@@ -24,6 +24,11 @@ case class User(
   email: String
 )
 
+case class NestedUser(
+  timestamp: Long,
+  user: User
+)
+
 case class CollectionSample(
   id: UUID,
   firstName: String,

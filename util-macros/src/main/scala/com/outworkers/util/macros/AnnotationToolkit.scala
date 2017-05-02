@@ -15,33 +15,64 @@
  */
 package com.outworkers.util.macros
 
+import scala.reflect.macros.blackbox
+
 @macrocompat.bundle
-class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
+trait AnnotationToolkit {
+
+  val c: blackbox.Context
+
   import c.universe._
 
-  val collectionPkg = q"scala.collection.immutable"
+  val collectionPkg = q"_root_.scala.collection.immutable"
 
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
-  def caseFields(tpe: Type): Iterable[Accessor] = {
-    object CaseField {
-      def unapply(arg: TermSymbol): Option[(Name, Type)] = {
-        if (arg.isVal && arg.isCaseAccessor) {
-          Some(TermName(arg.name.toString.trim) -> arg.typeSignature)
-        } else {
-          None
-        }
+  object CaseField {
+    def unapply(arg: TermSymbol): Option[(Name, Type)] = {
+      if (arg.isVal && arg.isCaseAccessor) {
+        Some(TermName(arg.name.toString.trim) -> arg.typeSignature.dealias)
+      } else {
+        None
       }
     }
+  }
 
+  /**
+    * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.
+    * For every single field in a case class, a reference to the string name and string type of the field are returned.
+    *
+    * Example:
+    *
+    * {{{
+    *   case class Test(id: UUID, name: String, age: Int)
+    *
+    *   accessors(Test) = Iterable("id" -> "UUID", "name" -> "String", age: "Int")
+    * }}}
+    *
+    * @param tpe The input type of the case class definition.
+    * @return An iterable of tuples where each tuple encodes the string name and string type of a field.
+    */
+  def caseFields(tpe: Type): Iterable[Accessor] = {
     tpe.decls.collect { case CaseField(name, fType) => {
       Accessor(name.toTermName, fType)
     }}
   }
 
+  def printType(tpe: Type): String = showCode(tq"${tpe.dealias}")
 
-  def isTuple(tpe: Type): Boolean = {
-    tpe.typeSymbol.fullName startsWith "scala.Tuple"
+  def tupleTerm(i: Int): TermName = TermName("_" + (i + 1).toString)
+
+  def isCaseClass(tpe: Type): Boolean = isCaseClass(tpe.typeSymbol)
+
+  def isCaseClass(sym: Symbol): Boolean = {
+    sym.isClass && sym.asClass.isCaseClass
+  }
+
+  def isTuple(tpe: Type): Boolean = isTuple(tpe.typeSymbol)
+
+  def isTuple(sym: Symbol): Boolean = {
+    sym.fullName startsWith "scala.Tuple"
   }
 
   object Symbols {
@@ -60,65 +91,9 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
 
     def typeArgs: List[Type] = paramType.typeArgs
 
-    def tpe: TypeName = symbol.name.toTypeName
+    def tpe: Type = paramType
 
     def symbol: Symbol = paramType.typeSymbol
-  }
-
-  case class ListAccessor(
-    accessor: Accessor
-  )
-
-  object ListAccessor {
-    def unapply(arg: Accessor): Option[ListAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.listSymbol) {
-        Some(ListAccessor(arg))
-      } else {
-        None
-      }
-    }
-  }
-
-  case class SetAccessor(
-    accessor: Accessor
-  )
-
-  object SetAccessor {
-    def unapply(arg: Accessor): Option[SetAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.setSymbol) {
-        Some(SetAccessor(arg))
-      } else {
-        None
-      }
-    }
-  }
-
-  case class OptionAccessor(
-    accessor: Accessor
-  )
-
-  object OptionAccessor {
-    def unapply(arg: Accessor): Option[OptionAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.optSymbol) {
-        Some(OptionAccessor(arg))
-      } else {
-        None
-      }
-    }
-  }
-
-  case class MapAccessor(
-    accessor: Accessor
-  )
-
-  object MapAccessor {
-    def unapply(arg: Accessor): Option[MapAccessor] = {
-      if (arg.paramType.typeSymbol == Symbols.mapSymbol) {
-        Some(MapAccessor(arg))
-      } else {
-        None
-      }
-    }
   }
 
   /**
@@ -145,6 +120,4 @@ class AnnotationToolkit(val c: scala.reflect.macros.blackbox.Context) {
       }
     }
   }
-
-
 }

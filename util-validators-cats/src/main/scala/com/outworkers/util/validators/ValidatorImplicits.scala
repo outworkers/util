@@ -3,12 +3,56 @@ package com.outworkers.util.validators
 import cats.data.Validated.{Invalid, Valid}
 import cats.{Applicative, Semigroup, SemigroupK}
 import cats.data.{NonEmptyList, Validated, ValidatedNel}
+import com.outworkers.util.domain.ApiError
+
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.control.NoStackTrace
 
 trait ValidatorImplicits extends Wrappers {
 
   implicit class CatsPropValidation[X, T](val vd: ValidatedNel[X, T]) {
     def prop(str: String): ValidatedNel[(String, X), T] = {
       vd.leftMap(f => NonEmptyList(str -> f.head, Nil))
+    }
+  }
+
+  implicit def catsErrorConvert[T](vd: ValidatedNel[String, Future[T]])(
+    implicit ctx: ExecutionContext
+  ): Future[Validated[ApiError, T]] = {
+    vd.fold(
+      nel => Future.successful(Invalid(ApiError.fromArgs(ApiError.defaultErrorCode, nel.toList))),
+      future => future.map(Valid.apply)
+    )
+  }
+
+  implicit class CatsErrorHelper[T](val vd: ValidatedNel[String, Future[T]]) {
+    def mapSuccess(
+      errorCode: Int = ApiError.defaultErrorCode
+    )(implicit ctx: ExecutionContext): Future[Validated[ApiError, T]] = {
+      vd.fold(
+        nel => Future.successful(Invalid(ApiError.fromArgs(errorCode, nel.toList))),
+        future => future.map(Valid.apply)
+      )
+    }
+
+    def response(jsonFunc: ApiError => String)(
+      implicit ctx: ExecutionContext
+    ): Future[T] = vd.fold(
+      nel => {
+        val err = ApiError.fromArgs(ApiError.defaultErrorCode, nel.toList)
+        Future.failed(new RuntimeException(jsonFunc(err)) with NoStackTrace)
+      },
+      identity
+    )
+
+  }
+
+  implicit class FutureErrorConverter[T](val f: Future[Validated[ApiError, T]]) {
+    def response(jsonFunc: ApiError => String)(
+      implicit ctx: ExecutionContext
+    ): Future[T] = f map {
+      case Valid(s) => s
+      case Invalid(err) => throw new RuntimeException(jsonFunc(err)) with NoStackTrace
     }
   }
 
@@ -25,8 +69,8 @@ trait ValidatorImplicits extends Wrappers {
 
   implicit class ValidationNelAugmenter[T](val valid: ValidatedNel[(String, String), T]) {
     def unwrap: Either[ValidationError, T] = {
-      valid.leftMap(nel => nel.toList.groupBy(_._1).map {
-        case (label, errors) => label -> errors.map(_._2)
+      valid.leftMap(nel => nel.toList.groupBy { case (a, b) => a } map {
+        case (label, errors) => label -> errors.map { case (a, b) => b }
       }).unwrap
     }
   }

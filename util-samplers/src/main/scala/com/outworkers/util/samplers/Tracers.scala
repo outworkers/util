@@ -21,4 +21,25 @@ object Tracers {
     override def trace(instance: T): String = instance.toString
   }
 
+  class OptionTracer[T : Tracer] extends Tracer[Option[T]] {
+    override def trace(instance: Option[T]): String = {
+      instance.fold("None")(e => Tracer[T].trace(e))
+    }
+  }
+
+  class MapLikeTracer[M[A, B] <: TraversableOnce[(A, B)], Key, Value]()(
+    implicit kTracer: Tracer[Key],
+    vTracer: Tracer[Value]
+  ) extends Tracer[M[Key, Value]] {
+    override def trace(m: M[Key, Value]): String = m.map { case (key, value) =>
+      Tracer[Key].trace(key) + " " + Tracer[Value].trace(value)
+    } mkString "\n"
+  }
+
+  class TraversableTracers[M[X] <: TraversableOnce[X], RR]()(
+    implicit tracer: Tracer[RR]
+  ) extends Tracer[M[RR]] {
+    override def trace(instance: M[RR]): String = instance.map(tracer.trace) mkString "\n"
+  }
+
 }

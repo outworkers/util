@@ -40,7 +40,7 @@ object Publishing {
   }
 
   val versionSettings = Seq(
-    version := "0.30.1",
+    version := "0.31.0",
     credentials ++= defaultCredentials
   )
 
@@ -61,18 +61,15 @@ object Publishing {
         None
       }
     },
-    publishTo <<= version.apply {
-      v =>
-        val nexus = "https://oss.sonatype.org/"
-        if (v.trim.endsWith("SNAPSHOT")) {
-          Some("snapshots" at nexus + "content/repositories/snapshots")
-        } else {
-          Some("releases" at nexus + "service/local/staging/deploy/maven2")
-        }
+    publishTo := {
+      val nexus = "https://oss.sonatype.org/"
+      if (version.value.trim.endsWith("SNAPSHOT")) {
+        Some("snapshots" at nexus + "content/repositories/snapshots")
+      } else {
+        Some("releases" at nexus + "service/local/staging/deploy/maven2")
+      }
     },
-    externalResolvers <<= resolvers map { rs =>
-      Resolver.withDefaultResolvers(rs, mavenCentral = true)
-    },
+    externalResolvers := Resolver.withDefaultResolvers(resolvers.value, mavenCentral = true),
     licenses += ("Outworkers License", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
@@ -95,9 +92,7 @@ object Publishing {
     publishMavenStyle := true,
     bintrayReleaseOnPublish in ThisBuild := true,
     bintrayOrganization := Some("outworkers"),
-    bintrayRepository <<= scalaVersion.apply {
-      v => if (v.trim.endsWith("SNAPSHOT")) "oss-snapshots" else "oss-releases"
-    },
+    bintrayRepository := { if (scalaVersion.value.trim.endsWith("SNAPSHOT")) "oss-snapshots" else "oss-releases" },
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true},
     licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0"))

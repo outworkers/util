@@ -17,7 +17,7 @@ import com.twitter.sbt.{GitProject, VersionManagement}
 import sbt.Keys._
 
 lazy val Versions = new {
-  val scalatest = "3.0.0"
+  val scalatest = "3.0.1"
   val cats = "0.8.1"
   val joda = "2.9.7"
   val jodaConvert = "1.8.1"
@@ -70,7 +70,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
   ),
-  gitTagName in ThisBuild <<= (organization, name, version) map { (o, n, v) => s"version=$v"},
+  gitTagName in ThisBuild := s"version=${scalaVersion.value}",
   scalacOptions ++= Seq(
     "-language:postfixOps",
     "-language:higherKinds",

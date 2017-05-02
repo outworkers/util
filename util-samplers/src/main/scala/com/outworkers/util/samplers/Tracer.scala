@@ -17,6 +17,7 @@ package com.outworkers.util.samplers
 
 import scala.annotation.implicitNotFound
 import scala.reflect.macros.blackbox
+import com.outworkers.util.macros.AnnotationToolkit
 
 @implicitNotFound("Could not emit trace for type")
 trait Tracer[T] {
@@ -27,74 +28,85 @@ object Tracer {
   implicit def macroMaterialize[T]: Tracer[T] = macro TracerMacro.macroImpl[T]
 
   def apply[T : Tracer]: Tracer[T] = implicitly[Tracer[T]]
+
+  def tupled(traces: Seq[String]*): String = {
+    "(" + traces.mkString(", ") + ")"
+  }
 }
 
 @macrocompat.bundle
-class TracerMacro(val c: blackbox.Context) {
+class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   import c.universe._
 
-  def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
-
-  object CaseField {
-    def unapply(sym: TermSymbol): Option[(Name, Type)] = {
-      if (sym.isVal && sym.isCaseAccessor) {
-        Some(sym.name -> sym.typeSignature)
-      } else {
-        None
-      }
-    }
-  }
-
-  object Symbols {
-    val listSymbol = typed[scala.collection.immutable.List[_]]
-    val setSymbol = typed[scala.collection.immutable.Set[_]]
-    val mapSymbol = typed[scala.collection.immutable.Map[_, _]]
-  }
-
-  val packagePrefix = q"com.outworkers.util.samplers"
-
-  /**
-    * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.
-    * For every single field in a case class, a reference to the string name and string type of the field are returned.
-    *
-    * Example:
-    *
-    * {{{
-    *   case class Test(id: UUID, name: String, age: Int)
-    *
-    *   accessors(Test) = Iterable("id" -> "UUID", "name" -> "String", age: "Int")
-    * }}}
-    *
-    * @param tpe The input type of the case class definition.
-    * @return An iterable of tuples where each tuple encodes the string name and string type of a field.
-    */
-  def fields(tpe: Type): Iterable[(Name, Type)] = {
-    tpe.decls.collect { case CaseField(nm, tp) => nm -> tp }
-  }
+  val packagePrefix = q"_root_.com.outworkers.util.samplers"
+  private[this] val stringType = tq"java.lang.String"
 
   def macroImpl[T : WeakTypeTag]: Tree = {
-    val sym = weakTypeOf[T].typeSymbol
+    val tpe = weakTypeOf[T]
 
-    if (sym.isClass && sym.asClass.isCaseClass) {
-      caseClassImpl[T]
-    } else {
-      q"""new $packagePrefix.Tracers.StringTracer[$sym]"""
+    tpe match {
+      case t if isTuple(tpe) => tupleTracer(tpe)
+      case t if isCaseClass(t) => fieldTracer(tpe, caseFields(tpe))
+
+      case t if tpe <:< typeOf[Option[_]] => tpe.typeArgs match {
+        case head :: Nil => q"new $packagePrefix.Tracers.OptionTracer[$head]"
+        case _ => c.abort(
+          c.enclosingPosition,
+          s"Found option type with more than two arguments ${printType(tpe)}"
+        )
+      }
+
+      case t if tpe <:< typeOf[TraversableOnce[_]] =>
+        tpe.typeArgs match {
+          case Nil =>
+            q"new $packagePrefix.Tracers.StringTracer[$tpe]"
+          case head :: Nil =>
+            q"new $packagePrefix.Tracers.TraversableTracers[${tpe.typeConstructor}, $head]"
+          case first :: second :: Nil =>
+            q"new $packagePrefix.Tracers.MapLikeTracer[${tpe.typeConstructor}, $first, $second]"
+          case _ =>
+            q"new $packagePrefix.Tracers.StringTracer[$tpe]"
+      }
+
+      case _ => q"new $packagePrefix.Tracers.StringTracer[$tpe]"
     }
   }
 
-  def caseClassImpl[T : WeakTypeTag]: Tree = {
-    val tpe = weakTypeOf[T]
-    val flds = fields(tpe)
+  def tupleTracer(tpe: Type): Tree = {
     val cmp = tpe.typeSymbol.name
 
-    val appliers = flds.map {
-      case (nm, tp) => q""" "  " + ${nm.toString} + "= " + $packagePrefix.Tracer[$tp].trace(${c.parse(s"instance.$nm")})"""
+    val appliers = tpe.typeArgs.zipWithIndex.map { case (tp, i) =>
+      q""" "  " + ${tupleTerm(i).toString} + "= " + $packagePrefix.Tracer[$tp].trace(
+        instance.${tupleTerm(i)}
+      )"""
     }
+
+    val t = q"_root_.scala.collection.immutable.List.apply(..$appliers)"
 
     q"""
       new $packagePrefix.Tracer[$tpe] {
-        def trace(instance: $tpe): String = {
-          ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(..$appliers).mkString("\n") + "\n)"
+        def trace(instance: $tpe): $stringType = {
+          ${cmp.toString} + "(\n" + $t.mkString("\n") + "\n)"
+        }
+      }
+    """
+  }
+
+  def fieldTracer(tpe: Type, fields: Iterable[Accessor]): Tree = {
+    val cmp = tpe.typeSymbol.name
+
+    val appliers = fields.map { accessor =>
+      q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.tpe}].trace(
+        instance.${accessor.name}
+      )"""
+    }
+
+    val t = q"_root_.scala.collection.immutable.List.apply(..$appliers)"
+
+    q"""
+      new $packagePrefix.Tracer[$tpe] {
+        def trace(instance: $tpe): $stringType = {
+          ${cmp.toString} + "(\n" + $t.mkString("\n") + "\n)"
         }
       }
     """

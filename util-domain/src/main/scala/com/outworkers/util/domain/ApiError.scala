@@ -23,6 +23,8 @@ case class ApiErrorResponse(
 case class ApiError(error: ApiErrorResponse)
 
 object ApiError {
+  val defaultErrorCode = 400
+
   def fromArgs(code: Int, messages: List[String]): ApiError = {
     ApiError(ApiErrorResponse(code, messages))
   }
