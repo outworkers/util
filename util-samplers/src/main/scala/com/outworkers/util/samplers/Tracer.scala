@@ -45,17 +45,16 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val tpe = weakTypeOf[T]
 
     tpe match {
-      case t if isCaseClass(t) | isTuple(t) => fieldTracer(tpe, fields(tpe))
+      case t if isTuple(tpe) => tupleTracer(tpe)
+      case t if isCaseClass(t) => fieldTracer(tpe, caseFields(tpe))
 
-      case t if tpe <:< typeOf[Option[_]] =>
-        q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
+      case t if tpe <:< typeOf[Option[_]] => q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
 
       case t if tpe <:< typeOf[TraversableOnce[_]] =>
         tpe.typeArgs match {
           case Nil =>
             q"new $packagePrefix.Tracers.StringTracer[$tpe]"
           case head :: Nil =>
-            c.echo(c.enclosingPosition, s"Passing in collection type ${printType(head)}")
             q"new $packagePrefix.Tracers.TraversableTracers[${tpe.typeConstructor}, $head]"
           case first :: second :: Nil =>
             q"new $packagePrefix.Tracers.MapLikeTracer[${tpe.typeConstructor}, $first, $second]"
@@ -67,11 +66,30 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     }
   }
 
+  def tupleTracer(tpe: Type): Tree = {
+    val cmp = tpe.typeSymbol.name
+
+    val appliers = tpe.typeArgs.zipWithIndex.map { case (tp, i) =>
+      q""" "  " + ${tupleTerm(i).toString} + "= " + $packagePrefix.Tracer[$tp].trace(
+        instance.${tupleTerm(i)}
+      )"""
+    }
+
+    val t = q"_root_.scala.collection.immutable.List.apply(..$appliers)"
+
+    q"""
+      new $packagePrefix.Tracer[$tpe] {
+        def trace(instance: $tpe): $stringType = {
+          ${cmp.toString} + "(\n" + $t.mkString("\n") + "\n)"
+        }
+      }
+    """
+  }
+
   def fieldTracer(tpe: Type, fields: Iterable[Accessor]): Tree = {
     val cmp = tpe.typeSymbol.name
 
     val appliers = fields.map { accessor =>
-
       q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.tpe}].trace(
         instance.${accessor.name}
       )"""
@@ -79,14 +97,12 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
 
     val t = q"_root_.scala.collection.immutable.List.apply(..$appliers)"
 
-    val code = q"""
+    q"""
       new $packagePrefix.Tracer[$tpe] {
         def trace(instance: $tpe): $stringType = {
           ${cmp.toString} + "(\n" + $t.mkString("\n") + "\n)"
         }
       }
     """
-    c.echo(c.enclosingPosition, showCode(code))
-    code
   }
 }

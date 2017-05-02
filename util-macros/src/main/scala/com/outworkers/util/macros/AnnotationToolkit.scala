@@ -28,6 +28,16 @@ trait AnnotationToolkit {
 
   def typed[A : c.WeakTypeTag]: Symbol = weakTypeOf[A].typeSymbol
 
+  object CaseField {
+    def unapply(arg: TermSymbol): Option[(Name, Type)] = {
+      if (arg.isVal && arg.isCaseAccessor) {
+        Some(TermName(arg.name.toString.trim) -> arg.typeSignature.dealias)
+      } else {
+        None
+      }
+    }
+  }
+
   /**
     * Retrieves the accessor fields on a case class and returns an iterable of tuples of the form Name -> Type.
     * For every single field in a case class, a reference to the string name and string type of the field are returned.
@@ -44,16 +54,6 @@ trait AnnotationToolkit {
     * @return An iterable of tuples where each tuple encodes the string name and string type of a field.
     */
   def caseFields(tpe: Type): Iterable[Accessor] = {
-    object CaseField {
-      def unapply(arg: TermSymbol): Option[(Name, Type)] = {
-        if (arg.isVal && arg.isCaseAccessor) {
-          Some(TermName(arg.name.toString.trim) -> arg.typeSignature.dealias)
-        } else {
-          None
-        }
-      }
-    }
-
     tpe.decls.collect { case CaseField(name, fType) => {
       Accessor(name.toTermName, fType)
     }}
@@ -62,27 +62,6 @@ trait AnnotationToolkit {
   def printType(tpe: Type): String = showCode(tq"${tpe.dealias}")
 
   def tupleTerm(i: Int): TermName = TermName("_" + (i + 1).toString)
-
-  def tupleFields(tpe: Type): Iterable[Accessor] = {
-    tpe.typeArgs.zipWithIndex.map {
-      case (tp, i) =>
-        c.echo(c.enclosingPosition, s"Tuple type ${printType(tpe)}: ${printType(tp)}")
-        Accessor(tupleTerm(i), tp)
-    }
-  }
-
-  def fields(tpe: Type): Iterable[Accessor] = {
-    if (isCaseClass(tpe)) {
-      caseFields(tpe)
-    } else if (isTuple(tpe)) {
-      tupleFields(tpe)
-    } else {
-      c.abort(
-        c.enclosingPosition,
-        "Attempted to retrieve fields from non case class or tuple fields"
-      )
-    }
-  }
 
   def isCaseClass(tpe: Type): Boolean = isCaseClass(tpe.typeSymbol)
 
