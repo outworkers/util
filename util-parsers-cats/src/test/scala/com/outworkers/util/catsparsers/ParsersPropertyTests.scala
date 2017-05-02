@@ -6,13 +6,14 @@ import org.scalatest.{FlatSpec, Matchers, OptionValues}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import com.outworkers.util.testing._
 import org.joda.time.DateTime
+import org.scalatest.Assertion
 
 class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with GeneratorDrivenPropertyChecks {
 
   implicit val dateTimeGen = Sample.arbitrary[DateTime]
   implicit val uuidGen = Sample.arbitrary[UUID]
 
-  def parserTest[T : Parser : Arbitrary](fn: T => String) = {
+  def parserTest[T : Parser : Arbitrary](fn: T => String): Assertion = {
     forAll { value: T =>
       val parsed = parse[T](fn(value))
       parsed.isValid shouldEqual true

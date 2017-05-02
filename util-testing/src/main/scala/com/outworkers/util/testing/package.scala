@@ -23,11 +23,13 @@ import org.scalacheck.Gen
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 import org.scalatest.exceptions.TestFailedException
+import org.scalatest.time.Seconds
 
 import scala.collection.JavaConverters._
+import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.control.NonFatal
-import scala.util.{Failure, Success, Random}
+import scala.util.{Failure, Random, Success}
 
 package object testing extends ScalaFutures
   with Generators
@@ -38,7 +40,7 @@ package object testing extends ScalaFutures
     val limit = 10000
     def sample: DateTime = {
       // may the gods of code review forgive me for me sins
-      val offset = Gen.choose(-limit, limit).sample.get
+      val offset = Gen.choose(-limit, limit).sample.getOrElse(limit)
       val now = new DateTime(DateTimeZone.UTC)
       now.plusSeconds(offset)
     }
@@ -48,9 +50,9 @@ package object testing extends ScalaFutures
     val limit = 10000
     def sample: LocalDate = {
       // may the gods of code review forgive me for me sins
-      val offset = Gen.choose(-limit, limit).sample.get
+      val offset = Gen.choose(-limit, limit).sample.getOrElse(limit)
       val zone = Generators.oneOf(DateTimeZone.getAvailableIDs.asScala.toList)
-      new LocalDate(DateTimeSampler.sample.getMillis + offset, DateTimeZone.forID(zone))
+      new LocalDate(DateTimeSampler.sample.getMillis + offset * 1000, DateTimeZone.forID(zone))
     }
   }
 
@@ -89,7 +91,11 @@ package object testing extends ScalaFutures
      * @param timeout The timeout of the asynchronous Waiter.
      * @tparam T The error returned by the failing computation. Used to assert error messages.
      */
-    def failing[T  <: Throwable](implicit mf: Manifest[T], timeout: PatienceConfiguration.Timeout, ec: ExecutionContext): Unit = {
+    def failing[T  <: Throwable](
+      implicit mf: Manifest[T],
+      timeout: PatienceConfiguration.Timeout,
+      ec: ExecutionContext
+    ): Unit = {
       val w = new Waiter
 
       f onComplete {

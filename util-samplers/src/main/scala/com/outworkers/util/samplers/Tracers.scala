@@ -33,13 +33,13 @@ object Tracers {
   ) extends Tracer[M[Key, Value]] {
     override def trace(m: M[Key, Value]): String = m.map { case (key, value) =>
       Tracer[Key].trace(key) + " " + Tracer[Value].trace(value)
-    } mkString("\n")
+    } mkString "\n"
   }
 
   class TraversableTracers[M[X] <: TraversableOnce[X], RR]()(
     implicit tracer: Tracer[RR]
   ) extends Tracer[M[RR]] {
-    override def trace(instance: M[RR]): String = instance.map(e => tracer.trace(e)).mkString("\n")
+    override def trace(instance: M[RR]): String = instance.map(tracer.trace) mkString "\n"
   }
 
 }
