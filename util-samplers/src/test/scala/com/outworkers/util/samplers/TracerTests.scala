@@ -21,14 +21,20 @@ class TracerTests extends FlatSpec with Matchers {
 
   it should "automatically derive a tracer for a simple type" in {
     val sample = gen[User]
+    sample.trace()
+    "sample.trace()" should compile
   }
 
   it should "automatically derive a tracer for a nested type" in {
     val sample = gen[NestedUser]
+    sample.trace()
+    "sample.trace()" should compile
   }
 
   it should "automatically derive a tracer for a nested tuple type" in {
     val sample = gen[TupleRecord]
+    sample.trace()
+    "sample.trace()" should compile
   }
 
   it should "automatically derive a tracer for a nested tuple collection type" in {
@@ -37,10 +43,12 @@ class TracerTests extends FlatSpec with Matchers {
 
     val sample = gen[TupleCollectionRecord]
     sample.trace()
+    "sample.trace()" should compile
   }
 
   it should "automatically derive a tracer for a type with collections" in {
     val sample = gen[CollectionSample]
+    sample.trace()
+    "sample.trace()" should compile
   }
-
 }

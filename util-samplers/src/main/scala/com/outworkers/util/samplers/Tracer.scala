@@ -48,7 +48,13 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       case t if isTuple(tpe) => tupleTracer(tpe)
       case t if isCaseClass(t) => fieldTracer(tpe, caseFields(tpe))
 
-      case t if tpe <:< typeOf[Option[_]] => q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
+      case t if tpe <:< typeOf[Option[_]] => tpe.typeArgs match {
+        case head :: Nil => q"new $packagePrefix.Tracers.OptionTracer[$head]"
+        case _ => c.abort(
+          c.enclosingPosition,
+          s"Found option type with more than two arguments ${printType(tpe)}"
+        )
+      }
 
       case t if tpe <:< typeOf[TraversableOnce[_]] =>
         tpe.typeArgs match {
