@@ -27,11 +27,7 @@ object Tracers {
     }
   }
 
-  class MapLikeTracer[
-    M[A, B] <: TraversableOnce[(A, B)],
-    Key,
-    Value
-  ]()(
+  class MapLikeTracer[M[A, B] <: TraversableOnce[(A, B)], Key, Value]()(
     implicit kTracer: Tracer[Key],
     vTracer: Tracer[Value]
   ) extends Tracer[M[Key, Value]] {
