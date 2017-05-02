@@ -26,7 +26,6 @@ class GeneratorsTest extends FlatSpec with Matchers {
 
   it should "generate a sized map based on the given size argument" in {
     val limit = 10
-
     assert(genMap[String, String](limit).size == limit)
   }
 
@@ -37,7 +36,6 @@ class GeneratorsTest extends FlatSpec with Matchers {
 
   it should "automatically derive valid samples" in {
     val sample = gen[User]
-    info(sample.trace())
   }
 
   it should "automatically derive generator samples for complex case classes" in {

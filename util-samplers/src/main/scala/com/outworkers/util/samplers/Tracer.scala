@@ -43,23 +43,9 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
 
   def macroImpl[T : WeakTypeTag]: Tree = {
     val tpe = weakTypeOf[T]
-    val sym = tpe.typeSymbol
 
     tpe match {
-      case t if isCaseClass(t) => fieldTracer(tpe, fields(tpe))
-      case t if isTuple(t) => {
-
-        val fields = tupleFields(tpe)
-        Console.println(s"Tuple ${printType(tpe)} has ${fields.size} entries.")
-        val args = fields.map(acc => q"$packagePrefix.Tracer[${acc.paramType}].trace(${acc.name})")
-        q"""
-          new $packagePrefix.Tracer[$tpe] {
-            override def trace(instance: $tpe): $stringType = {
-              $packagePrefix.Tracer.tupled(..$args)
-            }
-          }
-        """
-      }
+      case t if isCaseClass(t) | isTuple(t) => fieldTracer(tpe, fields(tpe))
 
       case t if tpe <:< typeOf[Option[_]] =>
         q"new $packagePrefix.Tracers.OptionTracer[$tpe]"
@@ -69,10 +55,10 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
           case Nil =>
             q"new $packagePrefix.Tracers.StringTracer[$tpe]"
           case head :: Nil =>
-            Console.println(s"Found collection inner type ${printType(head)}")
-            q"new $packagePrefix.Tracers.TraversableTracers[$sym, ${head}]"
+            c.echo(c.enclosingPosition, s"Passing in collection type ${printType(head)}")
+            q"new $packagePrefix.Tracers.TraversableTracers[${tpe.typeConstructor}, $head]"
           case first :: second :: Nil =>
-            q"new $packagePrefix.Tracers.MapLikeTracer[$sym, $first, $second]"
+            q"new $packagePrefix.Tracers.MapLikeTracer[${tpe.typeConstructor}, $first, $second]"
           case _ =>
             q"new $packagePrefix.Tracers.StringTracer[$tpe]"
       }
@@ -85,25 +71,22 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val cmp = tpe.typeSymbol.name
 
     val appliers = fields.map { accessor =>
-      q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.paramType}].trace(
+
+      q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.tpe}].trace(
         instance.${accessor.name}
       )"""
     }
 
-    val t = q"""scala.collection.immutable.List.apply(
-      ..$appliers
-    )"""
+    val t = q"_root_.scala.collection.immutable.List.apply(..$appliers)"
 
     val code = q"""
       new $packagePrefix.Tracer[$tpe] {
         def trace(instance: $tpe): $stringType = {
-          ${cmp.toString} + "(\n" + scala.collection.immutable.List.apply(
-            ..$appliers
-          ).mkString("\n") + "\n)"
+          ${cmp.toString} + "(\n" + $t.mkString("\n") + "\n)"
         }
       }
     """
-    // Console.println(showCode(code))
+    c.echo(c.enclosingPosition, showCode(code))
     code
   }
 }

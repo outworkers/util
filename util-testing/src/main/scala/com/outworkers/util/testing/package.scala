@@ -49,8 +49,8 @@ package object testing extends ScalaFutures
     def sample: LocalDate = {
       // may the gods of code review forgive me for me sins
       val offset = Gen.choose(-limit, limit).sample.get
-      val zone = Generators.oneOf(DateTimeZone.getAvailableIDs().asScala.toList)
-      new LocalDate(DateTimeSampler.sample.getMillis, DateTimeZone.forID(zone))
+      val zone = Generators.oneOf(DateTimeZone.getAvailableIDs.asScala.toList)
+      new LocalDate(DateTimeSampler.sample.getMillis + offset, DateTimeZone.forID(zone))
     }
   }
 

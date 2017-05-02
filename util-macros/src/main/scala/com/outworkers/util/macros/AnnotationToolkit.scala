@@ -66,7 +66,7 @@ trait AnnotationToolkit {
   def tupleFields(tpe: Type): Iterable[Accessor] = {
     tpe.typeArgs.zipWithIndex.map {
       case (tp, i) =>
-        Console.println(s"Tuple type ${printType(tpe)}: ${printType(tp)}")
+        c.echo(c.enclosingPosition, s"Tuple type ${printType(tpe)}: ${printType(tp)}")
         Accessor(tupleTerm(i), tp)
     }
   }
