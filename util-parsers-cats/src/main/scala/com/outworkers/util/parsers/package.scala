@@ -20,7 +20,7 @@ import cats.data.{ValidatedNel, NonEmptyList => NEL}
 
 import scala.util.{Failure, Success, Try}
 
-package object catsparsers extends DefaultParsers {
+package object parsers extends DefaultParsers {
 
   implicit class StringToNel(val str: String) extends AnyVal {
     def invalidNel[T]: ValidatedNel[String, T] = Invalid(NEL(str, Nil))
