@@ -16,7 +16,7 @@
 package com.outworkers.util
 
 import _root_.play.api.data.validation.ValidationError
-import _root_.play.api.libs.json.{JsPath, JsValue, Json}
+import _root_.play.api.libs.json.{ JsPath, JsValue, Json }
 import _root_.play.api.mvc.{Result, Results}
 import cats.data.NonEmptyList
 import com.outworkers.util.domain.{ApiError, ApiErrorResponse}
@@ -45,9 +45,8 @@ package object play {
   implicit class ParseErrorAugmenter(val errors: Seq[(JsPath, Seq[ValidationError])]) extends AnyVal {
 
     def errorMessages: List[String] = errors.toList.map {
-      case (path, validations) => {
+      case (path, validations) =>
         s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
-      }
     }
 
     def asException: Exception with NoStackTrace = {

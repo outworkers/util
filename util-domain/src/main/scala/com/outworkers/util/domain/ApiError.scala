@@ -17,7 +17,7 @@ package com.outworkers.util.domain
 
 case class ApiErrorResponse(
   code: Int,
-  messages: List[String]
+  messages: Seq[String]
 )
 
 case class ApiError(error: ApiErrorResponse)
@@ -25,7 +25,7 @@ case class ApiError(error: ApiErrorResponse)
 object ApiError {
   val defaultErrorCode = 400
 
-  def fromArgs(code: Int, messages: List[String]): ApiError = {
+  def fromArgs(code: Int, messages: Seq[String]): ApiError = {
     ApiError(ApiErrorResponse(code, messages))
   }
 }

@@ -1,4 +1,4 @@
-package com.outworkers.util.catsparsers
+package com.outworkers.util.parsers
 
 import java.util.UUID
 import org.scalacheck.Arbitrary
