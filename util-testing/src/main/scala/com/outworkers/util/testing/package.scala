@@ -16,20 +16,18 @@
 package com.outworkers.util
 
 import com.outworkers.util.domain.GenerationDomain
-import com.outworkers.util.samplers.{Generators, Sample}
+import com.outworkers.util.samplers.Generators
 import com.outworkers.util.tags.DefaultTaggedTypes
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
 import org.scalatest.Assertions
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 import org.scalatest.exceptions.TestFailedException
-import org.scalatest.time.Seconds
 
 import scala.collection.JavaConverters._
-import scala.concurrent.duration.Duration
 import scala.concurrent.{ExecutionContext, Await => ScalaAwait, Future => ScalaFuture}
 import scala.util.control.NonFatal
-import scala.util.{Failure, Random, Success}
+import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures
   with Generators

@@ -16,7 +16,7 @@
 package com.outworkers.util
 
 import _root_.play.api.data.validation.ValidationError
-import _root_.play.api.libs.json.{JsPath, JsValue, Json}
+import _root_.play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError}
 import _root_.play.api.mvc.{Result, Results}
 import cats.data.NonEmptyList
 import com.outworkers.util.domain.{ApiError, ApiErrorResponse}
@@ -42,12 +42,48 @@ package object play {
     }
   }
 
+  implicit class ParseDataErrorAugmenter(val errors: Seq[(JsPath, Seq[JsonValidationError])]) extends AnyVal {
+
+    def errorMessages: Seq[String] = errors.map {
+      case (path, validations) =>
+        s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
+    }
+
+    def asException: Exception with NoStackTrace = {
+      new RuntimeException(errorMessages.mkString(", ")) with NoStackTrace
+    }
+
+    /**
+      * This will transform a list of accumulated errors to a JSON body that's usable as a response format.
+      * From a non empty liust of errors this will produce something in the following format:
+      *
+      * {{{
+      *   {
+      *     "error": {
+      *       "code": 400,
+      *       "messages": [
+      *         "this is an error message",
+      *         "this is another error message
+      *       ]
+      *     }
+      *   }
+      * }}}
+      *
+      * @return
+      */
+    def apiError: ApiError = ApiError.fromArgs(defaultErrorCode, errorMessages)
+
+    def toJson: JsValue = Json.toJson(apiError)
+
+    def response: Result = Results.BadRequest(toJson)
+  }
+
+
   implicit class ParseErrorAugmenter(val errors: Seq[(JsPath, Seq[ValidationError])]) extends AnyVal {
 
     def errorMessages: List[String] = errors.toList.map {
-      case (path, validations) => {
+      case (path, validations) =>
         s"${path.toJsonString} -> ${validations.map(_.message).mkString(", ")}"
-      }
     }
 
     def asException: Exception with NoStackTrace = {
