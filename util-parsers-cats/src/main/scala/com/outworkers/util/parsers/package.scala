@@ -22,6 +22,10 @@ import scala.util.{Failure, Success, Try}
 
 package object parsers extends DefaultParsers {
 
+  type ValidatedNel[L, R] = cats.data.ValidatedNel[L, R]
+  type Valid[X] = cats.data.Valid[X]
+  type Invalid[X] = cats.data.Invalid[X]
+
   implicit class StringToNel(val str: String) extends AnyVal {
     def invalidNel[T]: ValidatedNel[String, T] = Invalid(NEL(str, Nil))
   }
