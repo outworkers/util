@@ -18,7 +18,7 @@ package com.outworkers.util.parsers
 import java.net.URL
 import java.util.UUID
 
-import cats.data.ValidatedNel
+import cats.data._
 import com.outworkers.util.domain.GenerationDomain
 import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}
@@ -50,20 +50,24 @@ trait BiParser[X, T] {
   /**
     * A basic way to parse known types from options.
     *
-    * @param str The string to attempt to parse from.
+    * @param in The string to attempt to parse from.
     * @return An Option wrapping a valid T instance if the parsing was successful, None otherwise.
     */
-  def parseOpt(str: X): Option[T] = tryParse(str).toOption
+  def parseOpt(in: X): Option[T] = tryParse(in).toOption
 
-  def parse(str: X): ValidatedNel[String, T]
+  def validateOpt(in: X): Option[T] = parseOpt(in)
 
-  def parse(str: Option[X]): ValidatedNel[String, T] = {
-    parseRequired(str)(s => parse(s))
-  }
+  def parse(in: X): ValidatedNel[String, T]
 
-  def parseIfExists(str: Option[X]): ValidatedNel[String, Option[T]] = {
-    optional(str)(parse)
-  }
+  def validate(in: X): ValidatedNel[String, T] = parse(in)
+
+  def parse(in: Option[X]): ValidatedNel[String, T] = parseRequired(in)(parse)
+
+  def validate(in: Option[X]): ValidatedNel[String, T] = parse(in)
+
+  def parseIfExists(str: Option[X]): ValidatedNel[String, Option[T]] = optional(str)(parse)
+
+  def validateSkip(str: Option[X]): ValidatedNel[String, Option[T]] = parseIfExists(str)
 }
 
 object BiParser {
@@ -210,32 +214,42 @@ trait CatsImplicitParsers extends GenerationDomain {
     implicit parser: BiParser[String, T]
   ): ValidatedNel[String, T] = summon[T].parse(str)
 
+  def validate[T](str: String)(
+    implicit parser: BiParser[String, T]
+  ): ValidatedNel[String, T] = parser.parse(str)
+
   def parse[T](obj: Option[String])(
     implicit parser: BiParser[String, T]
   ): ValidatedNel[String, T] = summon[T].parse(obj)
+
+  def validate[T](obj: Option[String])(
+    implicit parser: BiParser[String, T]
+  ): ValidatedNel[String, T] = parser.parse(obj)
 
   def parseOpt[T](obj: String)(
     implicit parser: BiParser[String, T]
   ): Option[T] = summon[T].parseOpt(obj)
 
+  def validateOpt[T](obj: String)(
+    implicit parser: BiParser[String, T]
+  ): Option[T] = parser.parseOpt(obj)
+
   def parseNonEmpty[T](obj: Option[String])(
     implicit parser: BiParser[String, T]
   ): ValidatedNel[String, Option[T]] = summon[T].parseIfExists(obj)
 
-  def biparse[A, B](obj: A)(implicit p: BiParser[A, B]): ValidatedNel[String, B] = {
-    p.parse(obj)
-  }
+  def validateNonEmpty[T](obj: Option[String])(
+    implicit parser: BiParser[String, T]
+  ): ValidatedNel[String, Option[T]] = parser.parseIfExists(obj)
 
-  def biparse[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidatedNel[String, B] = {
-    p.parse(obj)
-  }
+  def biparse[A, B](obj: A)(implicit p: BiParser[A, B]): ValidatedNel[String, B] = p.parse(obj)
 
-  def biparseOpt[A, B](obj: A)(implicit p: BiParser[A, B]): Option[B] = {
-    p.parseOpt(obj)
-  }
+  def biparse[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidatedNel[String, B] = p.parse(obj)
+
+  def biparseOpt[A, B](obj: A)(implicit p: BiParser[A, B]): Option[B] = p.parseOpt(obj)
 
   def biparseNonEmpty[A, B](obj: Option[A])(implicit p: BiParser[A, B]): ValidatedNel[String, Option[B]] = {
-    implicitly[BiParser[A, B]].parseIfExists(obj)
+    BiParser[A, B].parseIfExists(obj)
   }
 }
 

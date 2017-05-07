@@ -18,7 +18,7 @@ import sbt.Keys._
 
 lazy val Versions = new {
   val scalatest = "3.0.1"
-  val cats = "0.8.1"
+  val cats = "0.9.0"
   val joda = "2.9.7"
   val jodaConvert = "1.8.1"
   val lift = "3.0"

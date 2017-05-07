@@ -16,9 +16,10 @@
 package com.outworkers.util
 
 import _root_.play.api.data.validation.ValidationError
-import _root_.play.api.libs.json.{ JsPath, JsValue, Json }
+import _root_.play.api.libs.json.{JsPath, JsValue, Json}
 import _root_.play.api.mvc.{Result, Results}
-import cats.data.NonEmptyList
+import cats.data.Validated.{Invalid, Valid}
+import cats.data._
 import com.outworkers.util.domain.{ApiError, ApiErrorResponse}
 
 import scala.concurrent.Future
@@ -31,15 +32,60 @@ package object play {
   implicit val apiErrorResponseFormat = Json.format[ApiErrorResponse]
   implicit val apiErrorFormat = Json.format[ApiError]
 
+  implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
+
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list.toList)
+
+    def toJson(code: Int = defaultErrorCode): Result = {
+      Results.Ok(Json.toJson(toError(code)))
+    }
+
+    def asResponse(code: Int = defaultErrorCode): Result = {
+      Results.Ok(Json.toJson(toError(code)))
+    }
+  }
+
+  implicit class CatsHelpers[T](val obj: T) extends AnyVal {
+    def valid: Valid[T] = Valid(obj)
+
+    def invalid: Invalid[T] = Invalid(obj)
+
+    def invalidNel: Invalid[NonEmptyList[T]] = Invalid(NonEmptyList(obj, Nil))
+  }
+
   implicit class NelAugmenter(val list: NonEmptyList[String]) extends AnyVal {
 
     def response: Result = {
-      Results.BadRequest(Json.toJson(ApiError(ApiErrorResponse(defaultErrorCode, list.list.toList))))
+      Results.BadRequest(Json.toJson(ApiError(ApiErrorResponse(defaultErrorCode, list.toList))))
     }
 
-    def futureResponse(): Future[Result] = {
-      Future.successful(response)
-    }
+    def futureResponse(): Future[Result] = Future.successful(response)
+  }
+
+
+  implicit class ValidationResponseHelper[+A](val vd: ValidatedNel[String, A]) extends AnyVal {
+
+    /**
+      * Maps a validation to a LiftResponse if the validation is successful.
+      * If the validation is not successful, this method provides a default response mechanism
+      * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+      * and a list of messages corresponding to each individual error in the applicative functor.
+      *
+      * @param pf The partial function that maps the successful result to a LiftResponse.
+      * @return A future wrapping a Lift Response.
+      */
+    def mapSuccess(pf: A => Future[Result]): Future[Result] = vd.fold(_.toJson().future, pf)
+
+    /**
+      * Maps a validation to a LiftResponse if the validation is successful.
+      * If the validation is not successful, this method provides a default response mechanism
+      * which returns a JSON HTTP 400 response, where the body is an object containing the error code
+      * and a list of messages corresponding to each individual error in the applicative functor.
+      *
+      * @param pf The partial function that maps the successful result to a LiftResponse.
+      * @return A future wrapping a Lift Response.
+      */
+    def respond(pf: A => Result): Result = vd.fold(_.toJson(), pf)
   }
 
   implicit class ParseErrorAugmenter(val errors: Seq[(JsPath, Seq[ValidationError])]) extends AnyVal {
@@ -83,12 +129,8 @@ package object play {
   }
 
   implicit class ResultAugmenter(val res: Result) {
-    def future: Future[Result] = {
-      Future.successful(res)
-    }
+    def future: Future[Result] = Future successful res
   }
 
-  def malformedJson(): Result = {
-    errorResponse("Malformed or missing JSON body")
-  }
+  def malformedJson(): Result = errorResponse("Malformed or missing JSON body")
 }

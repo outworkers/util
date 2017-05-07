@@ -48,8 +48,8 @@ package object lift extends LiftParsers with JsonHelpers {
   implicit class FutureOptionTransformer[T <: Product with Serializable](val future: Future[Option[T]]) extends AnyVal {
 
     def json()(implicit ec: ExecutionContext, formats: Formats, mf: Manifest[T]): Future[LiftResponse] = {
-      future map {
-        item => item.fold(JsonUnauthorizedResponse())(item => JsonResponse(item.asJValue(), defaultSuccessResponse))
+      future map { item =>
+        item.fold(JsonUnauthorizedResponse())(s => JsonResponse(s.asJValue(), defaultSuccessResponse))
       }
     }
   }
@@ -156,7 +156,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
   }
 
-  implicit class ValidationResponseHelper[+A](val eval: ValidationNel[String, A]) extends AnyVal {
+  implicit class ValidationResponseHelper[+A](val vd: ValidationNel[String, A]) extends AnyVal {
 
     /**
       * Maps a validation to a LiftResponse if the validation is successful.
@@ -167,9 +167,7 @@ package object lift extends LiftParsers with JsonHelpers {
       * @param pf The partial function that maps the successful result to a LiftResponse.
       * @return A future wrapping a Lift Response.
       */
-    def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = {
-      eval.fold(_.toJson().future(), pf)
-    }
+    def mapSuccess(pf: A => Future[LiftResponse]): Future[LiftResponse] = vd.fold(_.toJson().future(), pf)
 
     /**
       * Maps a validation to a LiftResponse if the validation is successful.
@@ -180,8 +178,6 @@ package object lift extends LiftParsers with JsonHelpers {
       * @param pf The partial function that maps the successful result to a LiftResponse.
       * @return A future wrapping a Lift Response.
       */
-    def respond(pf: A => LiftResponse): LiftResponse = {
-      eval.fold(_.toJson(), pf)
-    }
+    def respond(pf: A => LiftResponse): LiftResponse = vd.fold(_.toJson(), pf)
   }
 }
