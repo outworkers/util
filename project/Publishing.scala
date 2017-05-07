@@ -40,7 +40,7 @@ object Publishing {
   }
 
   val versionSettings = Seq(
-    version := "0.31.3",
+    version := "0.32.0",
     credentials ++= defaultCredentials
   )
 

@@ -21,6 +21,14 @@ class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with
     }
   }
 
+  def validateTest[T : Parser : Arbitrary](fn: T => String): Assertion = {
+    forAll { value: T =>
+      val parsed = validate[T](fn(value))
+      parsed.isValid shouldEqual true
+      parsed.toOption.value shouldEqual value
+    }
+  }
+
   it should "parse a long from a string value for every generated long" in {
     parserTest[Long](_.toString)
   }
@@ -57,4 +65,31 @@ class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with
     }
   }
 
+  it should "validate a long from a string value for every generated long" in {
+    validateTest[Long](_.toString)
+  }
+
+  it should "validate a Boolean value from a string" in {
+    validateTest[Boolean](_.toString)
+  }
+
+  it should "validate a Float value from a string" in {
+    validateTest[Float](_.toString)
+  }
+
+  it should "validate an UUID value from a string" in {
+    validateTest[UUID](_.toString)
+  }
+
+  it should "validate a Double value from a string" in {
+    validateTest[Double](_.toString)
+  }
+
+  it should "validate an Int value from a string" in {
+    validateTest[Int](_.toString)
+  }
+
+  it should "validate a DateTime from a valid millisecond string" in {
+    validateTest[DateTime](_.getMillis.toString)
+  }
 }

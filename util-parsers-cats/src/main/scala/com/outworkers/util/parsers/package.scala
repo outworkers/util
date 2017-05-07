@@ -17,10 +17,11 @@ package com.outworkers.util
 
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{ValidatedNel, NonEmptyList => NEL}
+import cats.syntax.CartesianSyntax
 
 import scala.util.{Failure, Success, Try}
 
-package object parsers extends DefaultParsers {
+package object parsers extends DefaultParsers with CartesianSyntax {
 
   implicit class StringToNel(val str: String) extends AnyVal {
     def invalidNel[T]: ValidatedNel[String, T] = Invalid(NEL(str, Nil))

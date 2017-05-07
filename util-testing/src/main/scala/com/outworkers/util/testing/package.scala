@@ -34,6 +34,10 @@ package object testing extends ScalaFutures
   with GenerationDomain
   with DefaultTaggedTypes {
 
+  type Sample[R] = com.outworkers.util.samplers.Sample[R]
+  val Sample = com.outworkers.util.samplers.Sample
+  val Generators = com.outworkers.util.samplers.Generators
+
   implicit object DateTimeSampler extends Sample[DateTime] {
     val limit = 10000
     def sample: DateTime = {
@@ -53,10 +57,6 @@ package object testing extends ScalaFutures
       new LocalDate(DateTimeSampler.sample.getMillis + offset * 1000, DateTimeZone.forID(zone))
     }
   }
-
-  type Sample[R] = com.outworkers.util.samplers.Sample[R]
-  val Sample = com.outworkers.util.samplers.Sample
-  val Generators = com.outworkers.util.samplers.Generators
 
   def shouldNotThrow[T](pf: => T): Unit = try pf catch {
     case NonFatal(e) =>
