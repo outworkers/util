@@ -87,6 +87,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
   lift,
+  liftCats,
   parsers,
   parsersCats,
   validatorsCats,
@@ -270,6 +271,26 @@ lazy val lift = (project in file("util-lift"))
     )
   ).dependsOn(
     parsers,
+    testing % Test
+  )
+
+lazy val liftCats = (project in file("util-lift-cats"))
+  .settings(sharedSettings: _*)
+  .settings(
+    moduleName := "util-lift-cats",
+    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    unmanagedSourceDirectories in Compile ++= Seq(
+      (sourceDirectory in Compile).value / ("scala-2." + {
+        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
+          case Some((major, minor)) if minor <= 11 => minor.toString
+          case _ => "non-existing"
+        }
+    })),
+    libraryDependencies ++= Seq(
+      "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
+    )
+  ).dependsOn(
+    parsersCats,
     testing % Test
   )
 
