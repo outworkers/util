@@ -26,10 +26,10 @@ import scala.util.{Failure, Success, Try}
 import scala.util.control.NonFatal
 
 sealed class UUIDSerializer extends Serializer[UUID] {
-  private[this] val Class = classOf[UUID]
+  private[this] val uuidClz = classOf[UUID]
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), UUID] = {
-    case (TypeInfo(Class, _), json) => json match {
+    case (TypeInfo(uuidClz, _), json) => json match {
       case JString(value) => try {
         UUID.fromString(value)
       }  catch {
@@ -54,12 +54,10 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
 
   val EnumerationClass = classOf[E#Value]
 
-  def deserialize(implicit format: Formats):
-  PartialFunction[(TypeInfo, JValue), E#Value] = {
+  def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), E#Value] = {
     case (TypeInfo(EnumerationClass, _), json) => json match {
       case JInt(value) if value <= enum.maxId => enum(value.toInt)
-      case value => throw new MappingException("Can't convert " +
-        value + " to "+ EnumerationClass)
+      case value => throw new MappingException("Can't convert " + value + " to " +  EnumerationClass)
     }
   }
 
@@ -109,13 +107,13 @@ class EnumNameSerializer[E <: Enumeration: ClassTag](enum: E)
   extends Serializer[E#Value] {
   import JsonDSL._
 
-  val EnumerationClass = classOf[E#Value]
+  val enumClz = classOf[E#Value]
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), E#Value] = {
-    case (TypeInfo(EnumerationClass, _), json) => json match {
+    case (TypeInfo(`enumClz`, _), json) => json match {
       case JString(value) if enum.values.exists(_.toString == value) =>
         enum.withName(value)
-      case value => throw new MappingException(s"Can't convert $value to $EnumerationClass")
+      case value => throw new MappingException(s"Can't convert $value to $enumClz")
     }
   }
 

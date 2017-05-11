@@ -36,7 +36,7 @@ case class JsonUnauthorizedResponse(
      InMemoryResponse(bytes,
        "Content-Length" -> bytes.length.toString :: "Content-Type" -> "application/json; charset=utf-8" :: headers,
        cookies,
-       401
+       JsonUnauthorizedResponse.unauthorizedCode
      )
    }
  }
@@ -44,7 +44,7 @@ case class JsonUnauthorizedResponse(
 object JsonUnauthorizedResponse {
 
   protected[this] implicit val formats = net.liftweb.json.DefaultFormats
-  protected[this] final val unauthorizedCode = 401
+  final val unauthorizedCode = 401
 
   implicit def jsonUnauthorizedToLiftResponse(resp: JsonUnauthorizedResponse): LiftResponse = {
     resp.toResponse
@@ -58,8 +58,7 @@ object JsonUnauthorizedResponse {
 
   def apply(): LiftResponse = {
     val resp = ApiErrorResponse(unauthorizedCode, List("Unauthorized request"))
-    val json = "error" -> decompose(resp)
-    JsonResponse(json, unauthorizedCode)
+    JsonResponse("error" -> decompose(resp), unauthorizedCode)
   }
 
   def apply(msg: String): LiftResponse = {
@@ -68,10 +67,10 @@ object JsonUnauthorizedResponse {
     JsonResponse(json, unauthorizedCode)
   }
 
-  def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie]): LiftResponse = {
+  def apply(json: JsonAST.JValue, headers: List[(String, String)], cookies: List[HTTPCookie]): LiftResponse = {
     new JsonResponse(new JsExp {
       lazy val toJsCmd = jsonPrinter(JsonAST.render(_json))
-    }, _headers, _cookies, unauthorizedCode)
+    }, headers, cookies, unauthorizedCode)
   }
 
   lazy val jsonPrinter: scala.text.Document => String = LiftRules.jsonOutputConverter.vend

@@ -26,7 +26,8 @@ import net.liftweb.json.JsonAST.JValue
 case class JsonErrorResponse(
   json: JsExp,
   headers: List[(String, String)],
-  cookies: List[HTTPCookie] = Nil) {
+  cookies: List[HTTPCookie] = Nil
+) {
 
     protected[this] val defaultErrorResponse = 400
 
@@ -34,7 +35,7 @@ case class JsonErrorResponse(
       val bytes = json.toJsCmd.getBytes
       InMemoryResponse(
         bytes,
-        ("Content-Length", bytes.length.toString) :: ("Content-Type", "application/json; charset=utf-8") :: headers,
+        ("Content-Length" -> bytes.length.toString) :: ("Content-Type" -> "application/json; charset=utf-8") :: headers,
         cookies,
         defaultErrorResponse
       )
@@ -54,18 +55,17 @@ object JsonErrorResponse {
     JsonResponse(json, headers, cookies, code)
 
   def apply(msg: String, code: Int): LiftResponse = {
-    val resp = ApiError.fromArgs(code, List(msg))
-    JsonResponse(decompose(resp), code)
+    JsonResponse(decompose(ApiError.fromArgs(code, msg :: Nil)), code)
   }
 
   def apply(ex: Exception, code: Int): LiftResponse = {
     apply(ex.getMessage, code)
   }
 
-  def apply(_json: JsonAST.JValue, _headers: List[(String, String)], _cookies: List[HTTPCookie], _code: Int): LiftResponse = {
+  def apply(json: JsonAST.JValue, headers: List[(String, String)], cookies: List[HTTPCookie], code: Int): LiftResponse = {
     new JsonResponse(new JsExp {
-      lazy val toJsCmd: String = jsonPrinter(JsonAST.render(_json))
-    }, _headers, _cookies, _code)
+      lazy val toJsCmd: String = jsonPrinter(JsonAST.render(json))
+    }, headers, cookies, code)
   }
 
   lazy val jsonPrinter: scala.text.Document => String = LiftRules.jsonOutputConverter.vend
