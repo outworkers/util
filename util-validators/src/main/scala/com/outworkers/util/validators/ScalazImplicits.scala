@@ -3,7 +3,6 @@ package com.outworkers.util.validators
 import _root_.cats.data._
 import _root_.cats.data.Validated._
 import _root_.cats.data.NonEmptyList
-import com.outworkers.util.validators.dsl._
 
 import scalaz.{Validation, _}
 
