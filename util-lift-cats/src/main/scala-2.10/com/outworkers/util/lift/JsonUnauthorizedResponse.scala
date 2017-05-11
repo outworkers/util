@@ -69,7 +69,7 @@ object JsonUnauthorizedResponse {
 
   def apply(json: JsonAST.JValue, headers: List[(String, String)], cookies: List[HTTPCookie]): LiftResponse = {
     new JsonResponse(new JsExp {
-      lazy val toJsCmd = jsonPrinter(JsonAST.render(_json))
+      lazy val toJsCmd = jsonPrinter(JsonAST.render(json))
     }, headers, cookies, unauthorizedCode)
   }
 
