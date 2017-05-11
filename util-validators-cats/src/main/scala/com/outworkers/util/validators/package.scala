@@ -15,10 +15,6 @@
  */
 package com.outworkers.util
 
-import cats.data.Validated.{Invalid, Valid}
-import cats.data.{ValidatedNel, NonEmptyList => NEL}
-import cats.syntax.CartesianSyntax
+import com.outworkers.util.parsers.CatsOps
 
-import scala.util.{Failure, Success, Try}
-
-package object parsers extends DefaultParsers with CartesianSyntax with CatsOps
+package object validators extends Wrappers with ValidatorImplicits with CatsOps

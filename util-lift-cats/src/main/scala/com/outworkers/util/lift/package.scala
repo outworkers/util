@@ -15,18 +15,17 @@
  */
 package com.outworkers.util
 
+import cats.data.{NonEmptyList, ValidatedNel}
 import com.outworkers.util.domain.ApiError
 import com.outworkers.util.parsers._
-
 import net.liftweb.http.rest.RestContinuation
 import net.liftweb.http.{JsonResponse, LiftResponse}
 import net.liftweb.json._
-import cats.data.{ NonEmptyList, ValidatedNel }
+
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-
-package object lift extends LiftParsers with JsonHelpers {
+package object lift extends LiftParsers with JsonHelpers with CatsOps {
 
   protected[this] val defaultSuccessResponse = 200
   protected[this] val noContentSuccessResponse = 204
@@ -64,7 +63,7 @@ package object lift extends LiftParsers with JsonHelpers {
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list.toList)
+    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.toList)
 
     def toJson(code: Int = defaultErrorResponse)(implicit formats: Formats): LiftResponse = {
       JsonResponse(Extraction.decompose(toError(code)), code)

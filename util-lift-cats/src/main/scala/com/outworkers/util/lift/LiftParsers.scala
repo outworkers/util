@@ -23,7 +23,7 @@ import net.liftweb.json._
 import scala.util.control.NonFatal
 import cats.data.{ NonEmptyList, ValidatedNel }
 
-trait LiftParsers extends DefaultParsers {
+trait LiftParsers extends DefaultParsers with CatsOps {
 
   implicit val formats = DefaultFormats
 
@@ -32,9 +32,9 @@ trait LiftParsers extends DefaultParsers {
     formats: Formats
   ): ValidatedNel[String, T] = {
     try {
-      JsonParser.parse(str).extract[T].successNel[String]
+      JsonParser.parse(str).extract[T].validNel[String]
     } catch {
-      case NonFatal(e) => e.getMessage.failureNel[T]
+      case NonFatal(e) => e.getMessage.invalidNel[T]
     }
   }
 
@@ -45,10 +45,10 @@ trait LiftParsers extends DefaultParsers {
     try {
       str.map(JsonParser.parse(_)
         .extract[T]
-        .successNel[String])
-        .getOrElse("Missing required parameter".failureNel[T])
+        .validNel[String])
+        .getOrElse("Missing required parameter".invalidNel[T])
     } catch {
-      case NonFatal(e) => e.getMessage.failureNel[T]
+      case NonFatal(e) => e.getMessage.invalidNel[T]
     }
   }
 
@@ -58,9 +58,9 @@ trait LiftParsers extends DefaultParsers {
     formats: Formats
   ): ValidatedNel[String, T] = {
     try {
-      str.extract[T].successNel[String]
+      str.extract[T].validNel[String]
     } catch {
-      case NonFatal(e) => e.getMessage.failureNel[T]
+      case NonFatal(e) => e.getMessage.invalidNel[T]
     }
   }
 
@@ -69,8 +69,8 @@ trait LiftParsers extends DefaultParsers {
   }
 
   final def required[T](box: Box[T]): ValidatedNel[String, T] = {
-    box.map(_.successNel[String])
-      .getOrElse("Required parameter is missing or empty".failureNel[T])
+    box.map(_.validNel[String])
+      .getOrElse("Required parameter is missing or empty".invalidNel[T])
   }
 }
 
