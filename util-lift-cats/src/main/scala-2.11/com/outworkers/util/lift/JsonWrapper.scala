@@ -13,12 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util
+package com.outworkers.util.lift
 
-import cats.data.Validated.{Invalid, Valid}
-import cats.data.{ValidatedNel, NonEmptyList => NEL}
-import cats.syntax.CartesianSyntax
+import net.liftweb.json.{prettyRender => nativePretty}
+import net.liftweb.json.JsonAST.JValue
 
-import scala.util.{Failure, Success, Try}
-
-package object parsers extends DefaultParsers with CartesianSyntax with CatsOps
+object JsonWrapper {
+  def prettyRender(json: JValue): String = nativePretty(json)
+}

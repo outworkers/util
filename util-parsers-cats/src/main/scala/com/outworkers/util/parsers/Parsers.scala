@@ -28,7 +28,7 @@ import scala.util.{Failure, Success, Try}
 trait BiParser[X, T] {
 
   final def optional(str: Option[X])(f: X => ValidatedNel[String, T]): ValidatedNel[String, Option[T]] = {
-    str.fold(Option.empty[T].invalid("Option was not defined")) { s =>
+    str.fold("Option was not defined".invalidNel[Option[T]]) { s =>
       f(s).bimap(identity, Some(_))
     }
   }

@@ -15,7 +15,6 @@
  */
 package com.outworkers.util.parsers
 
-import cats.implicits._
 import org.scalatest.{FlatSpec, Matchers}
 import scala.util.{Failure, Try}
 import com.outworkers.util.testing._

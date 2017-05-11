@@ -39,7 +39,7 @@ sealed class UUIDSerializer extends Serializer[UUID] {
           throw exception
         }
       }
-      case x => throw new MappingException("Can't convert " + x + " to UUID")
+      case x => throw new MappingException(s"Can't convert $x to UUID")
     }
   }
 
@@ -52,12 +52,12 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
   extends Serializer[E#Value] {
   import JsonDSL._
 
-  val EnumerationClass = classOf[E#Value]
+  val enumClz = classOf[E#Value]
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), E#Value] = {
-    case (TypeInfo(EnumerationClass, _), json) => json match {
+    case (TypeInfo(`enumClz`, _), json) => json match {
       case JInt(value) if value <= enum.maxId => enum(value.toInt)
-      case value => throw new MappingException("Can't convert " + value + " to " +  EnumerationClass)
+      case value => throw new MappingException(s"Can't convert $value to $enumClz")
     }
   }
 
@@ -68,32 +68,30 @@ class EnumSerializer[E <: Enumeration: ClassTag](enum: E)
 
 sealed class DateTimeSerializer extends Serializer[DateTime] {
 
-  val DateTimeClass = classOf[DateTime]
+  val dateTimeClz = classOf[DateTime]
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), DateTime] = {
-    case (TypeInfo(DateTimeClass, _), json) => json match {
+    case (TypeInfo(`dateTimeClz`, _), json) => json match {
       case JString(value) =>
         Try {
           new DateTime(value.toLong, DateTimeZone.UTC)
         } match {
           case Success(dt) => dt
-          case Failure(err) => {
-            val exception =  new MappingException(s"Couldn't extract a DateTime from $value")
+          case Failure(err) =>
+            val exception = new MappingException(s"Couldn't extract a DateTime from $value")
             exception.initCause(err)
             throw exception
-          }
         }
       case JInt(value) => {
         Try(new DateTime(value.toLong, DateTimeZone.UTC)) match {
           case Success(dt) => dt
-          case Failure(err) => {
-            val exception =  new MappingException(s"Couldn't extract a DateTime from $value")
+          case Failure(err) =>
+            val exception = new MappingException(s"Couldn't extract a DateTime from $value")
             exception.initCause(err)
             throw exception
-          }
         }
       }
-      case x => throw new MappingException("Can't convert " + x + " to DateTime")
+      case x => throw new MappingException(s"Can't convert $x to DateTime")
     }
   }
 
@@ -102,18 +100,16 @@ sealed class DateTimeSerializer extends Serializer[DateTime] {
   }
 }
 
-
 class EnumNameSerializer[E <: Enumeration: ClassTag](enum: E)
   extends Serializer[E#Value] {
   import JsonDSL._
 
-  val enumClz = classOf[E#Value]
+  val EnumerationClass = classOf[E#Value]
 
   def deserialize(implicit format: Formats): PartialFunction[(TypeInfo, JValue), E#Value] = {
-    case (TypeInfo(`enumClz`, _), json) => json match {
-      case JString(value) if enum.values.exists(_.toString == value) =>
-        enum.withName(value)
-      case value => throw new MappingException(s"Can't convert $value to $enumClz")
+    case (TypeInfo(EnumerationClass, _), json) => json match {
+      case JString(value) if enum.values.exists(_.toString == value) => enum.withName(value)
+      case value => throw new MappingException(s"Can't convert $value to $EnumerationClass")
     }
   }
 
