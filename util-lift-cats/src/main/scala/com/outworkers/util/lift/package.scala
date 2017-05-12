@@ -28,6 +28,8 @@ import scala.util.{Failure, Success}
 
 package object lift extends LiftParsers with JsonHelpers with CatsOps with CartesianSyntax {
 
+  type ValidationNel[L, R] = cats.data.ValidatedNel[L, R]
+
   protected[this] val defaultSuccessResponse = 200
   protected[this] val noContentSuccessResponse = 204
   protected[this] val defaultErrorResponse = 400
