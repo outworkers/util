@@ -294,6 +294,15 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
     }
   }
 
+  final def enumOpt[T <: Enumeration](obj: Int, enum: T): Option[T#Value] = {
+    Try(enum(obj)).toOption
+  }
+
+  final def enum[T <: Enumeration](obj: Int, enum: T): ValidationNel[String, T#Value] = {
+
+    Try(enum.apply(obj)).toOption
+      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(_.successNel[String])
+  }
 
   final def enumOpt[T <: Enumeration](obj: String, enum: T): Option[T#Value] = {
     Try(enum.withName(obj)).toOption
