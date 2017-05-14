@@ -16,6 +16,7 @@
 package com.outworkers.util
 
 import cats.data.{NonEmptyList, ValidatedNel}
+import cats.syntax.CartesianSyntax
 import com.outworkers.util.domain.ApiError
 import com.outworkers.util.parsers._
 import net.liftweb.http.rest.RestContinuation
@@ -25,7 +26,9 @@ import net.liftweb.json._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-package object lift extends LiftParsers with JsonHelpers with CatsOps {
+package object lift extends LiftParsers with JsonHelpers with CatsOps with CartesianSyntax {
+
+  type ValidationNel[L, R] = cats.data.ValidatedNel[L, R]
 
   protected[this] val defaultSuccessResponse = 200
   protected[this] val noContentSuccessResponse = 204

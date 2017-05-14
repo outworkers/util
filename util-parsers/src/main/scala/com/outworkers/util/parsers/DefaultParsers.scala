@@ -232,14 +232,14 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
     def delegate[Y]()(implicit bi: BiParser[T, Y]): ValidationNel[String, Y] = {
       option.fold(
         "Option was empty, couldn't delegate to biparser".failureNel[Y])(
-        x => bi.parse(x)
+        bi.parse
       )
     }
 
     def chain[Y](nel: T => ValidationNel[String, Y]): ValidationNel[String, Y] = {
       option.fold(
-        "Option was empty, couldn't delegate to biparser".failureNel[Y])(
-        x => nel(x)
+        "Option was empty, couldn't chain parser function".failureNel[Y])(
+        nel
       )
     }
   }
@@ -248,8 +248,8 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
   implicit class NelDelegation[X, T](val nel: ValidationNel[X, T]) {
     def chain[Y](fn: T => ValidationNel[String, Y]): ValidationNel[String, Y] = {
       nel.fold(
-        fail => fail.list.toList.mkString(", ").failureNel[Y],
-        succ => fn(succ)
+        _.list.toList.mkString(", ").failureNel[Y],
+        fn
       )
     }
   }
@@ -294,6 +294,15 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
     }
   }
 
+  final def enumOpt[T <: Enumeration](obj: Int, enum: T): Option[T#Value] = {
+    Try(enum(obj)).toOption
+  }
+
+  final def enum[T <: Enumeration](obj: Int, enum: T): ValidationNel[String, T#Value] = {
+
+    Try(enum.apply(obj)).toOption
+      .fold(s"Value $obj is not part of the enumeration".failureNel[T#Value])(_.successNel[String])
+  }
 
   final def enumOpt[T <: Enumeration](obj: String, enum: T): Option[T#Value] = {
     Try(enum.withName(obj)).toOption
