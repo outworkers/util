@@ -76,7 +76,7 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val cmp = tpe.typeSymbol.name
 
     val appliers = tpe.typeArgs.zipWithIndex.map { case (tp, i) =>
-      q""" "  " + ${tupleTerm(i).toString} + "= " + $packagePrefix.Tracer[$tp].trace(
+      q""" "  " + ${tupleTerm(i).toString} + " = " + $packagePrefix.Tracer[$tp].trace(
         instance.${tupleTerm(i)}
       )"""
     }
@@ -96,7 +96,7 @@ class TracerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val cmp = tpe.typeSymbol.name
 
     val appliers = fields.map { accessor =>
-      q""" "  " + ${accessor.name.toString} + "= " + $packagePrefix.Tracer[${accessor.tpe}].trace(
+      q""" "  " + ${accessor.name.toString} + " = " + $packagePrefix.Tracer[${accessor.tpe}].trace(
         instance.${accessor.name}
       )"""
     }
