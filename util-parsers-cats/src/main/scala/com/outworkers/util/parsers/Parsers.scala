@@ -308,11 +308,11 @@ trait DefaultParsers extends CatsImplicitParsers {
     if (coll.nonEmpty) {
       true.valid
     } else {
-      "This collection is empty".invalidNel[Boolean]
+      "This Map collection is empty".invalidNel[Boolean]
     }
   }
 
-  def nonEmpty[T](coll: Traversable[T]): ValidatedNel[String, Boolean] = {
+  def nonEmpty[M[X] <: Traversable[X]](coll: M[_]): ValidatedNel[String, Boolean] = {
     if (coll.nonEmpty) {
       true.valid
     } else {

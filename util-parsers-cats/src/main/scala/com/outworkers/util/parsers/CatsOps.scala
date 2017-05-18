@@ -1,11 +1,11 @@
 package com.outworkers.util.parsers
 
 import cats.data.ValidatedNel
-import cats.syntax.ValidatedSyntax
+import cats.syntax.{CartesianSyntax, ValidatedSyntax}
 
 import scala.util.{Failure, Success, Try}
 
-trait CatsOps extends ValidatedSyntax {
+trait CatsOps extends ValidatedSyntax with CartesianSyntax {
 
   implicit class TryConverter[T](val block: Try[T]) {
     def asValidation: ValidatedNel[String, T] = {

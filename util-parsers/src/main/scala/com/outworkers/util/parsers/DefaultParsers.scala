@@ -227,7 +227,6 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
 
 private[util] trait DefaultParsers extends DefaultImplicitParsers {
 
-
   implicit class OptionDelegation[T](val option: Option[T]) {
     def delegate[Y]()(implicit bi: BiParser[T, Y]): ValidationNel[String, Y] = {
       option.fold(
@@ -286,7 +285,7 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
     }
   }
 
-  def nonEmpty[T](coll: Traversable[T]): ValidationNel[String, Boolean] = {
+  def nonEmpty[M[X] <: Traversable[X]](coll: M[_]): ValidationNel[String, Boolean] = {
     if (coll.nonEmpty) {
       true.successNel[String]
     } else {

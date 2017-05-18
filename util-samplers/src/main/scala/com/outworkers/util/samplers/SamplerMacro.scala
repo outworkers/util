@@ -246,7 +246,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
 
     q"""
       new $prefix.Sample[$tpe] {
-        override def sample: $tpe = ${tpe.typeSymbol.name.toTermName}.apply(..$applies)
+        override def sample: $tpe = new $tpe(..$applies)
       }
     """
   }

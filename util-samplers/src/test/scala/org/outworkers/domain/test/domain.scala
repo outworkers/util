@@ -13,12 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util
+package org.outworkers.domain.test
 
-import cats.data.Validated.{Invalid, Valid}
-import cats.data.{ValidatedNel, NonEmptyList => NEL}
-import cats.syntax.CartesianSyntax
+import java.util.UUID
 
-import scala.util.{Failure, Success, Try}
-
-package object parsers extends DefaultParsers with CatsOps
+case class OtherPackageExample(
+ id: UUID,
+ name: String,
+ firstName: String,
+ email: String,
+ sample: Int,
+ double: Double,
+ bigDec: BigDecimal,
+ long: Long
+)

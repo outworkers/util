@@ -96,8 +96,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   testing,
   testingTwitter,
   macros,
-  tags,
-  urls
+  tags
 )
 
 lazy val util = (project in file("."))
@@ -107,13 +106,6 @@ lazy val util = (project in file("."))
     moduleName := "util"
   ).aggregate(
     baseProjectList ++ Publishing.jdk8Only(play): _*
-  )
-
-lazy val urls = (project in file("util-urls"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-urls",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
   )
 
 lazy val domain = (project in file("util-domain"))
