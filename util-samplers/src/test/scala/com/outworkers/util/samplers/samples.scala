@@ -16,6 +16,7 @@
 package com.outworkers.util.samplers
 
 import java.util.UUID
+import org.outworkers.domain.test._
 
 case class User(
   id: UUID,
@@ -47,3 +48,9 @@ case class CollectionSample(
 case class TupleRecord(id: UUID, tp: (String, Long))
 
 case class TupleCollectionRecord(id: UUID, tuples: List[(Int, String)])
+
+case class NestedOtherPackage(
+  id: UUID,
+  otherPkg: OtherPackageExample,
+  emails: List[String]
+)

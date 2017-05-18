@@ -227,7 +227,6 @@ private[util] trait DefaultImplicitParsers extends GenerationDomain {
 
 private[util] trait DefaultParsers extends DefaultImplicitParsers {
 
-
   implicit class OptionDelegation[T](val option: Option[T]) {
     def delegate[Y]()(implicit bi: BiParser[T, Y]): ValidationNel[String, Y] = {
       option.fold(

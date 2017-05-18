@@ -45,6 +45,10 @@ class GeneratorsTest extends FlatSpec with Matchers {
     val tpColl = gen[TupleCollectionRecord]
   }
 
+  it should "automatically derive a generator for a nested case class in a different package" in {
+    "val sample = gen[NestedOtherPackage]" should compile
+  }
+
   it should "automatically derive a sample for a nested case class" in {
     val sample = gen[NestedUser]
     sample shouldEqual sample
