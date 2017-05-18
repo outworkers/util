@@ -285,7 +285,7 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
     }
   }
 
-  def nonEmpty[T](coll: Traversable[T]): ValidationNel[String, Boolean] = {
+  def nonEmpty[M[X] <: Traversable[X]](coll: M[_]): ValidationNel[String, Boolean] = {
     if (coll.nonEmpty) {
       true.successNel[String]
     } else {

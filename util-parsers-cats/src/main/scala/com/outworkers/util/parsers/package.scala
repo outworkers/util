@@ -21,4 +21,4 @@ import cats.syntax.CartesianSyntax
 
 import scala.util.{Failure, Success, Try}
 
-package object parsers extends DefaultParsers with CartesianSyntax with CatsOps
+package object parsers extends DefaultParsers with CatsOps
