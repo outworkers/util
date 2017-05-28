@@ -24,7 +24,6 @@ import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.util.{Failure, Success, Try}
-import scalaz._
 
 trait BiParser[X, T] {
 

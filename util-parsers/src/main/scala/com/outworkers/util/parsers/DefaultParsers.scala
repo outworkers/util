@@ -18,7 +18,6 @@ package com.outworkers.util.parsers
 import java.net.URL
 import java.util.UUID
 
-import cats.data._
 import com.outworkers.util.domain.GenerationDomain
 import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}

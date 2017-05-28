@@ -23,6 +23,11 @@ import com.outworkers.util.testing._
 
 class DefaultParsersTest extends FlatSpec with Matchers {
 
+  it should "not attempt to validate options if parseNonEmpty is used" in {
+    val source = Option.empty[String]
+    parseNonEmpty[Long](source).isSuccess shouldEqual true
+  }
+
   it should "convert a successful scala.util.Try to a successful validation" in {
     val attempt = Try("5".toInt).asValidation
 
