@@ -24,13 +24,12 @@ import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}
 
 import scala.util.{Failure, Success, Try}
+import scalaz._
 
 trait BiParser[X, T] {
 
   final def optional(str: Option[X])(f: X => ValidatedNel[String, T]): ValidatedNel[String, Option[T]] = {
-    str.fold("Option was not defined".invalidNel[Option[T]]) { s =>
-      f(s).bimap(identity, Some(_))
-    }
+    str.fold(Option.empty[T].validNel[String])(f(_).map(Some(_)))
   }
 
   private[util] def missing: ValidatedNel[String, T] = {
@@ -296,27 +295,55 @@ trait DefaultParsers extends CatsImplicitParsers {
     }
   }
 
-  def nonEmpty(str: String): ValidatedNel[String, Boolean] = {
+  /**
+    * A validator for strings, will only succeed if the string is not empty.
+    * @param str The source option.
+    * @return A [[ValidatedNel]] that will return the content of the string if not empty, or a failure otherwise.
+    */
+  def nonEmpty(str: String): ValidatedNel[String, String] = {
     if (str.length > 0) {
-      true.valid
+      str.valid
     } else {
-      s"String required to be non-empty found empty".invalidNel[Boolean]
+      s"String required to be non-empty found empty".invalidNel[String]
     }
   }
 
-  def nonEmpty[K, V](coll: Map[K, V]): ValidatedNel[String, Boolean] = {
-    if (coll.nonEmpty) {
-      true.valid
+  /**
+    * A validator for maps, will only succeed if the option is not empty.
+    * @param map The source option.
+    * @tparam K The type of the key.
+    * @tparam V The type of the value of the map.
+    * @return A [[ValidatedNel]] that will return the map itself if it's not empty, or a failure otherwise.
+    */
+  def nonEmpty[K, V](map: Map[K, V]): ValidatedNel[String, Map[K, V]] = {
+    if (map.nonEmpty) {
+      map.valid
     } else {
-      "This Map collection is empty".invalidNel[Boolean]
+      "This Map is empty".invalidNel[Map[K, V]]
     }
   }
 
-  def nonEmpty[M[X] <: Traversable[X]](coll: M[_]): ValidatedNel[String, Boolean] = {
+  /**
+    * A validator for options, will only succeed if the option is not empty.
+    * @param opt The source option.
+    * @tparam T The type of the option.
+    * @return A [[ValidatedNel]] that will return the content of the option if not empty, or a failure otherwise.
+    */
+  def nonEmpty[T](opt: Option[T]): ValidatedNel[String, T] = {
+    opt.fold("This collection is empty".invalidNel[T])(_.validNel[String])
+  }
+
+  /**
+    * A validator for collections, will only succeed if the underlying collection is not empty.
+    * @param coll The source collection.
+    * @tparam T The inner type of the collection.
+    * @return A [[ValidatedNel]] that will return the content of the collection if not empty, or a failure otherwise.
+    */
+  def nonEmpty[M[X] <: Traversable[X], T](coll: M[T]): ValidatedNel[String, M[T]] = {
     if (coll.nonEmpty) {
-      true.valid
+      coll.valid
     } else {
-      "This collection is empty".invalidNel[Boolean]
+      "This collection is empty".invalidNel[M[T]]
     }
   }
 
