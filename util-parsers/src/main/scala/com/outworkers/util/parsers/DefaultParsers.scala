@@ -31,9 +31,7 @@ sealed trait BaseParser[X, T] {
   type Out = ValidationNel[String, T]
 
   final def optional(str: Option[X])(f: X => ValidationNel[String, T]): ValidationNel[String, Option[T]] = {
-    str.fold(Option.empty[T].successNel[String]) { s =>
-      f(s).map(Some(_))
-    }
+    str.fold(Option.empty[T].successNel[String])(f(_).map(Some(_)))
   }
 
   private[util] def missing : ValidationNel[String, T] = {
@@ -269,27 +267,55 @@ private[util] trait DefaultParsers extends DefaultImplicitParsers {
     }
   }
 
-  def nonEmpty(str: String): ValidationNel[String, Boolean] = {
+  /**
+    * A validator for strings, will only succeed if the string is not empty.
+    * @param str The source option.
+    * @return A [[ValidationNel]] that will return the content of the string if not empty, or a failure otherwise.
+    */
+  def nonEmpty(str: String): ValidationNel[String, String] = {
     if (str.length > 0) {
-      true.successNel[String]
+      str.successNel[String]
     } else {
-      s"String required to be non-empty found empty".failureNel[Boolean]
+      s"String required to be non-empty found empty".failureNel[String]
     }
   }
 
-  def nonEmpty[K, V](coll: Map[K, V]): ValidationNel[String, Boolean] = {
-    if (coll.nonEmpty) {
-      true.successNel[String]
+  /**
+    * A validator for maps, will only succeed if the option is not empty.
+    * @param map The source option.
+    * @tparam K The type of the key.
+    * @tparam V The type of the value of the map.
+    * @return A [[ValidationNel]] that will return the map itself if it's not empty, or a failure otherwise.
+    */
+  def nonEmpty[K, V](map: Map[K, V]): ValidationNel[String, Map[K, V]] = {
+    if (map.nonEmpty) {
+      map.successNel[String]
     } else {
-      "This collection is empty".failureNel[Boolean]
+      "This Map is empty".failureNel[Map[K, V]]
     }
   }
 
-  def nonEmpty[M[X] <: Traversable[X]](coll: M[_]): ValidationNel[String, Boolean] = {
+  /**
+    * A validator for options, will only succeed if the option is not empty.
+    * @param opt The source option.
+    * @tparam T The type of the option.
+    * @return A [[ValidationNel]] that will return the content of the option if not empty, or a failure otherwise.
+    */
+  def nonEmpty[T](opt: Option[T]): ValidationNel[String, T] = {
+    opt.fold("This collection is empty".failureNel[T])(_.successNel[String])
+  }
+
+  /**
+    * A validator for collections, will only succeed if the underlying collection is not empty.
+    * @param coll The source collection.
+    * @tparam T The inner type of the collection.
+    * @return A [[ValidationNel]] that will return the content of the collection if not empty, or a failure otherwise.
+    */
+  def nonEmpty[M[X] <: Traversable[X], T](coll: M[T]): ValidationNel[String, M[T]] = {
     if (coll.nonEmpty) {
-      true.successNel[String]
+      coll.successNel[String]
     } else {
-      "This collection is empty".failureNel[Boolean]
+      "This collection is empty".failureNel[M[T]]
     }
   }
 

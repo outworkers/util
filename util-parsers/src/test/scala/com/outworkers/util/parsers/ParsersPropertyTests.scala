@@ -1,12 +1,12 @@
 package com.outworkers.util.parsers
 
 import java.util.UUID
-import org.scalacheck.Arbitrary
-import org.scalatest.{FlatSpec, Matchers, OptionValues}
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+
 import com.outworkers.util.testing._
 import org.joda.time.DateTime
-import org.scalatest.Assertion
+import org.scalacheck.Arbitrary
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{Assertion, FlatSpec, Matchers, OptionValues}
 
 class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with GeneratorDrivenPropertyChecks {
 
@@ -16,15 +16,15 @@ class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with
   def parserOptTest[T : Parser : Arbitrary](fn: T => String): Assertion = {
     forAll { value: T =>
       val parsed = parse[T](Some(fn(value)))
-      parsed.isValid shouldEqual true
+      parsed.isSuccess shouldEqual true
       parsed.toOption.value shouldEqual value
     }
   }
 
   def validateOptTest[T : Parser : Arbitrary](fn: T => String): Assertion = {
     forAll { value: T =>
-      val parsed = validate[T](Some(fn(value)))
-      parsed.isValid shouldEqual true
+      val parsed = parse[T](Some(fn(value)))
+      parsed.isSuccess shouldEqual true
       parsed.toOption.value shouldEqual value
     }
   }
@@ -32,15 +32,15 @@ class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with
   def parserTest[T : Parser : Arbitrary](fn: T => String): Assertion = {
     forAll { value: T =>
       val parsed = parse[T](fn(value))
-      parsed.isValid shouldEqual true
+      parsed.isSuccess shouldEqual true
       parsed.toOption.value shouldEqual value
     }
   }
 
   def validateTest[T : Parser : Arbitrary](fn: T => String): Assertion = {
     forAll { value: T =>
-      val parsed = validate[T](fn(value))
-      parsed.isValid shouldEqual true
+      val parsed = parse[T](fn(value))
+      parsed.isSuccess shouldEqual true
       parsed.toOption.value shouldEqual value
     }
   }
@@ -127,8 +127,8 @@ class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with
 
   it should "validate a Option[DateTime] from a valid millisecond string using biparse" in {
     forAll { value: DateTime =>
-      val parsed = validate[DateTime](Some(value.getMillis.toString))
-      parsed.isValid shouldEqual true
+      val parsed = parse[DateTime](Some(value.getMillis.toString))
+      parsed.isSuccess shouldEqual true
       parsed.toOption.value shouldEqual value
     }
   }
@@ -160,7 +160,7 @@ class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with
   it should "parse a Option[DateTime] from a valid millisecond string using biparse" in {
     forAll { value: DateTime =>
       val parsed = parse[DateTime](Some(value.getMillis.toString))
-      parsed.isValid shouldEqual true
+      parsed.isSuccess shouldEqual true
       parsed.toOption.value shouldEqual value
     }
   }

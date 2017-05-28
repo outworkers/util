@@ -15,15 +15,20 @@
  */
 package com.outworkers.util.parsers
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Matchers, OptionValues}
+
 import scala.util.{Failure, Try}
 import com.outworkers.util.testing._
 
-class DefaultParsersTest extends FlatSpec with Matchers {
+class DefaultParsersTest extends FlatSpec with Matchers with OptionValues {
+
+  it should "not attempt to validate options if parseNonEmpty is used" in {
+    val source = Option.empty[String]
+    parseNonEmpty[Long](source).isValid shouldEqual true
+  }
 
   it should "convert a successful scala.util.Try to a successful validation" in {
     val attempt = Try("5".toInt).asValidation
-
     attempt.isValid shouldEqual true
   }
 
@@ -50,7 +55,7 @@ class DefaultParsersTest extends FlatSpec with Matchers {
     val parser = parseOpt[Long]("124")
 
     parser.isDefined shouldEqual true
-    parser.get shouldEqual 124L
+    parser.value shouldEqual 124L
   }
 
   it should "parse a long as an applicative from an optional string" in {
@@ -78,11 +83,4 @@ class DefaultParsersTest extends FlatSpec with Matchers {
     parser.isValid shouldEqual false
     parser.toOption.isDefined shouldEqual false
   }
-
-  /*
-  "The email parser" should "combine with another parser" in {
-    val parser = parse[EmailAddress]("boti@google.com") |@| parse[Int]("5")
-    parser map {}
-    parser.toOption.isDefined shouldEqual true
-  }*/
 }
