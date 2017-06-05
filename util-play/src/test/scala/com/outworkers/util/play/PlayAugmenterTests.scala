@@ -17,15 +17,27 @@ package com.outworkers.util.play
 
 import java.util.concurrent.TimeUnit
 
-import cats.data.Validated.Invalid
+import com.outworkers.util.domain.ApiError
+import com.outworkers.util.domain.Definitions.ShortString
+import com.outworkers.util.samplers.Sample
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.{FlatSpec, Matchers, OptionValues}
+import play.api.libs.json.Json
 import play.api.mvc.Results
 
-class PlayAugmenterTests extends FlatSpec with Matchers with ScalaFutures with GeneratorDrivenPropertyChecks {
+class PlayAugmenterTests extends FlatSpec
+  with Matchers
+  with ScalaFutures
+  with GeneratorDrivenPropertyChecks
+  with OptionValues {
+
+  val apiErrorGen = for {
+    code <- Gen.choose(200, 400)
+    messages <- Gen.nonEmptyListOf(Sample.generator[ShortString]).map(_.map(_.value))
+  } yield ApiError.fromArgs(code, messages)
 
   implicit override val generatorDrivenConfig = PropertyCheckConfiguration(minSuccessful = 100)
 
@@ -72,4 +84,30 @@ class PlayAugmenterTests extends FlatSpec with Matchers with ScalaFutures with G
     "Something went wrong".invalidNel.toList
   }
 
+  it should "serialise and deserialise an ApiError to and from JSON" in {
+    forAll(apiErrorGen) { err =>
+      val json = Json.toJson(err).toString()
+      val parsed = Json.parse(json).validate[ApiError]
+      parsed.isSuccess shouldEqual true
+      parsed.asOpt.value shouldEqual err
+    }
+  }
+
+  it should "serialise and deserialise an ApiError to and from JSON using the JsonHelpers" in {
+    forAll(apiErrorGen) { err =>
+      val json = err.json()
+      val parsed = Json.parse(json).validate[ApiError]
+      parsed.isSuccess shouldEqual true
+      parsed.asOpt.value shouldEqual err
+    }
+  }
+
+  it should "serialise and deserialise an ApiError to and from JSON using the JsonHelpers jsonString" in {
+    forAll(apiErrorGen) { err =>
+      val json = err.jsValue().toString()
+      val parsed = Json.parse(json).validate[ApiError]
+      parsed.isSuccess shouldEqual true
+      parsed.asOpt.value shouldEqual err
+    }
+  }
 }
