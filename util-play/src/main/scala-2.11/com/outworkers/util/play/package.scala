@@ -16,7 +16,7 @@
 package com.outworkers.util
 
 import _root_.play.api.data.validation.ValidationError
-import _root_.play.api.libs.json.{ JsPath, JsValue, Json, JsonValidationError, OFormat }
+import _root_.play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError, OFormat, Writes}
 import _root_.play.api.mvc.{Result, Results}
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
@@ -33,6 +33,12 @@ package object play {
   implicit lazy val apiErrorFormat: OFormat[ApiError] = Json.format[ApiError]
 
   implicit lazy val apiErrorResponseFormat = Json.format[ApiErrorResponse]
+
+  implicit class JsonHelpers[T](val obj: T) extends AnyVal {
+    def jsValue()(implicit fmt: Writes[T]): JsValue = Json.toJson(obj)
+
+    def json()(implicit fmt: Writes[T]): String = jsValue.toString()
+  }
 
   implicit class CatsHelpers[T](val obj: T) extends AnyVal {
     def valid: Valid[T] = Valid(obj)
