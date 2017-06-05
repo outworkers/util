@@ -15,27 +15,18 @@
  */
 package com.outworkers.util
 
-import _root_.play.api.data.validation.ValidationError
-import _root_.play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError, OFormat, Writes}
+import _root_.play.api.libs.json._
 import _root_.play.api.mvc.{ResponseHeader, Result, Results}
-import _root_.play.api.http.{ HttpEntity, MimeTypes }
-import akka.util.ByteString
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
-import com.google.common.base.Charsets
 import com.outworkers.util.domain.{ApiError, ApiErrorResponse}
 
 import scala.concurrent.Future
-import scala.util.control.NoStackTrace
 
-package object play {
-
-  protected[this] final val defaultErrorCode = 400
-  protected[this] final val defaultErrorResponse = 400
-
-  implicit lazy val apiErrorFormat: OFormat[ApiError] = Json.format[ApiError]
+package object play extends ExtraImplicits {
 
   implicit lazy val apiErrorResponseFormat = Json.format[ApiErrorResponse]
+  implicit lazy val apiErrorFormat = Json.format[ApiError]
 
   implicit class JsonHelpers[T](val obj: T) extends AnyVal {
     def jsValue()(implicit fmt: Writes[T]): JsValue = Json.toJson(obj)
@@ -62,42 +53,14 @@ package object play {
     def futureResponse(): Future[Result] = Future.successful(response)
   }
 
-  trait ValidationMessage[T] {
-    def messages(source: T): Seq[String]
-
-    def message(source: T): String
-  }
-
-  object ValidationMessage {
-
-    def apply[T](implicit ev: ValidationMessage[T]): ValidationMessage[T] = ev
-
-    implicit object JsonValidationErrorMessage extends ValidationMessage[JsonValidationError] {
-      override def message(source: JsonValidationError): String = source.message
-
-      override def messages(source: JsonValidationError): Seq[String] = source.messages
-    }
-
-    implicit object ValidationErrorMessage extends ValidationMessage[ValidationError] {
-      override def message(source: ValidationError): String = source.message
-
-      override def messages(source: ValidationError): Seq[String] = source.messages
-    }
-  }
-
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
     def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list.toList)
 
-    def asResponse(code: Int = defaultErrorResponse): Result = {
+    def asResponse(code: Int = defaultErrorCode): Result = {
       Result(
         header = ResponseHeader(code),
-        body = HttpEntity.Strict(
-          ByteString(
-            Json.toJson(toError(code)).toString.getBytes(Charsets.UTF_8)
-          ),
-          Some(MimeTypes.JSON)
-        )
+        body = toError(code).body
       )
     }
   }
@@ -127,45 +90,6 @@ package object play {
     def respond(pf: A => Result): Result = vd.fold(_.asResponse(), pf)
   }
 
-  implicit class ParseDataErrorAugmenter[Source](
-    val errors: Seq[(JsPath, Seq[Source])]
-  ) extends AnyVal {
-
-    def errorMessages()(implicit ev: ValidationMessage[Source]): Seq[String] = errors.map {
-      case (path, vds) =>
-        s"${path.toJsonString} -> ${vds.map(ValidationMessage[Source].messages(_).mkString(", "))}"
-    }
-
-    def asException()(implicit ev: ValidationMessage[Source]): Exception with NoStackTrace = {
-      new RuntimeException(errorMessages.mkString(", ")) with NoStackTrace
-    }
-
-    /**
-      * This will transform a list of accumulated errors to a JSON body that's usable as a response format.
-      * From a non empty list of errors this will produce something in the following format:
-      *
-      * {{{
-      *   {
-      *     "error": {
-      *       "code": 400,
-      *       "messages": [
-      *         "this is an error message",
-      *         "this is another error message
-      *       ]
-      *     }
-      *   }
-      * }}}
-      *
-      * @return
-      */
-    def apiError()(implicit ev: ValidationMessage[Source]): ApiError = {
-      ApiError.fromArgs(defaultErrorCode, errorMessages)
-    }
-
-    def toJson()(implicit ev: ValidationMessage[Source]): JsValue = Json.toJson(apiError)
-
-    def response()(implicit ev: ValidationMessage[Source]): Result = Results.BadRequest(toJson)
-  }
 
   def errorResponse(msg: String, code: Int = defaultErrorCode): Result = {
     Results.BadRequest(Json.toJson(ApiError.fromArgs(code, List(msg))))
