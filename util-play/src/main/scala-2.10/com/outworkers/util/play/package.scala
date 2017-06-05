@@ -29,20 +29,22 @@ package object play {
 
   protected[this] final val defaultErrorCode = 400
 
-  implicit val apiErrorResponseFormat = Json.format[ApiErrorResponse]
   implicit val apiErrorFormat = Json.format[ApiError]
+
+  implicit val apiErrorResponseFormat = Json.format[ApiErrorResponse]
 
   implicit class ResponseConverter(val resp: NonEmptyList[String]) extends AnyVal {
 
-    def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list.toList)
+    def toError(code: Int = defaultErrorCode): ApiError = ApiError.fromArgs(code, resp.list.toList)
 
     def toJson(code: Int = defaultErrorCode): Result = {
-      Results.Ok(Json.toJson(toError(code)))
+      Result(
+        header = ResponseHeader(code),
+        body = HttpEntity(Json.toJson(toError(code)))
+      )
     }
 
-    def asResponse(code: Int = defaultErrorCode): Result = {
-      Results.Ok(Json.toJson(toError(code)))
-    }
+    def asResponse(code: Int = defaultErrorCode): Result = toJson(code)
   }
 
   implicit class CatsHelpers[T](val obj: T) extends AnyVal {
