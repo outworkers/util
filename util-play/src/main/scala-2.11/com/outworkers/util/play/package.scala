@@ -30,9 +30,9 @@ package object play {
   protected[this] final val defaultErrorCode = 400
   protected[this] final val defaultErrorResponse = 400
 
-  implicit val apiErrorFormat: OFormat[ApiError] = Json.format[ApiError]
+  implicit lazy val apiErrorFormat: OFormat[ApiError] = Json.format[ApiError]
 
-  implicit val apiErrorResponseFormat = Json.format[ApiErrorResponse]
+  implicit lazy val apiErrorResponseFormat = Json.format[ApiErrorResponse]
 
   implicit class CatsHelpers[T](val obj: T) extends AnyVal {
     def valid: Valid[T] = Valid(obj)
