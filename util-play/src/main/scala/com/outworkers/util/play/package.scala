@@ -17,9 +17,12 @@ package com.outworkers.util
 
 import _root_.play.api.data.validation.ValidationError
 import _root_.play.api.libs.json.{JsPath, JsValue, Json, JsonValidationError, OFormat, Writes}
-import _root_.play.api.mvc.{Result, Results}
+import _root_.play.api.mvc.{ResponseHeader, Result, Results}
+import _root_.play.api.http.{ HttpEntity, MimeTypes }
+import akka.util.ByteString
 import cats.data.Validated.{Invalid, Valid}
 import cats.data.{NonEmptyList, ValidatedNel}
+import com.google.common.base.Charsets
 import com.outworkers.util.domain.{ApiError, ApiErrorResponse}
 
 import scala.concurrent.Future
@@ -51,7 +54,9 @@ package object play {
   implicit class NelAugmenter(val list: NonEmptyList[String]) extends AnyVal {
 
     def response: Result = {
-      Results.BadRequest(Json.toJson(ApiError(ApiErrorResponse(defaultErrorCode, list.toList))))
+      Results.BadRequest(
+        Json.toJson(list.toError(defaultErrorCode))
+      )
     }
 
     def futureResponse(): Future[Result] = Future.successful(response)
@@ -84,12 +89,16 @@ package object play {
 
     def toError(code: Int): ApiError = ApiError.fromArgs(code, resp.list.toList)
 
-    def toJson(code: Int = defaultErrorResponse): Result = {
-      Results.Ok(Json.toJson(toError(code)))
-    }
-
     def asResponse(code: Int = defaultErrorResponse): Result = {
-      Results.Ok(Json.toJson(toError(code)))
+      Result(
+        header = ResponseHeader(code),
+        body = HttpEntity.Strict(
+          ByteString(
+            Json.toJson(toError(code)).toString.getBytes(Charsets.UTF_8)
+          ),
+          Some(MimeTypes.JSON)
+        )
+      )
     }
   }
 
@@ -104,7 +113,7 @@ package object play {
       * @param pf The partial function that maps the successful result to a LiftResponse.
       * @return A future wrapping a Lift Response.
       */
-    def mapSuccess(pf: A => Future[Result]): Future[Result] = vd.fold(_.toJson().future, pf)
+    def mapSuccess(pf: A => Future[Result]): Future[Result] = vd.fold(_.asResponse().future, pf)
 
     /**
       * Maps a validation to a LiftResponse if the validation is successful.
@@ -115,7 +124,7 @@ package object play {
       * @param pf The partial function that maps the successful result to a LiftResponse.
       * @return A future wrapping a Lift Response.
       */
-    def respond(pf: A => Result): Result = vd.fold(_.toJson(), pf)
+    def respond(pf: A => Result): Result = vd.fold(_.asResponse(), pf)
   }
 
   implicit class ParseDataErrorAugmenter[Source](
@@ -133,7 +142,7 @@ package object play {
 
     /**
       * This will transform a list of accumulated errors to a JSON body that's usable as a response format.
-      * From a non empty liust of errors this will produce something in the following format:
+      * From a non empty list of errors this will produce something in the following format:
       *
       * {{{
       *   {
@@ -149,7 +158,9 @@ package object play {
       *
       * @return
       */
-    def apiError()(implicit ev: ValidationMessage[Source]): ApiError = ApiError.fromArgs(defaultErrorCode, errorMessages)
+    def apiError()(implicit ev: ValidationMessage[Source]): ApiError = {
+      ApiError.fromArgs(defaultErrorCode, errorMessages)
+    }
 
     def toJson()(implicit ev: ValidationMessage[Source]): JsValue = Json.toJson(apiError)
 

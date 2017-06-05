@@ -229,17 +229,10 @@ lazy val play = (project in file("util-play"))
   .settings(
 
     moduleName := "util-play",
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    crossScalaVersions := Seq("2.11.8"),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
-    ),
-    unmanagedSourceDirectories in Compile ++= Seq(
-      (sourceDirectory in Compile).value / ("scala-2." + {
-        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) if minor <= 11 => minor.toString
-          case _ => "non-existing"
-        }
-      }))
+    )
   ).dependsOn(
   domain,
   parsersCats,

@@ -102,4 +102,12 @@ class PlayAugmenterTests extends FlatSpec
     }
   }
 
+  it should "serialise and deserialise an ApiError to and from JSON using the JsonHelpers jsonString" in {
+    forAll(apiErrorGen) { err =>
+      val json = err.jsValue().toString()
+      val parsed = Json.parse(json).validate[ApiError]
+      parsed.isSuccess shouldEqual true
+      parsed.asOpt.value shouldEqual err
+    }
+  }
 }
