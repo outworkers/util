@@ -29,6 +29,10 @@ trait Sample[T] {
 
 object Sample {
 
+  def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
+    override def sample: T1 = fn(gen[T])
+  }
+
   def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(generator[T])
 
   def generator[T : Sample]: Gen[T] = Gen.delay(gen[T])
@@ -59,10 +63,6 @@ object Sample {
 
 
 object Samples extends Generators {
-
-  def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
-    override def sample: T1 = fn(gen[T])
-  }
 
   private[this] val byteLimit = 127
   private[this] val shortLimit = 256

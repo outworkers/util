@@ -21,7 +21,15 @@ trait Generators extends GenerationDomain {
    */
   def gen[T : Sample]: T = implicitly[Sample[T]].sample
 
-  def genOpt[T : Sample]: Option[T] = Some(implicitly[Sample[T]].sample)
+  def genOpt[T : Sample]: Option[T] = {
+    val bool = Random.nextBoolean()
+
+    if (bool) {
+      Some(implicitly[Sample[T]].sample)
+    } else {
+      None
+    }
+  }
 
   /**
     * Generates a list of elements based on an input collection type.
