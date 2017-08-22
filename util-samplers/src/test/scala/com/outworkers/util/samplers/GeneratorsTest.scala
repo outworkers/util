@@ -65,5 +65,10 @@ class GeneratorsTest extends FlatSpec with Matchers {
     sample shouldEqual sample
   }
 
+  it should "automatically generate a sampler for random collection" in {
+    val sample = gen[IndexedSeq[String]]
+    sample shouldEqual sample
+  }
+
 
 }

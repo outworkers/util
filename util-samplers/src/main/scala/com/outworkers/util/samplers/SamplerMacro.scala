@@ -39,6 +39,9 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   val prefix = q"com.outworkers.util.samplers"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
   val definitions = "com.outworkers.util.domain.Definitions"
+  val scalaGeneric: (Type, Type) => Tree = (el, monad) => {
+    tq"scala.collection.generic.CanBuildFrom[scala.Nothing, $el, $monad]"
+  }
 
   object SamplersSymbols {
     val intSymbol: Symbol = typed[Int]
@@ -252,13 +255,13 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   }
 
   def traversableSample(tpe: Type): Tree = {
-    Console.println(tq"${tpe.typeConstructor}")
+    val outerSymbol = tpe.typeConstructor
 
     tpe.typeArgs match {
       case inner :: Nil => {
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generators.gen[$inner]()
+            override def sample: $tpe = $prefix.Generators.gen[$outerSymbol, $inner]()
           }
         """
       }
@@ -332,6 +335,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val symbol = tpe.typeSymbol
 
     val tree = symbol match {
+      case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
