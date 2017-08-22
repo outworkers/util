@@ -15,7 +15,8 @@
  */
 package com.outworkers.util.samplers
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.outworkers.domain.test.NestedCollections
+import org.scalatest.{FlatSpec, Matchers}
 
 class GeneratorsTest extends FlatSpec with Matchers {
 
@@ -51,6 +52,11 @@ class GeneratorsTest extends FlatSpec with Matchers {
 
   it should "automatically derive a sample for a nested case class" in {
     val sample = gen[NestedUser]
+    sample shouldEqual sample
+  }
+
+  it should "automatically sample nested collections" in {
+    val sample = gen[NestedCollections]
     sample shouldEqual sample
   }
 

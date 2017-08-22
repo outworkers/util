@@ -293,7 +293,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       case inner :: Nil =>
         q"""
           new $prefix.Sample[$tpe] {
-           override def sample: $tpe = $prefix.Generators.getList[$inner]().toSet
+           override def sample: $tpe = $prefix.Generators.genSet[$inner]()
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected inner type to be defined")
