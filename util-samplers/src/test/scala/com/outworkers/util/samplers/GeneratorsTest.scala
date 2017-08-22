@@ -55,6 +55,11 @@ class GeneratorsTest extends FlatSpec with Matchers {
     sample shouldEqual sample
   }
 
+  it should "automatically derive samplers for nested collections" in {
+    val sample = gen[List[List[String]]]
+    sample shouldEqual sample
+  }
+
   it should "automatically sample nested collections" in {
     val sample = gen[NestedCollections]
     sample shouldEqual sample

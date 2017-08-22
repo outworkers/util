@@ -251,12 +251,27 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     """
   }
 
+  def traversableSample(tpe: Type): Tree = {
+    Console.println(tq"${tpe.typeConstructor}")
+
+    tpe.typeArgs match {
+      case inner :: Nil => {
+        q"""
+          new $prefix.Sample[$tpe] {
+            override def sample: $tpe = $prefix.Generators.gen[$inner]()
+          }
+        """
+      }
+      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
+    }
+  }
+
   def listSample(tpe: Type): Tree = {
     tpe.typeArgs match {
       case inner :: Nil => {
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generators.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
+            override def sample: $tpe = $prefix.Generators.genList[$inner]()
           }
         """
       }
@@ -316,7 +331,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val tpe = weakTypeOf[T]
     val symbol = tpe.typeSymbol
 
-    symbol match {
+    val tree = symbol match {
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
       case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
@@ -348,5 +363,8 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
+
+    Console.println(showCode(tree))
+    tree
   }
 }

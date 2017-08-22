@@ -33,6 +33,16 @@ lazy val Versions = new {
   val paradise = "2.1.0"
   val macroCompat = "1.1.1"
 
+  val scala210 = "2.10.6"
+  val scala211 = "2.11.11"
+  val scala212 = "2.12.3"
+  val scalaAll = Seq(scala210, scala211, scala212)
+
+  val scala = new {
+    val all = Seq(scala210, scala211, scala212)
+  }
+
+
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
       case Some((_, minor)) if minor >= 11 => cats
@@ -64,7 +74,7 @@ lazy val Versions = new {
 
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
-  scalaVersion := "2.10.6",
+  scalaVersion := Versions.scala211,
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
@@ -112,14 +122,14 @@ lazy val domain = (project in file("util-domain"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-domain",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1")
+    crossScalaVersions := Versions.scala.all
   )
 
 lazy val parsers = (project in file("util-parsers"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-parsers",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
@@ -136,7 +146,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-parsers-cats",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
@@ -153,7 +163,7 @@ lazy val tags = (project in file("util-tags"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-tags",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     scalacOptions ++= Seq(
       "-language:experimental.macros"
     ),
@@ -173,7 +183,7 @@ lazy val samplers = (project in file("util-samplers"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-samplers",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     scalacOptions ++= Seq(
       "-language:experimental.macros"
     ),
@@ -193,7 +203,7 @@ lazy val testing = (project in file("util-testing"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-testing",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     scalacOptions ++= Seq(
       "-language:experimental.macros"
     ),
@@ -217,7 +227,7 @@ lazy val testingTwitter = (project in file("util-testing-twitter"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-testing-twitter",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % Versions.scalatest,
       "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value)
@@ -229,7 +239,7 @@ lazy val play = (project in file("util-play"))
   .settings(
 
     moduleName := "util-play",
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
     ),
@@ -250,7 +260,7 @@ lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift",
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
@@ -270,7 +280,7 @@ lazy val liftCats = (project in file("util-lift-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift-cats",
-    crossScalaVersions := Seq("2.10.6", "2.11.8"),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
@@ -290,7 +300,7 @@ lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-macros",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
       compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
       "org.typelevel"  %% "macro-compat" % "1.1.1",
@@ -302,7 +312,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-validators-cats",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     addCompilerPlugin(
       "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
     ),
@@ -319,7 +329,7 @@ lazy val validators = (project in file("util-validators"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-validators",
-    crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.1"),
+    crossScalaVersions := Versions.scala.all,
     addCompilerPlugin(
       "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
     ),
