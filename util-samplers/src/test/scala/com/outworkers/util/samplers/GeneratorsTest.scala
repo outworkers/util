@@ -69,6 +69,4 @@ class GeneratorsTest extends FlatSpec with Matchers {
     val sample = gen[IndexedSeq[String]]
     sample shouldEqual sample
   }
-
-
 }

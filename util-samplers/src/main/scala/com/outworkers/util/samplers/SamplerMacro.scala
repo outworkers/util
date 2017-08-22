@@ -39,9 +39,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
   val prefix = q"com.outworkers.util.samplers"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
   val definitions = "com.outworkers.util.domain.Definitions"
-  val scalaGeneric: (Type, Type) => Tree = (el, monad) => {
-    tq"scala.collection.generic.CanBuildFrom[scala.Nothing, $el, $monad]"
-  }
 
   object SamplersSymbols {
     val intSymbol: Symbol = typed[Int]
@@ -258,13 +255,11 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val outerSymbol = tpe.typeConstructor
 
     tpe.typeArgs match {
-      case inner :: Nil => {
-        q"""
-          new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generators.gen[$outerSymbol, $inner]()
-          }
-        """
-      }
+      case inner :: Nil => q"""
+        new $prefix.Sample[$tpe] {
+          override def sample: $tpe = $prefix.Generators.gen[$outerSymbol, $inner]()
+        }
+      """
       case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
     }
   }
@@ -334,13 +329,11 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     val tpe = weakTypeOf[T]
     val symbol = tpe.typeSymbol
 
-    val tree = symbol match {
-      case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
+    symbol match {
+      case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case sym if tpe <:< typeOf[TraversableOnce[_]] => treeCache.getOrElseUpdate(typed[T], traversableSample(tpe))
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
-      case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
-      case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
-      case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
       case SamplersSymbols.shortSymbol => sampler("ShortSampler")
       case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
@@ -367,8 +360,5 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
-
-    Console.println(showCode(tree))
-    tree
   }
 }
