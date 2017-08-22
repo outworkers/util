@@ -15,7 +15,8 @@
  */
 package com.outworkers.util.samplers
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.outworkers.domain.test.NestedCollections
+import org.scalatest.{FlatSpec, Matchers}
 
 class GeneratorsTest extends FlatSpec with Matchers {
 
@@ -54,5 +55,18 @@ class GeneratorsTest extends FlatSpec with Matchers {
     sample shouldEqual sample
   }
 
+  it should "automatically derive samplers for nested collections" in {
+    val sample = gen[List[List[String]]]
+    sample shouldEqual sample
+  }
 
+  it should "automatically sample nested collections" in {
+    val sample = gen[NestedCollections]
+    sample shouldEqual sample
+  }
+
+  it should "automatically generate a sampler for random collection" in {
+    val sample = gen[IndexedSeq[String]]
+    sample shouldEqual sample
+  }
 }

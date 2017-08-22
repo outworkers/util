@@ -27,3 +27,13 @@ case class OtherPackageExample(
  bigDec: BigDecimal,
  long: Long
 )
+
+
+case class NestedCollections(
+  id: UUID,
+  text: String,
+  nestedList: List[List[String]],
+  nestedListSet: List[Set[String]],
+  props: Map[String, List[String]],
+  doubleProps: Map[Set[String], List[String]]
+)

@@ -20,21 +20,15 @@ import java.nio.ByteBuffer
 import java.util.{Date, UUID}
 
 import _root_.com.outworkers.util.domain.Definitions
-import _root_.com.outworkers.util.macros.AnnotationToolkit
+import _root_.com.outworkers.util.macros.{AnnotationToolkit, BlackboxToolbelt}
 
 import scala.collection.concurrent.TrieMap
 import scala.reflect.macros.blackbox
 
 @macrocompat.bundle
-class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
+class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with BlackboxToolbelt {
 
   import c.universe._
-
-  /**
-    * Adds a caching layer for subsequent requests to materialise the same primitive type.
-    * This adds a simplistic caching layer that computes primitives based on types.
-    */
-  val treeCache: TrieMap[Symbol, Tree] = TrieMap.empty[Symbol, Tree]
 
   val prefix = q"com.outworkers.util.samplers"
   val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
@@ -251,15 +245,15 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     """
   }
 
-  def listSample(tpe: Type): Tree = {
+  def traversableSample(tpe: Type): Tree = {
+    val outerSymbol = tpe.typeConstructor
+
     tpe.typeArgs match {
-      case inner :: Nil => {
-        q"""
-          new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generators.genList[${inner.typeSymbol.typeSignatureIn(tpe)}]()
-          }
-        """
-      }
+      case inner :: Nil => q"""
+        new $prefix.Sample[$tpe] {
+          override def sample: $tpe = $prefix.Generators.gen[$outerSymbol, $inner]()
+        }
+      """
       case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
     }
   }
@@ -288,19 +282,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
     }
   }
 
-  def setSample(tpe: Type): Tree = {
-    tpe.typeArgs match {
-      case inner :: Nil =>
-        q"""
-          new $prefix.Sample[$tpe] {
-           override def sample: $tpe = $prefix.Generators.getList[$inner]().toSet
-          }
-        """
-      case _ => c.abort(c.enclosingPosition, "Expected inner type to be defined")
-    }
-  }
-
-  def enumPrimitive(tpe: Type): Tree = {
+  def enumSample(tpe: Type): Tree = {
     val comp = c.parse(s"${tpe.toString.replace("#Value", "")}")
 
     q"""
@@ -312,16 +294,14 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
 
   def sampler(nm: String): Tree = q"new $prefix.Samples.${TypeName(nm)}"
 
-  def materialize[T : c.WeakTypeTag]: Tree = {
-    val tpe = weakTypeOf[T]
+  def macroImpl(tpe: Type): Tree = {
     val symbol = tpe.typeSymbol
 
-    symbol match {
+    val tree = symbol match {
+      case SamplersSymbols.mapSymbol => mapSample(tpe)
+      case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
       case sym if isTuple(tpe) => tupleSample(tpe)
-      case SamplersSymbols.enum => treeCache.getOrElseUpdate(typed[T], enumPrimitive(tpe))
-      case SamplersSymbols.listSymbol => treeCache.getOrElseUpdate(typed[T], listSample(tpe))
-      case SamplersSymbols.setSymbol => treeCache.getOrElseUpdate(typed[T], setSample(tpe))
-      case SamplersSymbols.mapSymbol => treeCache.getOrElseUpdate(typed[T], mapSample(tpe))
+      case SamplersSymbols.enum => enumSample(tpe)
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
       case SamplersSymbols.shortSymbol => sampler("ShortSampler")
       case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
@@ -345,8 +325,24 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit {
       case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
       case SamplersSymbols.programmingLanguage => sampler("ProgrammingLanguageSampler")
       case SamplersSymbols.url => sampler("UrlSampler")
-      case sym if sym.isClass && sym.asClass.isCaseClass => treeCache.getOrElseUpdate(typed[T], caseClassSample(tpe))
+      case sym if sym.isClass && sym.asClass.isCaseClass => caseClassSample(tpe)
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
+
+    if (showTrees) {
+      echo(showCode(tree))
+    }
+
+    if (showCache) {
+      echo(BlackboxToolbelt.sampleCache.show)
+    }
+
+    tree
+  }
+
+  def materialize[T : WeakTypeTag]: Tree = {
+    val tt = weakTypeOf[T]
+
+    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(tt, { t: Type => macroImpl(t)})
   }
 }
