@@ -17,7 +17,7 @@ import com.twitter.sbt.{GitProject, VersionManagement}
 import sbt.Keys._
 
 lazy val Versions = new {
-  val scalatest = "3.0.1"
+  val scalatest = "3.0.4"
   val cats = "0.9.0"
   val joda = "2.9.7"
   val jodaConvert = "1.8.1"
@@ -27,7 +27,7 @@ lazy val Versions = new {
   val scalaz = "7.2.8"
   val scalacheck = "1.13.4"
   val datafactory = "0.8"
-  val play = "2.6.0-M4"
+  val play = "2.6.7"
   val shapeless = "2.3.2"
   val kindProjector = "0.9.3"
   val paradise = "2.1.0"
@@ -35,7 +35,7 @@ lazy val Versions = new {
 
   val scala210 = "2.10.6"
   val scala211 = "2.11.11"
-  val scala212 = "2.12.3"
+  val scala212 = "2.12.4"
   val scalaAll = Seq(scala210, scala211, scala212)
 
   val scala = new {

@@ -4,8 +4,28 @@ import sbt.{Credentials, Def, Path, ProjectReference, _}
 
 import scala.util.Properties
 import com.typesafe.sbt.pgp.PgpKeys._
+import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
+import sbtrelease.ReleaseStateTransformations._
 
 object Publishing {
+
+  val releaseSettings = Seq(
+    releaseVersionBump := sbtrelease.Version.Bump.Minor,
+    releaseTagComment := s"Releasing ${(version in ThisBuild).value}",
+    releaseCommitMessage := s"Setting version to ${(version in ThisBuild).value}",
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      releaseStepCommandAndRemaining("+publish"),
+      setNextVersion,
+      commitNextVersion,
+      pushChanges
+    )
+  )
+
 
   def runningUnderCi: Boolean = sys.env.contains("CI") || sys.env.contains("TRAVIS")
 
@@ -40,7 +60,6 @@ object Publishing {
   }
 
   val versionSettings = Seq(
-    version := "0.38.0",
     credentials ++= defaultCredentials
   )
 
