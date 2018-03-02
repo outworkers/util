@@ -21,8 +21,6 @@ import java.util.{Date, UUID}
 
 import _root_.com.outworkers.util.domain.Definitions
 import _root_.com.outworkers.util.macros.{AnnotationToolkit, BlackboxToolbelt}
-
-import scala.collection.concurrent.TrieMap
 import scala.reflect.macros.blackbox
 
 @macrocompat.bundle
