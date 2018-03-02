@@ -99,9 +99,7 @@ then
             echo "Setting MAVEN_PUBLISH mode to true"
             export MAVEN_PUBLISH="true"
             export pgp_passphrase=${maven_password}
-            sbt "such publishSigned"
-            sbt sonatypeReleaseAll
-            exit $?
+            sbt release with-defaults
         else
             echo "Not deploying to Maven Central, branch is not develop, current branch is ${TRAVIS_BRANCH}"
         fi

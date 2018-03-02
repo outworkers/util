@@ -79,7 +79,6 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
   ),
-  gitTagName in ThisBuild := s"version=${scalaVersion.value}",
   scalacOptions ++= Seq(
     "-language:postfixOps",
     "-language:higherKinds",

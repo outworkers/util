@@ -96,7 +96,7 @@ object Publishing {
       releaseStepCommandAndRemaining("such publishSigned"),
       releaseStepCommandAndRemaining("sonatypeReleaseAll"),
       setNextVersion,
-      commitTutFilesAndVersion,
+      commitNextVersion,
       pushChanges
     )
   )
@@ -204,6 +204,8 @@ object Publishing {
   def isTravisScala210: Boolean = !travisScala211
 
   def isJdk8: Boolean = sys.props("java.specification.version") == "1.8"
+
+  def jdk8Only(ref: ProjectReference): Seq[ProjectReference] = addOnCondition(isJdk8, ref)
 
   lazy val addOnCondition: (Boolean, ProjectReference) => Seq[ProjectReference] = (bool, ref) =>
     if (bool) ref :: Nil else Nil
