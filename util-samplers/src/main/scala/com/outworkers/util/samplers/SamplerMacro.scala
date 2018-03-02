@@ -21,8 +21,6 @@ import java.util.{Date, UUID}
 
 import _root_.com.outworkers.util.domain.Definitions
 import _root_.com.outworkers.util.macros.{AnnotationToolkit, BlackboxToolbelt}
-
-import scala.collection.concurrent.TrieMap
 import scala.reflect.macros.blackbox
 
 @macrocompat.bundle
@@ -287,7 +285,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
     q"""
       new $prefix.Sample[$tpe] {
-        override def sample: $tpe = $prefix.Sample.oneOf($comp)
+        override def sample: $tpe = $prefix.Generators.oneOf($comp)
       }
     """
   }

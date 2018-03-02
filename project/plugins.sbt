@@ -8,8 +8,6 @@ resolvers ++= Seq(
 
 addSbtPlugin("net.virtual-void" % "sbt-dependency-graph" % "0.8.2")
 
-addSbtPlugin("com.websudos" %% "sbt-package-dist" % "1.2.0")
-
 addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "0.8.5")
 
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "0.7.0")
@@ -33,3 +31,5 @@ if (sys.env.get("MAVEN_PUBLISH").exists("true" ==)) {
 } else {
   addSbtPlugin("me.lessis" % "bintray-sbt" % "0.3.0")
 }
+
+addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.5")

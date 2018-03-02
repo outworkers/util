@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import com.twitter.sbt.{GitProject, VersionManagement}
 import sbt.Keys._
 
 lazy val Versions = new {
@@ -80,7 +79,6 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
   ),
-  gitTagName in ThisBuild := s"version=${scalaVersion.value}",
   scalacOptions ++= Seq(
     "-language:postfixOps",
     "-language:higherKinds",
@@ -90,9 +88,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     "-feature",
     "-unchecked"
   )
-) ++ GitProject.gitSettings ++
-  VersionManagement.newSettings ++
-  Publishing.effectiveSettings
+) ++ Publishing.effectiveSettings
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,

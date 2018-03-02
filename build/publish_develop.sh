@@ -56,36 +56,6 @@ then
             echo "Bintray credentials still not found"
         fi
 
-        COMMIT_MSG=$(git log -1 --pretty=%B 2>&1)
-        COMMIT_SKIP_MESSAGE="[version skip]"
-
-        echo "Last commit message $COMMIT_MSG"
-
-        if [[ $COMMIT_MSG == *"${COMMIT_SKIP_MESSAGE}"* ]]
-        then
-            echo "Skipping version bump and simply tagging"
-            sbt git-tag
-        else
-            sbt version-bump-patch git-tag
-        fi
-
-        echo "Pushing tag to GitHub."
-        git push --tags "https://${github_token}@${GH_REF}"
-
-        if [[ $COMMIT_MSG == *"${COMMIT_SKIP_MESSAGE}"* ]]
-        then
-            echo "No version bump performed in CI, no GitHub push necessary."
-        else
-            echo "Publishing version bump information to GitHub"
-            git add .
-            git commit -m "TravisCI: Bumping version to match CI definition [ci skip]"
-            git checkout -b version_branch
-            git checkout -B $TRAVIS_BRANCH version_branch
-            git push "https://${github_token}@${GH_REF}" $TRAVIS_BRANCH
-        fi
-
-        echo "Publishing new version to bintray"
-        sbt "such publish"
 
         if [ "$TRAVIS_BRANCH" == "develop" ];
         then
@@ -99,9 +69,7 @@ then
             echo "Setting MAVEN_PUBLISH mode to true"
             export MAVEN_PUBLISH="true"
             export pgp_passphrase=${maven_password}
-            sbt "such publishSigned"
-            sbt sonatypeReleaseAll
-            exit $?
+            sbt release with-defaults
         else
             echo "Not deploying to Maven Central, branch is not develop, current branch is ${TRAVIS_BRANCH}"
         fi
