@@ -29,6 +29,8 @@ case class OtherPackageExample(
 )
 
 
+case class SimpleFoo(name: Option[String])
+
 case class NestedCollections(
   id: UUID,
   text: String,
