@@ -285,7 +285,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
     q"""
       new $prefix.Sample[$tpe] {
-        override def sample: $tpe = $prefix.Sample.oneOf($comp)
+        override def sample: $tpe = $prefix.Generators.oneOf($comp)
       }
     """
   }

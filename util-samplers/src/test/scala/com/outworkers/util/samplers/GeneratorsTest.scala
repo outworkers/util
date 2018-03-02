@@ -69,4 +69,10 @@ class GeneratorsTest extends FlatSpec with Matchers {
     val sample = gen[IndexedSeq[String]]
     sample shouldEqual sample
   }
+
+
+  it should "automatically generate a sampler for a nested Enumeration inside a CaseClass" in {
+    val sample = gen[IndexedSeq[String]]
+    sample shouldEqual sample
+  }
 }
