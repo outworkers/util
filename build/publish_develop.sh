@@ -70,10 +70,6 @@ then
             export MAVEN_PUBLISH="true"
             export pgp_passphrase=${maven_password}
             sbt release with-defaults
-
-            export MAVEN_PUBLISH="false"
-            echo "Publishing new version to Bintray"
-            sbt "such publish"
         else
             echo "Not deploying to Maven Central, branch is not develop, current branch is ${TRAVIS_BRANCH}"
         fi
