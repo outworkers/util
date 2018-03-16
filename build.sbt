@@ -26,7 +26,7 @@ lazy val Versions = new {
   val scalaz = "7.2.8"
   val scalacheck = "1.13.4"
   val datafactory = "0.8"
-  val play = "2.6.0-M4"
+  val play = "2.6.11"
   val shapeless = "2.3.2"
   val kindProjector = "0.9.3"
   val paradise = "2.1.0"
@@ -34,7 +34,7 @@ lazy val Versions = new {
 
   val scala210 = "2.10.6"
   val scala211 = "2.11.11"
-  val scala212 = "2.12.3"
+  val scala212 = "2.12.4"
   val scalaAll = Seq(scala210, scala211, scala212)
 
   val scala = new {
@@ -147,7 +147,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
-      "org.typelevel"           %% "cats"                           % Versions.cats,
+      "org.typelevel"           %% "cats-core"                           % Versions.cats,
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
@@ -314,7 +314,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
-      "org.typelevel" %% "cats" % Versions.cats
+      "org.typelevel" %% "cats-core" % Versions.cats
     )
   ).dependsOn(
     parsersCats,

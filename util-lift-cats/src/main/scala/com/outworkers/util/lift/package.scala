@@ -16,7 +16,7 @@
 package com.outworkers.util
 
 import cats.data.{NonEmptyList, ValidatedNel}
-import cats.syntax.CartesianSyntax
+import cats.syntax.SemigroupalSyntax
 import com.outworkers.util.domain.ApiError
 import com.outworkers.util.parsers._
 import net.liftweb.http.rest.RestContinuation
@@ -26,7 +26,7 @@ import net.liftweb.json._
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
-package object lift extends LiftParsers with JsonHelpers with CatsOps with CartesianSyntax {
+package object lift extends LiftParsers with JsonHelpers with CatsOps with SemigroupalSyntax {
 
   type ValidationNel[L, R] = cats.data.ValidatedNel[L, R]
 

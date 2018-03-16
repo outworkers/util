@@ -80,10 +80,6 @@ class PlayAugmenterTests extends FlatSpec
     }
   }
 
-  it should "correctly create an error response from an invalid Nel" in {
-    "Something went wrong".invalidNel.toList
-  }
-
   it should "serialise and deserialise an ApiError to and from JSON" in {
     forAll(apiErrorGen) { err =>
       val json = Json.toJson(err).toString()
