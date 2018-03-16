@@ -161,7 +161,7 @@ After you define such a one-time sampling type class instance, you have access t
 It's useful to define such typeclass instances inside package objects, as they will be "invisibly" imported in to the scope you need them to. This is often really neat, albeit potentially confusing for novice Scala users.
 
 
-```tut:silent
+```tut:passthrough
 
 import com.outworkers.util.testing._
 
@@ -183,7 +183,7 @@ give you an instance of your `case class` with the fields appropiately pre-fille
 
 What this means is that we try to make the data feel "real" with respect to what it should be. Let's take the below example:
 
-```tut:silent
+```tut:passthrough
 
 @sample case class User(
   id: UUID,
@@ -194,11 +194,11 @@ What this means is that we try to make the data feel "real" with respect to what
 ```
 This is interesting and common enough. What's more interesting is the output of `gen`.
 
-```scala
+```tut:passthrough
 
 val user = gen[User]
 
-Console.println(user.trace())
+user.trace()
 
 /**
 User(
