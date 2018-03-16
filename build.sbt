@@ -102,7 +102,8 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   testing,
   testingTwitter,
   macros,
-  tags
+  tags,
+  readme
 )
 
 lazy val util = (project in file("."))
