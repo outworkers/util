@@ -337,3 +337,28 @@ lazy val validators = (project in file("util-validators"))
     parsers,
     testing % Test
   )
+
+lazy val readme = (project in file("readme"))
+  .settings(sharedSettings ++ Publishing.noPublishSettings)
+  .settings(
+    crossScalaVersions := Seq(Versions.scala211, Versions.scala212),
+    tutSourceDirectory := sourceDirectory.value / "main" / "tut",
+    tutTargetDirectory := phantom.base / "docs",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "macro-compat" % Versions.macrocompat % "tut",
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "tut",
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.macroParadise cross CrossVersion.full),
+      "com.outworkers" %% "util-samplers" % Versions.util % "tut",
+      "io.circe" %% "circe-parser" % Versions.circe % "tut",
+      "io.circe" %% "circe-generic" % Versions.circe % "tut",
+      "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
+    )
+  ).dependsOn(
+    phantomDsl,
+    phantomJdk8,
+    phantomExample,
+    phantomConnectors,
+    phantomFinagle,
+    phantomStreams,
+    phantomThrift
+  ).enablePlugins(TutPlugin, CrossPerProjectPlugin)
