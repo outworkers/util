@@ -344,22 +344,20 @@ lazy val readme = (project in file("readme"))
   .settings(
     crossScalaVersions := Seq(Versions.scala211, Versions.scala212),
     tutSourceDirectory := sourceDirectory.value / "main" / "tut",
-    tutTargetDirectory := phantom.base / "docs",
+    tutTargetDirectory := util.base / "docs",
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % Versions.macrocompat % "tut",
+      "org.typelevel" %% "macro-compat" % Versions.macroCompat % "tut",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "tut",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.macroParadise cross CrossVersion.full),
-      "com.outworkers" %% "util-samplers" % Versions.util % "tut",
-      "io.circe" %% "circe-parser" % Versions.circe % "tut",
-      "io.circe" %% "circe-generic" % Versions.circe % "tut",
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
     )
   ).dependsOn(
-    phantomDsl,
-    phantomJdk8,
-    phantomExample,
-    phantomConnectors,
-    phantomFinagle,
-    phantomStreams,
-    phantomThrift
+    domain,
+    parsers,
+    play,
+    parsersCats,
+    macros,
+    samplers,
+    testing,
+    validatorsCats
   ).enablePlugins(TutPlugin, CrossPerProjectPlugin)
