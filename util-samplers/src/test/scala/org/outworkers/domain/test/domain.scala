@@ -28,7 +28,6 @@ case class OtherPackageExample(
  long: Long
 )
 
-
 case class SimpleFoo(name: Option[String])
 
 case class NestedCollections(
