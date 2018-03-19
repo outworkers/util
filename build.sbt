@@ -110,7 +110,15 @@ lazy val util = (project in file("."))
   .settings(sharedSettings: _*)
   .settings(
     name := "util",
-    moduleName := "util"
+    moduleName := "util",
+    commands += Command.command("testsWithCoverage") { state =>
+      "coverage" ::
+      "test" ::
+      "coverageReport" ::
+      "coverageAggregate" ::
+      "coveralls" ::
+      state
+    }
   ).aggregate(
     baseProjectList ++ Publishing.jdk8Only(play): _*
   )
