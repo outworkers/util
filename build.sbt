@@ -360,4 +360,4 @@ lazy val readme = (project in file("readme"))
     samplers,
     testing,
     validatorsCats
-  ).enablePlugins(TutPlugin, CrossPerProjectPlugin)
+  ).enablePlugins(TutPlugin)
