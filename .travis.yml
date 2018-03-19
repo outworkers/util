@@ -9,8 +9,6 @@ notifications:
   email:
   - dev@websudos.co.uk
 jdk:
-- oraclejdk7
-- openjdk7
 - oraclejdk8
 branches:
   only:
@@ -20,6 +18,7 @@ matrix:
   include:
   - scala: 2.12.4
     jdk: oraclejdk8
+
 env:
   global:
   - GH_REF: github.com/outworkers/util.git
