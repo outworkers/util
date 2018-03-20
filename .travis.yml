@@ -9,6 +9,7 @@ notifications:
   email:
   - dev@websudos.co.uk
 jdk:
+- oraclejdk7
 - oraclejdk8
 branches:
   only:

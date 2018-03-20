@@ -16,8 +16,8 @@
 import sbt.Keys._
 
 lazy val Versions = new {
-  val scalatest = "3.0.4"
-  val cats = "1.0.1"
+  val scalatest = "3.0.1"
+  val cats = "0.9.0"
   val joda = "2.9.7"
   val jodaConvert = "1.8.1"
   val lift = "3.0"
@@ -26,7 +26,7 @@ lazy val Versions = new {
   val scalaz = "7.2.8"
   val scalacheck = "1.13.4"
   val datafactory = "0.8"
-  val play = "2.6.11"
+  val play = "2.6.0-M4"
   val shapeless = "2.3.2"
   val kindProjector = "0.9.3"
   val paradise = "2.1.0"
@@ -34,7 +34,7 @@ lazy val Versions = new {
 
   val scala210 = "2.10.6"
   val scala211 = "2.11.11"
-  val scala212 = "2.12.4"
+  val scala212 = "2.12.3"
   val scalaAll = Seq(scala210, scala211, scala212)
 
   val scala = new {
@@ -102,26 +102,17 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   testing,
   testingTwitter,
   macros,
-  tags,
-  readme
+  tags
 )
 
 lazy val util = (project in file("."))
   .settings(sharedSettings: _*)
   .settings(
     name := "util",
-    moduleName := "util",
-    commands += Command.command("testsWithCoverage") { state =>
-      "coverage" ::
-      "test" ::
-      "coverageReport" ::
-      "coverageAggregate" ::
-      "coveralls" ::
-      state
-    }
+    moduleName := "util"
   ).aggregate(
-    baseProjectList ++ Publishing.jdk8Only(play): _*
-  )
+  baseProjectList ++ Publishing.jdk8Only(play): _*
+)
 
 lazy val domain = (project in file("util-domain"))
   .settings(sharedSettings: _*)
@@ -143,9 +134,9 @@ lazy val parsers = (project in file("util-parsers"))
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
-    domain,
-    testing % Test
-  )
+  domain,
+  testing % Test
+)
 
 lazy val parsersCats = (project in file("util-parsers-cats"))
   .settings(sharedSettings: _*)
@@ -156,13 +147,13 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
-      "org.typelevel"           %% "cats-core"                           % Versions.cats,
+      "org.typelevel"           %% "cats"                           % Versions.cats,
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
-    domain,
-    testing % Test
-  )
+  domain,
+  testing % Test
+)
 
 lazy val tags = (project in file("util-tags"))
   .settings(sharedSettings: _*)
@@ -180,9 +171,9 @@ lazy val tags = (project in file("util-tags"))
       "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     )
   ).dependsOn(
-    domain,
-    macros
-  )
+  domain,
+  macros
+)
 
 lazy val samplers = (project in file("util-samplers"))
   .settings(sharedSettings: _*)
@@ -200,9 +191,9 @@ lazy val samplers = (project in file("util-samplers"))
       "org.scalacheck" %% "scalacheck" % Versions.scalacheck
     )
   ).dependsOn(
-    domain,
-    macros
-  )
+  domain,
+  macros
+)
 
 lazy val testing = (project in file("util-testing"))
   .settings(sharedSettings: _*)
@@ -222,11 +213,11 @@ lazy val testing = (project in file("util-testing"))
       "org.scalacheck" %% "scalacheck" % Versions.scalacheck
     )
   ).dependsOn(
-    domain,
-    tags,
-    macros,
-    samplers
-  )
+  domain,
+  tags,
+  macros,
+  samplers
+)
 
 lazy val testingTwitter = (project in file("util-testing-twitter"))
   .settings(sharedSettings: _*)
@@ -272,14 +263,14 @@ lazy val lift = (project in file("util-lift"))
           case Some((major, minor)) if minor <= 11 => minor.toString
           case _ => "non-existing"
         }
-    })),
+      })),
     libraryDependencies ++= Seq(
       "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
     )
   ).dependsOn(
-    parsers,
-    testing % Test
-  )
+  parsers,
+  testing % Test
+)
 
 lazy val liftCats = (project in file("util-lift-cats"))
   .settings(sharedSettings: _*)
@@ -292,14 +283,14 @@ lazy val liftCats = (project in file("util-lift-cats"))
           case Some((major, minor)) if minor <= 11 => minor.toString
           case _ => "non-existing"
         }
-    })),
+      })),
     libraryDependencies ++= Seq(
       "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
     )
   ).dependsOn(
-    parsersCats,
-    testing % Test
-  )
+  parsersCats,
+  testing % Test
+)
 
 lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
@@ -323,12 +314,12 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
-      "org.typelevel" %% "cats-core" % Versions.cats
+      "org.typelevel" %% "cats" % Versions.cats
     )
   ).dependsOn(
-    parsersCats,
-    testing % Test
-  )
+  parsersCats,
+  testing % Test
+)
 
 lazy val validators = (project in file("util-validators"))
   .settings(sharedSettings: _*)
@@ -342,30 +333,7 @@ lazy val validators = (project in file("util-validators"))
       "org.scalaz" %% "scalaz-core" % Versions.scalaz
     )
   ).dependsOn(
-    validatorsCats,
-    parsers,
-    testing % Test
-  )
-
-lazy val readme = (project in file("readme"))
-  .settings(sharedSettings ++ Publishing.noPublishSettings)
-  .settings(
-    crossScalaVersions := Seq(Versions.scala211, Versions.scala212),
-    tutSourceDirectory := sourceDirectory.value / "main" / "tut",
-    tutTargetDirectory := util.base / "docs",
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % Versions.macroCompat % "tut",
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "tut",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
-      "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
-    )
-  ).dependsOn(
-    domain,
-    parsers,
-    play,
-    parsersCats,
-    macros,
-    samplers,
-    testing,
-    validatorsCats
-  ).enablePlugins(TutPlugin)
+  validatorsCats,
+  parsers,
+  testing % Test
+)
