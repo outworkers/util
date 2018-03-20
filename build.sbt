@@ -20,7 +20,6 @@ lazy val Versions = new {
   val cats = "1.0.1"
   val joda = "2.9.7"
   val jodaConvert = "1.8.1"
-  val lift = "3.0"
   val twitterUtil = "6.41.0"
   val twitterUtil210 = "6.34.0"
   val scalaz = "7.2.8"
@@ -62,18 +61,11 @@ lazy val Versions = new {
       case _ => "2.4.8"
     }
   }
-
-  val liftVersion: String => String = {
-    s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 11 => lift
-      case _ => "3.0-M1"
-    }
-  }
 }
 
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
-  scalaVersion := Versions.scala211,
+  scalaVersion := Versions.scala212,
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
@@ -92,12 +84,8 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
-  lift,
-  liftCats,
-  parsers,
   parsersCats,
   validatorsCats,
-  validators,
   samplers,
   testing,
   testingTwitter,
@@ -128,23 +116,6 @@ lazy val domain = (project in file("util-domain"))
   .settings(
     moduleName := "util-domain",
     crossScalaVersions := Versions.scala.all
-  )
-
-lazy val parsers = (project in file("util-parsers"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-parsers",
-    crossScalaVersions := Versions.scala.all,
-    libraryDependencies ++= Seq(
-      "commons-validator"       %  "commons-validator"              % "1.4.0",
-      "joda-time"               %  "joda-time"                      % Versions.joda,
-      "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
-      "org.scalaz"              %% "scalaz-core"                    % Versions.scalaz,
-      "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
-    )
-  ).dependsOn(
-    domain,
-    testing % Test
   )
 
 lazy val parsersCats = (project in file("util-parsers-cats"))
@@ -261,46 +232,6 @@ lazy val play = (project in file("util-play"))
   testing % Test
 )
 
-lazy val lift = (project in file("util-lift"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-lift",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
-    unmanagedSourceDirectories in Compile ++= Seq(
-      (sourceDirectory in Compile).value / ("scala-2." + {
-        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) if minor <= 11 => minor.toString
-          case _ => "non-existing"
-        }
-    })),
-    libraryDependencies ++= Seq(
-      "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
-    )
-  ).dependsOn(
-    parsers,
-    testing % Test
-  )
-
-lazy val liftCats = (project in file("util-lift-cats"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-lift-cats",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
-    unmanagedSourceDirectories in Compile ++= Seq(
-      (sourceDirectory in Compile).value / ("scala-2." + {
-        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) if minor <= 11 => minor.toString
-          case _ => "non-existing"
-        }
-    })),
-    libraryDependencies ++= Seq(
-      "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
-    )
-  ).dependsOn(
-    parsersCats,
-    testing % Test
-  )
-
 lazy val macros = (project in file("util-macros"))
   .settings(sharedSettings: _*)
   .settings(
@@ -330,22 +261,6 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     testing % Test
   )
 
-lazy val validators = (project in file("util-validators"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-validators",
-    crossScalaVersions := Versions.scala.all,
-    addCompilerPlugin(
-      "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
-    ),
-    libraryDependencies ++= Seq(
-      "org.scalaz" %% "scalaz-core" % Versions.scalaz
-    )
-  ).dependsOn(
-    validatorsCats,
-    parsers,
-    testing % Test
-  )
 
 lazy val readme = (project in file("readme"))
   .settings(sharedSettings ++ Publishing.noPublishSettings)
@@ -361,7 +276,6 @@ lazy val readme = (project in file("readme"))
     )
   ).dependsOn(
     domain,
-    parsers,
     play,
     parsersCats,
     macros,
