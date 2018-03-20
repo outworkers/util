@@ -17,7 +17,7 @@ import sbt.Keys._
 
 lazy val Versions = new {
   val scalatest = "3.0.4"
-  val cats = "1.0.1"
+  val cats = "1.1.0"
   val joda = "2.9.7"
   val jodaConvert = "1.8.1"
   val lift = "3.0"
@@ -34,18 +34,17 @@ lazy val Versions = new {
 
   val scala210 = "2.10.6"
   val scala211 = "2.11.11"
-  val scala212 = "2.12.3"
+  val scala212 = "2.12.5"
   val scalaAll = Seq(scala210, scala211, scala212)
 
   val scala = new {
     val all = Seq(scala210, scala211, scala212)
   }
 
-
   val catsVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 11 => cats
-      case _ => twitterUtil210
+      case Some((_, minor)) if minor >= 11 => "1.1.0"
+      case _ => "0.9.0"
     }
   }
 
@@ -147,7 +146,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
-      "org.typelevel"           %% "cats"                           % Versions.cats,
+      "org.typelevel"           %% "cats"                           % Versions.catsVersion(scalaVersion.value),
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
@@ -314,7 +313,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
-      "org.typelevel" %% "cats" % Versions.cats
+      "org.typelevel" %% "cats" % Versions.catsVersion(scalaVersion.value)
     )
   ).dependsOn(
   parsersCats,
