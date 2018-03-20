@@ -73,6 +73,7 @@ lazy val Versions = new {
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
   scalaVersion := Versions.scala211,
+  crossScalaVersions := Versions.scala.all,
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
