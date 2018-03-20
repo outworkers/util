@@ -127,7 +127,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
-      "org.typelevel"           %% "cats-core"                           % Versions.cats,
+      "org.typelevel"           %% "cats-core"                      % Versions.cats,
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
