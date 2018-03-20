@@ -41,10 +41,10 @@ lazy val Versions = new {
     val all = Seq(scala210, scala211, scala212)
   }
 
-  val catsVersion: String => String = {
+  val catsVersion: String => ModuleID = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 11 => "1.1.0"
-      case _ => "0.9.0"
+      case Some((_, minor)) if minor >= 11 => "org.typelevel" %% "cats-core" % "1.1.0"
+      case _ => "org.typelevel" %% "cats" % "0.9.0"
     }
   }
 
@@ -146,7 +146,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
       "commons-validator"       %  "commons-validator"              % "1.4.0",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
-      "org.typelevel"           %% "cats"                           % Versions.catsVersion(scalaVersion.value),
+      Versions.catsVersion(scalaVersion.value),
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
@@ -313,7 +313,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
-      "org.typelevel" %% "cats" % Versions.catsVersion(scalaVersion.value)
+      Versions.catsVersion(scalaVersion.value)
     )
   ).dependsOn(
   parsersCats,
