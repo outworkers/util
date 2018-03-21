@@ -34,12 +34,6 @@ object Publishing {
 
   val ciSkipSequence = "[ci skip]"
 
-  private def toProcessLogger(st: State): ProcessLogger = new ProcessLogger {
-    override def error(s: => String): Unit = st.log.error(s)
-    override def info(s: => String): Unit = st.log.info(s)
-    override def buffer[T](f: => T): T = st.log.buffer(f)
-  }
-
   def vcs(state: State): Vcs = {
     Project.extract(state).get(releaseVcs)
       .getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
@@ -49,7 +43,6 @@ object Publishing {
 
   def commitTutFilesAndVersion: ReleaseStep = ReleaseStep { st: State =>
     val settings = Project.extract(st)
-    val log = toProcessLogger(st)
     val versionsFile = settings.get(releaseVersionFile).getCanonicalFile
     val docsFolder = settings.get(releaseTutFolder).getCanonicalFile
     val base = vcs(st).baseDir.getCanonicalFile
@@ -66,13 +59,13 @@ object Publishing {
     ).getOrElse("Docs folder [%s] is outside of this VCS repository with base directory [%s]!" format(docsFolder, base))
 
 
-    vcs(st).add(relativePath) !! log
-    vcs(st).add(relativeDocsPath) !! log
+    vcs(st).add(relativePath) !! st.log
+    vcs(st).add(relativeDocsPath) !! st.log
     val status = (vcs(st).status !!) trim
 
     val newState = if (status.nonEmpty) {
       val (state, msg) = settings.runTask(releaseCommitMessage, st)
-      vcs(state).commit(msg, sign) ! log
+      vcs(state).commit(msg, sign) ! st.log
       state
     } else {
       // nothing to commit. this happens if the version.sbt file hasn't changed.
@@ -168,7 +161,6 @@ object Publishing {
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
       }
     },
-    externalResolvers := Resolver.withDefaultResolvers(resolvers.value, mavenCentral = true),
     licenses += ("Outworkers License", url("https://github.com/outworkers/phantom/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },

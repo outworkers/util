@@ -9,4 +9,3 @@ else
     sbt "plz $TRAVIS_SCALA_VERSION test"
     exit $?
 fi
-q

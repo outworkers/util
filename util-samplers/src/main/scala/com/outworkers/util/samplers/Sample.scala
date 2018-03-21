@@ -168,7 +168,7 @@ object Samples extends Generators {
   }
 
   class CitySampler extends Sample[City] {
-    def sample: City = City(Gen.oneOf(BaseSamplers.cities).sample.get)
+    def sample: City = City(Generators.oneOf(BaseSamplers.cities))
   }
 
   class InetAddressSampler extends Sample[InetAddress] {

@@ -1,7 +1,7 @@
 language: scala
 scala:
 - 2.10.6
-- 2.11.8
+- 2.11.11
 sudo: false
 notifications:
   slack:
@@ -10,7 +10,6 @@ notifications:
   - dev@websudos.co.uk
 jdk:
 - oraclejdk7
-- openjdk7
 - oraclejdk8
 branches:
   only:
@@ -18,8 +17,9 @@ branches:
   - develop
 matrix:
   include:
-  - scala: 2.12.0
+  - scala: 2.12.4
     jdk: oraclejdk8
+
 env:
   global:
   - GH_REF: github.com/outworkers/util.git

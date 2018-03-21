@@ -15,7 +15,7 @@
  */
 package com.outworkers.util.samplers
 
-import org.outworkers.domain.test.NestedCollections
+import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
 import org.scalatest.{FlatSpec, Matchers}
 
 class GeneratorsTest extends FlatSpec with Matchers {
@@ -57,6 +57,12 @@ class GeneratorsTest extends FlatSpec with Matchers {
 
   it should "automatically derive samplers for nested collections" in {
     val sample = gen[List[List[String]]]
+    sample shouldEqual sample
+  }
+
+
+  it should "automatically derive dictionaries for nested options" in {
+    val sample = gen[SimpleFoo]
     sample shouldEqual sample
   }
 

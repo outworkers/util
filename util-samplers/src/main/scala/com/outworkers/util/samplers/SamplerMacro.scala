@@ -202,7 +202,10 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
               generator = t => q"""$prefix.genOpt[..$t]"""
             )
           )
-          case _ => c.abort(c.enclosingPosition, s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead")
+          case _ => c.abort(
+            c.enclosingPosition,
+            s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead"
+          )
         }
       } else {
         None
@@ -214,7 +217,9 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     accessor match {
       case MapType(col) => col.default
       case OptionType(opt) => accessor.name match {
-        case KnownField(derived) => opt.generator(derived :: Nil)
+        case KnownField(derived) => {
+          q"""$prefix.genOpt[$derived].map(_.value)"""
+        }
         case _ => opt.default
       }
       case CollectionType(col) => accessor.name match {

@@ -25,21 +25,13 @@ import scala.concurrent.Future
 
 package object play extends ExtraImplicits {
 
-  implicit lazy val apiErrorResponseFormat = Json.format[ApiErrorResponse]
-  implicit lazy val apiErrorFormat = Json.format[ApiError]
+  implicit lazy val apiErrorResponseFormat: OFormat[ApiErrorResponse] = Json.format[ApiErrorResponse]
+  implicit lazy val apiErrorFormat: OFormat[ApiError] = Json.format[ApiError]
 
   implicit class JsonHelpers[T](val obj: T) extends AnyVal {
     def jsValue()(implicit fmt: Writes[T]): JsValue = Json.toJson(obj)
 
     def json()(implicit fmt: Writes[T]): String = jsValue.toString()
-  }
-
-  implicit class CatsHelpers[T](val obj: T) extends AnyVal {
-    def valid: Valid[T] = Valid(obj)
-
-    def invalid: Invalid[T] = Invalid(obj)
-
-    def invalidNel: Invalid[NonEmptyList[T]] = Invalid(NonEmptyList(obj, Nil))
   }
 
   implicit class NelAugmenter(val list: NonEmptyList[String]) extends AnyVal {
