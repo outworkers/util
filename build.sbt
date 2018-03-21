@@ -108,7 +108,7 @@ val scalacOptionsFn: String => Seq[String] = { s =>
   }
 }
 
-scalacOptions in ThisBuild := (scalacOptionsFn(scalaVersion.value)) 
+scalacOptions in ThisBuild ++= (scalacOptionsFn(scalaVersion.value)) 
 
   val catsVersion: String => ModuleID = {
     s => CrossVersion.partialVersion(s) match {
