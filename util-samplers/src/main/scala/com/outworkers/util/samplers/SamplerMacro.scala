@@ -332,7 +332,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
 
-    // println(showCode(tree))
     if (showTrees) {
       echo(showCode(tree))
     }
