@@ -8,4 +8,6 @@ package object samplers extends Generators with GenerationDomain {
     def trace()(implicit tracer: Tracer[T]): String = tracer.trace(obj)
   }
 
+  
+
 }

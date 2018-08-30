@@ -27,7 +27,9 @@ trait Sample[T] {
   def sample: T
 }
 
-object Sample {
+object Sample extends Generators {
+
+  def iso[T : Sample, T1](fn: T => T1): Sample[T1] = derive(fn)
 
   def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
     override def sample: T1 = fn(gen[T])
@@ -59,16 +61,12 @@ object Sample {
   }
 
   def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]
-}
-
-
-object Samples extends Generators {
 
   private[this] val byteLimit = 127
   private[this] val shortLimit = 256
   private[this] val inetBlock = 4
 
-  class StringSampler extends Sample[String] {
+  implicit object StringSampler extends Sample[String] {
     /**
       * Get a unique random generated string.
       * This uses the default java GUID implementation.
@@ -77,57 +75,57 @@ object Samples extends Generators {
     def sample: String = UUID.randomUUID().toString
   }
 
-  class ShortStringSampler extends Sample[ShortString] {
+  implicit object ShortStringSampler extends Sample[ShortString] {
     def sample: ShortString = {
       ShortString(java.lang.Long.toHexString(java.lang.Double.doubleToLongBits(Math.random())))
     }
   }
 
-  class ByteSampler extends Sample[Byte] {
+  implicit object ByteSampler extends Sample[Byte] {
     def sample: Byte = Random.nextInt(byteLimit).toByte
   }
 
-  class BooleanSampler extends Sample[Boolean] {
+  implicit object BooleanSampler extends Sample[Boolean] {
     def sample: Boolean = Random.nextBoolean()
   }
 
-  class IntSampler extends Sample[Int] {
+  implicit object IntSampler extends Sample[Int] {
     def sample: Int = Random.nextInt()
   }
 
-  class ShortSampler extends Sample[Short] {
+  implicit object ShortSampler extends Sample[Short] {
     def sample: Short = Random.nextInt(shortLimit).toShort
   }
 
-  class DoubleSampler extends Sample[Double] {
+  implicit object DoubleSampler extends Sample[Double] {
     def sample: Double = Random.nextDouble()
   }
 
-  class FloatSampler extends Sample[Float] {
+  implicit object FloatSampler extends Sample[Float] {
     def sample: Float = Random.nextFloat()
   }
 
-  class LongSampler extends Sample[Long] {
+  implicit object LongSampler extends Sample[Long] {
     def sample: Long = Random.nextLong()
   }
 
-  class BigDecimalSampler extends Sample[BigDecimal] {
+  implicit object BigDecimalSampler extends Sample[BigDecimal] {
     def sample: BigDecimal = BigDecimal(Random.nextDouble())
   }
 
-  class BigIntSampler extends Sample[BigInt] {
+  implicit object BigIntSampler extends Sample[BigInt] {
     def sample: BigInt = BigInt(Random.nextLong())
   }
 
-  class DateSampler extends Sample[Date] {
+  implicit object DateSampler extends Sample[Date] {
     def sample: Date = new Date()
   }
 
-  class UUIDSampler extends Sample[UUID] {
+  implicit object UUIDSampler extends Sample[UUID] {
     def sample: UUID = UUID.randomUUID()
   }
 
-  class EmailAddressSampler extends Sample[EmailAddress] {
+  implicit object EmailAddressSampler extends Sample[EmailAddress] {
     def sample: EmailAddress = {
       val random = new Random
       val test = random.nextInt(100)
@@ -147,19 +145,19 @@ object Samples extends Generators {
     }
   }
 
-  class FirstNameSampler extends Sample[FirstName] {
+  implicit object FirstNameSampler extends Sample[FirstName] {
     def sample: FirstName = FirstName(Generators.oneOf(NameValues.firstNames))
   }
 
-  class LastNameSampler extends Sample[LastName] {
+  implicit object LastNameSampler extends Sample[LastName] {
     def sample: LastName = LastName(Generators.oneOf(NameValues.lastNames))
   }
 
-  class FullNameSampler extends Sample[FullName] {
+  implicit object FullNameSampler extends Sample[FullName] {
     def sample: FullName = FullName(s"${Gen.oneOf(NameValues.firstNames).sample.get} ${Gen.oneOf(NameValues.lastNames).sample.get}")
   }
 
-  class CountryCodeSampler extends Sample[CountryCode] {
+  implicit object CountryCodeSampler extends Sample[CountryCode] {
     def sample: CountryCode = CountryCode(Gen.oneOf(Locale.getISOCountries).sample.get)
   }
 
@@ -167,25 +165,25 @@ object Samples extends Generators {
     def sample: Country = Country(Gen.oneOf(BaseSamplers.Countries).sample.get)
   }
 
-  class CitySampler extends Sample[City] {
+  implicit object CitySampler extends Sample[City] {
     def sample: City = City(Generators.oneOf(BaseSamplers.cities))
   }
 
-  class InetAddressSampler extends Sample[InetAddress] {
+  implicit object InetAddressSampler extends Sample[InetAddress] {
     def sample: InetAddress = {
-      InetAddress.getByAddress(List.tabulate(inetBlock)(_ => new ByteSampler().sample).toArray)
+      InetAddress.getByAddress(List.tabulate(inetBlock)(_ => ByteSampler.sample).toArray)
     }
   }
 
-  class ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
+  implicit object ProgrammingLanguageSampler extends Sample[ProgrammingLanguage] {
     def sample: ProgrammingLanguage = ProgrammingLanguage(Gen.oneOf(BaseSamplers.ProgrammingLanguages).sample.get)
   }
 
-  class LoremIpsumSampler extends Sample[LoremIpsum] {
+  implicit object LoremIpsumSampler extends Sample[LoremIpsum] {
     def sample: LoremIpsum = LoremIpsum(Gen.oneOf(BaseSamplers.LoremIpsum).sample.get)
   }
 
-  class UrlSampler extends Sample[Url] {
+  implicit object UrlSampler extends Sample[Url] {
     def sample: Url = {
       val str = java.lang.Long.toHexString(java.lang.Double.doubleToLongBits(Math.random()))
       Url(oneOf(protocols) + "://www." + str + "." + oneOf(domains))
