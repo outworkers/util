@@ -32,13 +32,12 @@ lazy val Versions = new {
   val paradise = "2.1.0"
   val macroCompat = "1.1.1"
 
-  val scala210 = "2.10.6"
   val scala211 = "2.11.12"
   val scala212 = "2.12.6"
-  val scalaAll = Seq(scala210, scala211, scala212)
+  val scalaAll = Seq(scala211, scala212)
 
   val scala = new {
-    val all = Seq(scala210, scala211, scala212)
+    val all = Seq(scala211, scala212)
   }
 
   lazy val ScalacOptions = Seq(
@@ -304,7 +303,7 @@ lazy val play = (project in file("util-play"))
   .settings(
 
     moduleName := "util-play",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
     ),
@@ -325,7 +324,7 @@ lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
@@ -345,7 +344,7 @@ lazy val liftCats = (project in file("util-lift-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift-cats",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
