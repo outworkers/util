@@ -305,29 +305,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => enumSample(tpe)
-      case SamplersSymbols.stringSymbol => sampler("StringSampler")
-      case SamplersSymbols.shortSymbol => sampler("ShortSampler")
-      case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
-      case SamplersSymbols.byteSymbol => sampler("ByteSampler")
-      case SamplersSymbols.dateSymbol => sampler("DateSampler")
-      case SamplersSymbols.floatSymbol => sampler("FloatSampler")
-      case SamplersSymbols.longSymbol => sampler("LongSampler")
-      case SamplersSymbols.intSymbol => sampler("IntSampler")
-      case SamplersSymbols.shortString => sampler("ShortStringSampler")
-      case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
-      case SamplersSymbols.bigInt => sampler("BigIntSampler")
-      case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
-      case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
-      case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
-      case SamplersSymbols.firstName => sampler("FirstNameSampler")
-      case SamplersSymbols.lastName => sampler("LastNameSampler")
-      case SamplersSymbols.fullName =>sampler("FullNameSampler")
-      case SamplersSymbols.emailAddress => sampler("EmailAddressSampler")
-      case SamplersSymbols.city => sampler("CitySampler")
-      case SamplersSymbols.country => sampler("CountrySampler")
-      case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
-      case SamplersSymbols.programmingLanguage => sampler("ProgrammingLanguageSampler")
-      case SamplersSymbols.url => sampler("UrlSampler")
       case sym if sym.isClass && sym.asClass.isCaseClass => caseClassSample(tpe)
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
@@ -344,8 +321,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   }
 
   def materialize[T : WeakTypeTag]: Tree = {
-    val tt = weakTypeOf[T]
-
-    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(tt, { t: Type => macroImpl(t)})
+    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(weakTypeOf[T], macroImpl)
   }
 }

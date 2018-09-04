@@ -16,29 +16,28 @@
 import sbt.Keys._
 
 lazy val Versions = new {
-  val scalatest = "3.0.4"
-  val cats = "1.1.0"
-  val joda = "2.9.7"
-  val jodaConvert = "1.8.1"
+  val scalatest = "3.0.5"
+  val cats = "1.2.0"
+  val joda = "2.10"
+  val jodaConvert = "2.1.1"
   val lift = "3.0"
   val twitterUtil = "6.41.0"
   val twitterUtil210 = "6.34.0"
-  val scalaz = "7.2.8"
-  val scalacheck = "1.13.4"
+  val scalaz = "7.2.26"
+  val scalacheck = "1.14.0"
   val datafactory = "0.8"
   val play = "2.6.0-M4"
   val shapeless = "2.3.2"
-  val kindProjector = "0.9.3"
+  val kindProjector = "0.9.7"
   val paradise = "2.1.0"
   val macroCompat = "1.1.1"
 
-  val scala210 = "2.10.6"
-  val scala211 = "2.11.11"
-  val scala212 = "2.12.5"
-  val scalaAll = Seq(scala210, scala211, scala212)
+  val scala211 = "2.11.12"
+  val scala212 = "2.12.6"
+  val scalaAll = Seq(scala211, scala212)
 
   val scala = new {
-    val all = Seq(scala210, scala211, scala212)
+    val all = Seq(scala211, scala212)
   }
 
   lazy val ScalacOptions = Seq(
@@ -196,7 +195,7 @@ lazy val parsers = (project in file("util-parsers"))
     moduleName := "util-parsers",
     crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
-      "commons-validator"       %  "commons-validator"              % "1.4.0",
+      "commons-validator"       %  "commons-validator"              % "1.6",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
       "org.scalaz"              %% "scalaz-core"                    % Versions.scalaz,
@@ -304,7 +303,7 @@ lazy val play = (project in file("util-play"))
   .settings(
 
     moduleName := "util-play",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
     ),
@@ -325,7 +324,7 @@ lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
@@ -345,7 +344,7 @@ lazy val liftCats = (project in file("util-lift-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift-cats",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
