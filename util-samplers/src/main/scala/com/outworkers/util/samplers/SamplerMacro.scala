@@ -321,8 +321,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   }
 
   def materialize[T : WeakTypeTag]: Tree = {
-    val tt = weakTypeOf[T]
-
-    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(tt, { t: Type => macroImpl(t)})
+    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(weakTypeOf[T], macroImpl)
   }
 }
