@@ -26,7 +26,7 @@ lazy val Versions = new {
   val scalaz = "7.2.26"
   val scalacheck = "1.14.0"
   val datafactory = "0.8"
-  val play = "2.6.0-M4"
+  val play = "2.6.19"
   val shapeless = "2.3.2"
   val kindProjector = "0.9.7"
   val paradise = "2.1.0"
@@ -107,7 +107,7 @@ val scalacOptionsFn: String => Seq[String] = { s =>
   }
 }
 
-scalacOptions in ThisBuild ++= (scalacOptionsFn(scalaVersion.value)) 
+scalacOptions in ThisBuild ++= (scalacOptionsFn(scalaVersion.value))
 
   val catsVersion: String => ModuleID = {
     s => CrossVersion.partialVersion(s) match {
@@ -303,7 +303,7 @@ lazy val play = (project in file("util-play"))
   .settings(
 
     moduleName := "util-play",
-    crossScalaVersions := Seq(Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala211, Versions.scala212),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
     ),
