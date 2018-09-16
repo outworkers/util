@@ -20,7 +20,7 @@ lazy val Versions = new {
   val cats = "1.2.0"
   val joda = "2.10"
   val jodaConvert = "2.1.1"
-  val lift = "3.0"
+  val lift = "3.3.0"
   val twitterUtil = "6.41.0"
   val twitterUtil210 = "6.34.0"
   val scalaz = "7.2.26"
@@ -29,7 +29,7 @@ lazy val Versions = new {
   val play = "2.6.19"
   val shapeless = "2.3.2"
   val kindProjector = "0.9.7"
-  val paradise = "2.1.0"
+  val paradise = "2.1.1"
   val macroCompat = "1.1.1"
 
   val scala211 = "2.11.12"
@@ -111,7 +111,7 @@ scalacOptions in ThisBuild ++= (scalacOptionsFn(scalaVersion.value))
 
   val catsVersion: String => ModuleID = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 11 => "org.typelevel" %% "cats-core" % "1.1.0"
+      case Some((_, minor)) if minor >= 11 => "org.typelevel" %% "cats-core" % "1.4.0"
       case _ => "org.typelevel" %% "cats" % "0.9.0"
     }
   }
