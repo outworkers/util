@@ -27,7 +27,7 @@ lazy val Versions = new {
   val scalacheck = "1.14.0"
   val datafactory = "0.8"
   val play = "2.6.19"
-  val shapeless = "2.3.2"
+  val shapeless = "2.3.3"
   val kindProjector = "0.9.7"
   val paradise = "2.1.1"
   val macroCompat = "1.1.1"
@@ -212,7 +212,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
     moduleName := "util-parsers-cats",
     crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
-      "commons-validator"       %  "commons-validator"              % "1.4.0",
+      "commons-validator"       %  "commons-validator"              % "1.6",
       "joda-time"               %  "joda-time"                      % Versions.joda,
       "org.joda"                %  "joda-convert"                   % Versions.jodaConvert,
       Versions.catsVersion(scalaVersion.value),
