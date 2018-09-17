@@ -15,7 +15,6 @@
  */
 package com.outworkers.util
 
-import com.outworkers.util.domain.GenerationDomain
 import com.outworkers.util.samplers.Generators
 import com.outworkers.util.tags.DefaultTaggedTypes
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
@@ -31,7 +30,6 @@ import scala.util.{Failure, Success}
 
 package object testing extends ScalaFutures
   with Generators
-  with GenerationDomain
   with DefaultTaggedTypes {
 
   type Sample[R] = com.outworkers.util.samplers.Sample[R]

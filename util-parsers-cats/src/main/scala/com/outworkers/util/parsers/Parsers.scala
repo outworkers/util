@@ -19,7 +19,7 @@ import java.net.URL
 import java.util.UUID
 
 import cats.data._
-import com.outworkers.util.domain.GenerationDomain
+import com.outworkers.util.domain._
 import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}
 
@@ -80,7 +80,7 @@ object Parser {
   def apply[Target]()(implicit ev: Parser[Target]): Parser[Target] = ev
 }
 
-trait CatsImplicitParsers extends GenerationDomain {
+trait CatsImplicitParsers {
 
   implicit object UUIDParser extends Parser[UUID] {
     override def parse(str: String): ValidatedNel[String, UUID] = {

@@ -19,8 +19,9 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.util.{Date, UUID}
 
-import _root_.com.outworkers.util.domain.Definitions
+import _root_.com.outworkers.util.domain._
 import _root_.com.outworkers.util.macros.{AnnotationToolkit, BlackboxToolbelt}
+
 import scala.reflect.macros.blackbox
 
 @macrocompat.bundle
@@ -29,8 +30,8 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   import c.universe._
 
   val prefix = q"com.outworkers.util.samplers"
-  val domainPkg = q"com.outworkers.util.domain.GenerationDomain"
-  val definitions = "com.outworkers.util.domain.Definitions"
+  val domainPkg = q"com.outworkers.util.domain"
+  val definitions = "com.outworkers.util.domain"
 
   object SamplersSymbols {
     val intSymbol: Symbol = typed[Int]
@@ -55,7 +56,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     val enum: Symbol = typed[Enumeration#Value]
     val firstName: Symbol = typed[FirstName]
     val lastName: Symbol = typed[LastName]
-    val fullName: Symbol = typed[Definitions.FullName]
+    val fullName: Symbol = typed[FullName]
     val emailAddress: Symbol = typed[EmailAddress]
     val city: Symbol = typed[City]
     val country: Symbol = typed[Country]
@@ -228,7 +229,10 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       }
 
       case _ => accessor.name match {
-        case KnownField(derived) => q"$prefix.gen[$derived].value"
+        case KnownField(derived) => {
+
+          q"$prefix.gen[$derived].value"
+        }
         case _ => q"$prefix.gen[${accessor.paramType}]"
       }
     }
@@ -254,7 +258,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     tpe.typeArgs match {
       case inner :: Nil => q"""
         new $prefix.Sample[$tpe] {
-          override def sample: $tpe = $prefix.Generators.gen[$outerSymbol, $inner]()
+          override def sample: $tpe = $prefix.gen[$outerSymbol, $inner]()
         }
       """
       case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
@@ -264,7 +268,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   def tupleSample(tpe: Type): Tree = {
     val comp = tpe.typeSymbol.name.toTermName
 
-    val samplers = tpe.typeArgs.map(t => q"$prefix.Sample[$t].sample")
+    val samplers = tpe.typeArgs.map(t => q"$prefix.gen[$t]")
 
     q"""
       new $prefix.Sample[$tpe] {
@@ -278,7 +282,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       case k :: v :: Nil =>
         q"""
           new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.Generators.genMap[$k, $v]()
+            override def sample: $tpe = $prefix.genMap[$k, $v]()
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected exactly two type arguments to be provided to map")
@@ -290,7 +294,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
     q"""
       new $prefix.Sample[$tpe] {
-        override def sample: $tpe = $prefix.Generators.oneOf($comp)
+        override def sample: $tpe = $prefix.oneOf($comp)
       }
     """
   }

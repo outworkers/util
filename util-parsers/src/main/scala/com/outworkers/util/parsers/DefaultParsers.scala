@@ -18,7 +18,7 @@ package com.outworkers.util.parsers
 import java.net.URL
 import java.util.UUID
 
-import com.outworkers.util.domain.GenerationDomain
+import com.outworkers.util.domain._
 import org.apache.commons.validator.routines.EmailValidator
 import org.joda.time.{DateTime, DateTimeZone}
 
@@ -71,7 +71,7 @@ trait BiParser[X, T] extends BaseParser[X, T]
 
 trait Parser[T] extends BaseParser[String, T]
 
-private[util] trait DefaultImplicitParsers extends GenerationDomain {
+private[util] trait DefaultImplicitParsers {
 
   implicit object UUIDParser extends Parser[UUID] {
     override def parse(str: String): ValidationNel[String, UUID] = {

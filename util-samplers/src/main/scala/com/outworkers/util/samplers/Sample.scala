@@ -19,7 +19,7 @@ import java.net.InetAddress
 import java.util.{Date, Locale, UUID}
 
 import org.scalacheck.{Arbitrary, Gen}
-
+import com.outworkers.util.domain._
 import scala.annotation.implicitNotFound
 import scala.collection.generic.CanBuildFrom
 import scala.util.Random

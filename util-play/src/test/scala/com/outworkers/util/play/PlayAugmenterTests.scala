@@ -18,7 +18,7 @@ package com.outworkers.util.play
 import java.util.concurrent.TimeUnit
 
 import com.outworkers.util.domain.ApiError
-import com.outworkers.util.domain.Definitions.ShortString
+import com.outworkers.util.domain.ShortString
 import com.outworkers.util.samplers.Sample
 import org.scalacheck.Gen
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures}

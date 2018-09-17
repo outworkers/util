@@ -149,7 +149,7 @@ scalacOptions in ThisBuild ++= (scalacOptionsFn(scalaVersion.value))
 
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
-  scalaVersion := Versions.scala211,
+  scalaVersion := Versions.scala212,
   crossScalaVersions := Versions.scala.all,
   resolvers ++= Seq(
     "Twitter Repository" at "http://maven.twttr.com",
