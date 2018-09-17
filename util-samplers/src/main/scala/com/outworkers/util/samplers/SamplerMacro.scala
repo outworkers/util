@@ -301,10 +301,10 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     val symbol = tpe.typeSymbol
 
     val tree = symbol match {
+      case SamplersSymbols.enum => enumSample(tpe)
+      case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.mapSymbol => mapSample(tpe)
       case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
-      case sym if isTuple(tpe) => tupleSample(tpe)
-      case SamplersSymbols.enum => enumSample(tpe)
       case sym if sym.isClass && sym.asClass.isCaseClass => caseClassSample(tpe)
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }

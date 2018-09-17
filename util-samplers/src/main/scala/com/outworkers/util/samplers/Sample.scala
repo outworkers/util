@@ -31,27 +31,6 @@ trait Sample[T] {
 
 object Sample extends Generators {
 
-
-
-  def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(generator[T])
-
-  def generator[T : Sample]: Gen[T] = Gen.delay(gen[T])
-
-  def collection[M[X] <: TraversableOnce[X], T : Sample](
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
-  ): Sample[M[T]] = {
-    new Sample[M[T]] {
-      override def sample: M[T] = {
-        val builder = cbf()
-        builder.sizeHint(com.outworkers.util.samplers.defaultGeneration)
-        for (_ <- 1 to defaultGeneration) builder += gen[T]
-        builder.result()
-      }
-    }
-  }
-
-  def apply[T : Sample]: Sample[T] = implicitly[Sample[T]]
-
   private[this] val byteLimit = 127
   private[this] val shortLimit = 256
   private[this] val inetBlock = 4
@@ -151,7 +130,7 @@ object Sample extends Generators {
     def sample: CountryCode = CountryCode(Gen.oneOf(Locale.getISOCountries).sample.get)
   }
 
-  class CountrySampler extends Sample[Country] {
+  implicit object CountrySampler extends Sample[Country] {
     def sample: Country = Country(Gen.oneOf(BaseSamplers.Countries).sample.get)
   }
 
@@ -180,6 +159,32 @@ object Sample extends Generators {
     }
   }
 
+  /**
+    * !! Warning !! Black magic going on. This will use the excellent macro compat
+    * library to macro materialise an instance of the required primitive based on the type argument.
+    * @tparam T The type parameter to materialise a sample for.
+    * @return A derived sampler, materialised via implicit blackbox macros.
+    */
+  implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
+
+  def arbitrary[T : Sample]: Arbitrary[T] = Arbitrary(generator[T])
+
+  def generator[T : Sample]: Gen[T] = Gen.delay(gen[T])
+
+  def collection[M[X] <: TraversableOnce[X], T : Sample](
+    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
+  ): Sample[M[T]] = {
+    new Sample[M[T]] {
+      override def sample: M[T] = {
+        val builder = cbf()
+        builder.sizeHint(com.outworkers.util.samplers.defaultGeneration)
+        for (_ <- 1 to defaultGeneration) builder += gen[T]
+        builder.result()
+      }
+    }
+  }
+
+
   def iso[T : Sample, T1](fn: T => T1): Sample[T1] = derive(fn)
 
   /**
@@ -194,10 +199,10 @@ object Sample extends Generators {
   }
 
   /**
-    * !! Warning !! Black magic going on. This will use the excellent macro compat
-    * library to macro materialise an instance of the required primitive based on the type argument.
-    * @tparam T The type parameter to materialise a sample for.
-    * @return A derived sampler, materialised via implicit blackbox macros.
+    * Convenience method to materialise the context bound and return a reference to it.
+    * This is somewhat shorter syntax than using implicitly.
+    * @tparam RR The type of the sample to retrieve.
+    * @return A reference to a concrete materialised implementation of a sample for the given type.
     */
-  implicit def materialize[T]: Sample[T] = macro SamplerMacro.materialize[T]
+  def apply[RR]()(implicit ev: Sample[RR]): Sample[RR] = ev
 }

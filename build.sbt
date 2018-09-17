@@ -32,12 +32,13 @@ lazy val Versions = new {
   val paradise = "2.1.1"
   val macroCompat = "1.1.1"
 
+  val scala210 = "2.10.6"
   val scala211 = "2.11.12"
   val scala212 = "2.12.6"
-  val scalaAll = Seq(scala211, scala212)
+  val scalaAll = Seq(scala210, scala211, scala212)
 
   val scala = new {
-    val all = Seq(scala211, scala212)
+    val all = Seq(scala210, scala211, scala212)
   }
 
   lazy val ScalacOptions = Seq(
@@ -120,6 +121,14 @@ scalacOptions in ThisBuild ++= (scalacOptionsFn(scalaVersion.value))
     s => CrossVersion.partialVersion(s) match {
       case Some((_, minor)) if minor == 12 => twitterUtil
       case _ => twitterUtil210
+    }
+  }
+
+
+  val scalaMacrosVersion: String => String = {
+    s => CrossVersion.partialVersion(s) match {
+      case Some((_, minor)) if minor >= 11 => paradise
+      case _ => "2.1.0"
     }
   }
 
@@ -235,7 +244,7 @@ lazy val tags = (project in file("util-tags"))
       "com.eaio.uuid" % "uuid" % "3.2",
       "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     )
   ).dependsOn(
@@ -254,7 +263,7 @@ lazy val samplers = (project in file("util-samplers"))
     libraryDependencies ++= Seq(
       "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
       "org.scalacheck" %% "scalacheck" % Versions.scalacheck
     )
@@ -274,7 +283,7 @@ lazy val testing = (project in file("util-testing"))
     libraryDependencies ++= Seq(
       "org.typelevel" %% "macro-compat" % Versions.macroCompat,
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest,
       "joda-time" % "joda-time" % Versions.joda,
       "org.joda" % "joda-convert" % Versions.jodaConvert,
@@ -303,7 +312,7 @@ lazy val play = (project in file("util-play"))
   .settings(
 
     moduleName := "util-play",
-    crossScalaVersions := Seq(Versions.scala211, Versions.scala212),
+    crossScalaVersions := Versions.scalaAll,
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
     ),
@@ -324,11 +333,11 @@ lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift",
-    crossScalaVersions := Seq(Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) if minor <= 11 => minor.toString
+          case Some((_, minor)) if minor <= 11 => minor.toString
           case _ => "non-existing"
         }
       })),
@@ -344,11 +353,11 @@ lazy val liftCats = (project in file("util-lift-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift-cats",
-    crossScalaVersions := Seq(Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) if minor <= 11 => minor.toString
+          case Some((_, minor)) if minor <= 11 => minor.toString
           case _ => "non-existing"
         }
       })),
@@ -366,7 +375,7 @@ lazy val macros = (project in file("util-macros"))
     moduleName := "util-macros",
     crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.paradise cross CrossVersion.full),
+      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.typelevel"  %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
     )
