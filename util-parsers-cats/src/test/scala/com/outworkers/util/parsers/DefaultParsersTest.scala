@@ -18,6 +18,7 @@ package com.outworkers.util.parsers
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
 
 import scala.util.{Failure, Try}
+import com.outworkers.util.domain._
 import com.outworkers.util.testing._
 
 class DefaultParsersTest extends FlatSpec with Matchers with OptionValues {
