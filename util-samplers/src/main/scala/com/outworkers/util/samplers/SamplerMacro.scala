@@ -228,8 +228,8 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       }
 
       case _ => accessor.name match {
-        case KnownField(derived) => q"$prefix.Sample.apply[$derived].sample.value"
-        case _ => q"$prefix.Sample.apply[${accessor.paramType}].sample"
+        case KnownField(derived) => q"$prefix.gen[$derived].value"
+        case _ => q"$prefix.gen[${accessor.paramType}]"
       }
     }
   }
@@ -294,8 +294,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       }
     """
   }
-
-  def sampler(nm: String): Tree = q"new $prefix.Samples.${TypeName(nm)}"
 
   def macroImpl(tpe: Type): Tree = {
     val symbol = tpe.typeSymbol
