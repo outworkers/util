@@ -333,11 +333,11 @@ lazy val lift = (project in file("util-lift"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211, Versions.scala212),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((_, minor)) if minor <= 11 => minor.toString
+          case Some((_, minor)) if minor <= 12 => minor.toString
           case _ => "non-existing"
         }
       })),
@@ -353,11 +353,11 @@ lazy val liftCats = (project in file("util-lift-cats"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-lift-cats",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211),
+    crossScalaVersions := Seq(Versions.scala210, Versions.scala211, Versions.scala212),
     unmanagedSourceDirectories in Compile ++= Seq(
       (sourceDirectory in Compile).value / ("scala-2." + {
         CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((_, minor)) if minor <= 11 => minor.toString
+          case Some((_, minor)) if minor <= 12 => minor.toString
           case _ => "non-existing"
         }
       })),
