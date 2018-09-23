@@ -19,10 +19,10 @@ import com.outworkers.util.testing._
 class JsonResponseHelpersTest extends LiftTest {
 
   it should "create a 204 response from an empty product list" in {
-    val list = List.empty[Product with Serializable]
+    val list = List.empty[String]
 
     shouldNotThrow {
-      list.asResponse().toResponse.code shouldEqual 204
+      list.asResponse.toResponse.code shouldEqual 204
     }
   }
 
@@ -30,7 +30,7 @@ class JsonResponseHelpersTest extends LiftTest {
     val list = genList[TestClass]()
 
     shouldNotThrow {
-      list.asResponse().toResponse.code shouldEqual 200
+      list.asResponse.toResponse.code shouldEqual 200
     }
   }
 
