@@ -102,7 +102,7 @@ package object lift extends LiftParsers with JsonHelpers {
     }
   }
   
-  implicit class JsonCollection[
+  implicit class JsonCollectionHelper[
     M[X] <: TraversableOnce[X],
     T <: Product with Serializable
   ](val list: M[T])(implicit formats: Formats, manifest: Manifest[T]) {

@@ -23,7 +23,7 @@ class JsonResponseHelpersTest extends LiftTest {
     val list = List.empty[EmailAddress]
 
     shouldNotThrow {
-      list.asResponse.toResponse.code shouldEqual 204
+      new JsonCollectionHelper(list).asResponse.toResponse.code shouldEqual 204
     }
   }
 
@@ -31,7 +31,7 @@ class JsonResponseHelpersTest extends LiftTest {
     val list = genList[TestClass]()
 
     shouldNotThrow {
-      list.asResponse.toResponse.code shouldEqual 200
+      new JsonCollectionHelper(list).asResponse.toResponse.code shouldEqual 200
     }
   }
 
