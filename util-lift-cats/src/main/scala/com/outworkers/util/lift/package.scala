@@ -53,7 +53,7 @@ package object lift extends LiftParsers with JsonHelpers with CatsOps with Valid
 
     def json()(implicit ec: ExecutionContext, formats: Formats, mf: Manifest[T]): Future[LiftResponse] = {
       future map { item =>
-        item.fold(JsonUnauthorizedResponse())(s => JsonResponse(s.asJValue(), defaultSuccessResponse))
+        item.fold(JsonUnauthorizedResponse())(s => JsonResponse(s.asJValue, defaultSuccessResponse))
       }
     }
   }

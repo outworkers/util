@@ -82,6 +82,26 @@ package object lift extends LiftParsers with JsonHelpers {
     def toJson(code: Int)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
   }
 
+  implicit class JsonHelper[T <: Product with Serializable](val clz: T)(
+    implicit formats: Formats, manifest: Manifest[T]
+  ) {
+    def asJson: String = {
+      compactRender(Extraction.decompose(clz))
+    }
+
+    def asPrettyJson: String = {
+      JsonWrapper.prettyRender(Extraction.decompose(clz))
+    }
+
+    def asJValue: JValue = {
+      Extraction.decompose(clz)
+    }
+
+    def asResponse: LiftResponse = {
+      JsonResponse(clz.asJValue, defaultSuccessResponse)
+    }
+  }
+  
   implicit class JsonCollection[
     M[X] <: TraversableOnce[X],
     T <: Product with Serializable
@@ -104,26 +124,6 @@ package object lift extends LiftParsers with JsonHelpers {
       } else {
         JsonResponse(JArray(Nil), noContentSuccessResponse)
       }
-    }
-  }
-
-  implicit class JsonHelper[T <: Product with Serializable](val clz: T)(
-    implicit formats: Formats, manifest: Manifest[T]
-  ) {
-    def asJson: String = {
-      compactRender(Extraction.decompose(clz))
-    }
-
-    def asPrettyJson: String = {
-      JsonWrapper.prettyRender(Extraction.decompose(clz))
-    }
-
-    def asJValue: JValue = {
-      Extraction.decompose(clz)
-    }
-
-    def asResponse: LiftResponse = {
-      JsonResponse(clz.asJValue, defaultSuccessResponse)
     }
   }
 
