@@ -49,19 +49,19 @@ class JsonExtractorsTest extends FlatSpec with Matchers {
   it should "pretty print a case class to JSON" in {
     val data = Test("test2", 2)
 
-    """data.asPrettyJson()""" should compile
+    """data.asPrettyJson""" should compile
     info(data.asPrettyJson)
   }
 
   it should "pretty print a Seq of case classes to JSON" in {
     val data = Seq(Test("test2", 2))
-    """data.asPrettyJson()""" should compile
+    """data.asPrettyJson""" should compile
     info(data.asPrettyJson)
   }
 
   it should "pretty print a Set of case classes to JSON" in {
     val data = Set(Test("test2", 2), Test("test3", 3))
-    """data.asPrettyJson()""" should compile
+    """data.asPrettyJson""" should compile
     info(data.asPrettyJson)
   }
 }
