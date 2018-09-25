@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 package com.outworkers.util.lift
+import com.outworkers.util.domain._
 import com.outworkers.util.testing._
 
 class JsonResponseHelpersTest extends LiftTest {
 
   it should "create a 204 response from an empty product list" in {
-    val list = List.empty[Product with Serializable]
+    val list = List.empty[EmailAddress]
 
     shouldNotThrow {
-      list.asResponse().toResponse.code shouldEqual 204
+      new JsonCollectionHelper(list).asResponse.toResponse.code shouldEqual 204
     }
   }
 
@@ -30,7 +31,7 @@ class JsonResponseHelpersTest extends LiftTest {
     val list = genList[TestClass]()
 
     shouldNotThrow {
-      list.asResponse().toResponse.code shouldEqual 200
+      new JsonCollectionHelper(list).asResponse.toResponse.code shouldEqual 200
     }
   }
 

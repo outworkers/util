@@ -53,7 +53,7 @@ package object lift extends LiftParsers with JsonHelpers with CatsOps with Valid
 
     def json()(implicit ec: ExecutionContext, formats: Formats, mf: Manifest[T]): Future[LiftResponse] = {
       future map { item =>
-        item.fold(JsonUnauthorizedResponse())(s => JsonResponse(s.asJValue(), defaultSuccessResponse))
+        item.fold(JsonUnauthorizedResponse())(s => JsonResponse(s.asJValue, defaultSuccessResponse))
       }
     }
   }
@@ -81,68 +81,53 @@ package object lift extends LiftParsers with JsonHelpers with CatsOps with Valid
 
     def toError(code: Int): ApiError = ApiError.fromArgs(code, List(err.getMessage))
 
-    def toJson(code: Int)(implicit formats: Formats): LiftResponse = JsonResponse(Extraction.decompose(toError(code)), code)
+    def toJson(code: Int)(implicit formats: Formats): LiftResponse = {
+      JsonResponse(Extraction.decompose(toError(code)), code)
+    }
   }
 
-  implicit class JsonHelper[T <: Product with Serializable](val clz: T) extends AnyVal {
-    def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+  implicit class JsonCollection[
+    M[X] <: TraversableOnce[X],
+    T <: Product with Serializable
+  ](val list: M[T])(implicit formats: Formats, manifest: Manifest[T]) {
+    def asJson: String = {
+      compactRender(Extraction.decompose(list.toList))
+    }
+
+    def asPrettyJson: String = {
+      JsonWrapper.prettyRender(Extraction.decompose(list.toList))
+    }
+
+    def asJValue: JValue = {
+      Extraction.decompose(list.toList)
+    }
+
+    def asResponse: LiftResponse = {
+      if (list.nonEmpty) {
+        JsonResponse(list.asJValue, defaultSuccessResponse)
+      } else {
+        JsonResponse(JArray(Nil), noContentSuccessResponse)
+      }
+    }
+  }
+
+  implicit class JsonHelper[T <: Product with Serializable](val clz: T)(
+    implicit formats: Formats, manifest: Manifest[T]
+  ) {
+    def asJson: String = {
       compactRender(Extraction.decompose(clz))
     }
 
-    def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
+    def asPrettyJson: String = {
       JsonWrapper.prettyRender(Extraction.decompose(clz))
     }
 
-    def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
+    def asJValue: JValue = {
       Extraction.decompose(clz)
     }
 
-    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
-      JsonResponse(clz.asJValue(), defaultSuccessResponse)
-    }
-  }
-
-  implicit class JsonSeqHelper[T <: Product with Serializable](val list: Seq[T]) extends AnyVal {
-    def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      compactRender(Extraction.decompose(list))
-    }
-
-    def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      JsonWrapper.prettyRender(Extraction.decompose(list))
-    }
-
-    def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
-      Extraction.decompose(list)
-    }
-
-    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
-      if (list.nonEmpty) {
-        JsonResponse(list.asJValue(), defaultSuccessResponse)
-      } else {
-        JsonResponse(JArray(Nil), noContentSuccessResponse)
-      }
-    }
-  }
-
-  implicit class JsonSetHelper[T <: Product with Serializable](val set: Set[T]) extends AnyVal {
-    def asJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      compactRender(Extraction.decompose(set))
-    }
-
-    def asPrettyJson()(implicit formats: Formats, manifest: Manifest[T]): String = {
-      JsonWrapper.prettyRender(Extraction.decompose(set))
-    }
-
-    def asJValue()(implicit formats: Formats, manifest: Manifest[T]): JValue = {
-      Extraction.decompose(set)
-    }
-
-    def asResponse()(implicit mf: Manifest[T], formats: Formats): LiftResponse = {
-      if (set.nonEmpty) {
-        JsonResponse(set.asJValue(), defaultSuccessResponse)
-      } else {
-        JsonResponse(JArray(Nil), noContentSuccessResponse)
-      }
+    def asResponse: LiftResponse = {
+      JsonResponse(clz.asJValue, defaultSuccessResponse)
     }
   }
 
