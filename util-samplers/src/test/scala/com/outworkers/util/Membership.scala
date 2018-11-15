@@ -1,4 +1,4 @@
-package com.outworkers.util.empty
+package com.outworkers.util
 
 trait RoleType extends Enumeration {
   //represents built-in role types.
