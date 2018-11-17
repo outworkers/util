@@ -65,33 +65,6 @@ class EmptyGeneratorsTest extends FlatSpec with Matchers {
   }
 
   it should "automatically sample nested collections" in {
-//
-//
-//    {
-//      final class $anon extends com.outworkers.util.empty.Empty[com.outworkers.util.empty.User] {
-//        override def sample: com.outworkers.util.empty.User = new com.outworkers.util.empty.User(
-//          id = com.outworkers.util.empty.void[java.util.UUID],
-//          firstName = com.outworkers.util.empty.void[com.outworkers.util.domain.FirstName].value,
-//          lastName = com.outworkers.util.empty.void[com.outworkers.util.domain.LastName].value,
-//          email = com.outworkers.util.empty.void[com.outworkers.util.domain.EmailAddress].value
-//        )
-//      };
-//      new $anon()
-//    }
-//    {
-//      final class $anon extends com.outworkers.util.empty.Empty[com.outworkers.util.empty.CollectionSample] {
-//        override def sample: com.outworkers.util.empty.CollectionSample = new com.outworkers.util.empty.CollectionSample(
-//          id = com.outworkers.util.empty.void[java.util.UUID],
-//          firstName = com.outworkers.util.empty.void[com.outworkers.util.domain.FirstName].value,
-//          lastName = com.outworkers.util.empty.void[com.outworkers.util.domain.LastName].value,
-//          sh = com.outworkers.util.empty.void[Short],
-//          b = com.outworkers.util.empty.void[Byte],
-//          name = com.outworkers.util.empty.void[com.outworkers.util.domain.FullName].value,
-//          email = com.outworkers.util.empty.void[com.outworkers.util.domain.EmailAddress].value,
-//          tests = com.outworkers.util.empty.Empty.void[_root_.scala.collection.immutable.List, String](), sets = com.outworkers.util.empty.Empty.void[_root_.scala.collection.immutable.List, String].sample, map = com.outworkers.util.empty.void[String, String], emails = com.outworkers.util.empty.Empty.void[_root_.scala.collection.immutable.List, String].sample, opt = com.outworkers.util.empty.voidOpt[Int])
-//      };
-//      new $anon()
-//    }
 
     val sample = void[NestedCollections]
     sample shouldEqual sample

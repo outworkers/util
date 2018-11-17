@@ -116,7 +116,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
             MapType(
               List(keyType, listType),
               applied => TypeName(s"scala.collection.immutable.Map[..$applied]"),
-              generator = types => q"$prefix.void[..$types]"
+              generator = types => q"$prefix.voidMap[..$types]"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Failed to find 2 type arguments for Map type")
