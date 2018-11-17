@@ -143,7 +143,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.Empty.void[$collectionPkg.List, ..$tpe].sample"
+              generator = tpe => q"$prefix.Empty.void[$collectionPkg.List, ..$tpe]()"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -154,7 +154,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.Empty.void[$collectionPkg.Set, ..$tpe].sample"
+              generator = tpe => q"$prefix.Empty.void[$collectionPkg.Set, ..$tpe]()"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -238,7 +238,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
           override def sample: $tpe = $prefix.void[$outerSymbol, $inner]()
         }
       """
-      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
+      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type Collection")
     }
   }
 
@@ -290,6 +290,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
 
+    Console.println(showCode(tree))
     if (showTrees) {
       echo(showCode(tree))
     }

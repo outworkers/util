@@ -25,12 +25,12 @@ trait EmptyGenerators {
     * @tparam T The type of the underlying sampled type.
     * @return A Collection of "size" elements with type T.
     */
-  def void[M[X] <: TraversableOnce[X], T](
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
+  def void[M[X] <: TraversableOnce[X], T](size: Int = 0)(
+    implicit cbf: CanBuildFrom[Nothing, T, M[T]],
+    proof: Empty[T]
   ): M[T] = cbf().result()
 
-  def void[A1 : Empty, A2 : Empty]: Map[A1, A2] = Map.empty[A1, A2]
-
+  //def void[A1 : Empty, A2 : Empty]: Map[A1, A2] = Map.empty[A1, A2]
 
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
 

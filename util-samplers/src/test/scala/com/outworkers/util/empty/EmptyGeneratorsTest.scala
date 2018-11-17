@@ -17,22 +17,20 @@ package com.outworkers.util.empty
 
 import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
 import org.scalatest.{FlatSpec, Matchers}
+import com.outworkers.util.macros.debug.Options.ShowTrees
 
 class EmptyGeneratorsTest extends FlatSpec with Matchers {
 
   it should "generate a sized list based on the given argument" in {
-    val limit = 10
-    assert(void[List, String].size == limit)
+    assert(void[List, String]().isEmpty)
   }
 
   it should "generate a sized map based on the given size argument" in {
-    val limit = 10
-    assert(voidMap[String, String](limit).size == limit)
+    assert(voidMap[String, String].isEmpty)
   }
 
   it should "generate a sized map of known key and value types" in {
-    val limit = 10
-    assert(voidMap[String, String](limit).size == limit)
+    assert(voidMap[String, String].isEmpty)
   }
 
   it should "automatically derive valid samples" in {
@@ -67,6 +65,34 @@ class EmptyGeneratorsTest extends FlatSpec with Matchers {
   }
 
   it should "automatically sample nested collections" in {
+//
+//
+//    {
+//      final class $anon extends com.outworkers.util.empty.Empty[com.outworkers.util.empty.User] {
+//        override def sample: com.outworkers.util.empty.User = new com.outworkers.util.empty.User(
+//          id = com.outworkers.util.empty.void[java.util.UUID],
+//          firstName = com.outworkers.util.empty.void[com.outworkers.util.domain.FirstName].value,
+//          lastName = com.outworkers.util.empty.void[com.outworkers.util.domain.LastName].value,
+//          email = com.outworkers.util.empty.void[com.outworkers.util.domain.EmailAddress].value
+//        )
+//      };
+//      new $anon()
+//    }
+//    {
+//      final class $anon extends com.outworkers.util.empty.Empty[com.outworkers.util.empty.CollectionSample] {
+//        override def sample: com.outworkers.util.empty.CollectionSample = new com.outworkers.util.empty.CollectionSample(
+//          id = com.outworkers.util.empty.void[java.util.UUID],
+//          firstName = com.outworkers.util.empty.void[com.outworkers.util.domain.FirstName].value,
+//          lastName = com.outworkers.util.empty.void[com.outworkers.util.domain.LastName].value,
+//          sh = com.outworkers.util.empty.void[Short],
+//          b = com.outworkers.util.empty.void[Byte],
+//          name = com.outworkers.util.empty.void[com.outworkers.util.domain.FullName].value,
+//          email = com.outworkers.util.empty.void[com.outworkers.util.domain.EmailAddress].value,
+//          tests = com.outworkers.util.empty.Empty.void[_root_.scala.collection.immutable.List, String](), sets = com.outworkers.util.empty.Empty.void[_root_.scala.collection.immutable.List, String].sample, map = com.outworkers.util.empty.void[String, String], emails = com.outworkers.util.empty.Empty.void[_root_.scala.collection.immutable.List, String].sample, opt = com.outworkers.util.empty.voidOpt[Int])
+//      };
+//      new $anon()
+//    }
+
     val sample = void[NestedCollections]
     sample shouldEqual sample
   }
