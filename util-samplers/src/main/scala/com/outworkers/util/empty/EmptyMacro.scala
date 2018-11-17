@@ -55,21 +55,6 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
     Some(c.typecheck(exp, c.TYPEmode).tpe)
   }
 
-  object KnownField {
-    def unapply(nm: TermName): Option[Type] = unapply(nm.decodedName.toString)
-
-    def unapply(str: String): Option[Type] = {
-      str.toLowerCase() match {
-        case "first_name" | "firstname" => extract(tq"$domainPkg.FirstName")
-        case "last_name" | "lastname" => extract(tq"$domainPkg.LastName")
-        case "name" | "fullname" | "fullName" | "full_name" => extract(tq"$domainPkg.FullName")
-        case "email" | "email_address" | "emailaddress" => extract(tq"$domainPkg.EmailAddress")
-        case "country" => extract(tq"$domainPkg.CountryCode")
-        case _ => None
-      }
-    }
-  }
-
   trait TypeExtractor {
 
     def sources: List[Type]
@@ -197,21 +182,9 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
   private[this] def deriveSamplerType(accessor: Accessor): Tree = {
     accessor match {
       case MapType(col) => col.default
-      case OptionType(opt) => accessor.name match {
-        case KnownField(derived) => {
-          q"""$prefix.voidOpt[$derived].map(_.value)"""
-        }
-        case _ => opt.default
-      }
-      case CollectionType(col) => accessor.name match {
-        case KnownField(derived) => col.generator(derived :: Nil)
-        case _ => col.default
-      }
-
-      case _ => accessor.name match {
-        case KnownField(derived) => q"$prefix.void[$derived].value"
-        case _ => q"$prefix.void[${accessor.paramType}]"
-      }
+      case OptionType(opt) => opt.default
+      case CollectionType(col) => col.default
+      case _ => q"$prefix.void[${accessor.paramType}]"
     }
   }
 
