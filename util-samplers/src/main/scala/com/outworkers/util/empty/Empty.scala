@@ -4,8 +4,7 @@ import java.net.InetAddress
 import java.util.{Date, UUID}
 
 import com.outworkers.util.domain._
-import com.outworkers.util.samplers.Sample.gen
-import com.outworkers.util.samplers.{City, Country, CountryCode, EmailAddress, FirstName, FullName, LastName, LoremIpsum, ProgrammingLanguage, Sample, Url}
+import com.outworkers.util.samplers.Sample
 import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.generic.CanBuildFrom
@@ -51,9 +50,9 @@ object Empty extends EmptyGenerators {
     */
   implicit def materialize[T]: Empty[T] = macro EmptyMacro.materialize[T]
 
-  def arbitrary[T : Empty]: Arbitrary[T] = Arbitrary(generator[T])
+  implicit def arbitrary[T : Empty]: Arbitrary[T] = Arbitrary(generator[T])
 
-  def generator[T : Empty]: Gen[T] = Gen.delay(gen[T])
+  def generator[T : Empty]: Gen[T] = Gen.delay(void[T])
 
   def collection[M[X] <: TraversableOnce[X], T : Empty](
     implicit cbf: CanBuildFrom[Nothing, T, M[T]]
@@ -63,8 +62,6 @@ object Empty extends EmptyGenerators {
     }
   }
 
-  def iso[T : Empty, T1](fn: T => T1): Empty[T1] = derive(fn)
-
   /**
     * Derives samplers and encodings for a non standard type.
     * @param fn The function that converts a [[T]] instance to a [[T1]] instance.
@@ -72,7 +69,7 @@ object Empty extends EmptyGenerators {
     * @tparam T The source type of the sampler, must already have a sampler defined for it.
     * @return A new sampler that can interact with the target type.
     */
-  def derive[T : Empty, T1](fn: T => T1): Empty[T1] = Empty(fn(empty[T]))
+  def iso[T : Empty, T1](fn: T => T1): Empty[T1] = Empty(fn(void[T]))
 
   /**
     * Convenience method to materialise the context bound and return a reference to it.

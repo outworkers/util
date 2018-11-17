@@ -16,6 +16,7 @@ trait EmptyGenerators {
   def void[T : Empty]: T = implicitly[Empty[T]].sample
 
   def voidOpt[T : Empty]: Option[T] = Option.empty[T]
+  def voidMap[K : Empty, V: Empty]: Map[K, V] = Map.empty[K, V]
 
   /**
     * Generates a list of elements based on an input collection type.

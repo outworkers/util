@@ -180,7 +180,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
             OptionType(
               sources = head :: Nil,
               applier = applied => TypeName(s"scala.Option[..$applied]"),
-              generator = t => q"""$prefix..voidOpt[..$t]"""
+              generator = t => q"""$prefix.voidOpt[..$t]"""
             )
           )
           case _ => c.abort(
@@ -199,7 +199,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
       case MapType(col) => col.default
       case OptionType(opt) => accessor.name match {
         case KnownField(derived) => {
-          q"""$prefix..voidOpt[$derived].map(_.value)"""
+          q"""$prefix.voidOpt[$derived].map(_.value)"""
         }
         case _ => opt.default
       }
