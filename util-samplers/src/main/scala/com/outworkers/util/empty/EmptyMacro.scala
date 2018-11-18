@@ -51,10 +51,6 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
     val url: Symbol = typed[Url]
   }
   
-  def extract(exp: Tree): Option[Type] = {
-    Some(c.typecheck(exp, c.TYPEmode).tpe)
-  }
-
   trait TypeExtractor {
 
     def sources: List[Type]
@@ -248,8 +244,6 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
       }
     """
   }
-
-  def sampler(nm: String): Tree = q"new $prefix.Empty.${TypeName(nm)}"
 
   def macroImpl(tpe: Type): Tree = {
     val symbol = tpe.typeSymbol
