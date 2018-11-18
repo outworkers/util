@@ -67,6 +67,7 @@ class EmptyGeneratorsTest extends FlatSpec with Matchers {
   it should "automatically sample nested collections" in {
 
     val sample = void[NestedCollections]
+    Console.println(sample.trace())
     sample shouldEqual sample
   }
 

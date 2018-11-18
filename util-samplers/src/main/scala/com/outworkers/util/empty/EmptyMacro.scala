@@ -257,7 +257,6 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
 
-    Console.println(showCode(tree))
     if (showTrees) {
       echo(showCode(tree))
     }
