@@ -15,9 +15,8 @@
  */
 package com.outworkers.util.empty
 
-import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
+import org.outworkers.domain.test._
 import org.scalatest.{FlatSpec, Matchers}
-import com.outworkers.util.macros.debug.Options.ShowTrees
 
 class EmptyGeneratorsTest extends FlatSpec with Matchers {
 
@@ -45,7 +44,7 @@ class EmptyGeneratorsTest extends FlatSpec with Matchers {
   }
 
   it should "automatically derive a generator for a nested case class in a different package" in {
-    "val sample = gen[NestedOtherPackage]" should compile
+    "val sample = void[NestedOtherPackage]" should compile
   }
 
   it should "automatically derive a sample for a nested case class" in {

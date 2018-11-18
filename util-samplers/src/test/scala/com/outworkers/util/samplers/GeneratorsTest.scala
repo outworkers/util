@@ -17,6 +17,7 @@ package com.outworkers.util.samplers
 
 import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
 import org.scalatest.{FlatSpec, Matchers}
+import org.outworkers.domain.test._
 
 class GeneratorsTest extends FlatSpec with Matchers {
 
