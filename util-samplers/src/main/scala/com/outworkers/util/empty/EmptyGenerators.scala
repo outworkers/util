@@ -30,8 +30,6 @@ trait EmptyGenerators {
     proof: Empty[T]
   ): M[T] = cbf().result()
 
-  //def void[A1 : Empty, A2 : Empty]: Map[A1, A2] = Map.empty[A1, A2]
-
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
 
   def oneOf[T <: Enumeration](enum: T): T#Value = oneOf(enum.values.toList)
