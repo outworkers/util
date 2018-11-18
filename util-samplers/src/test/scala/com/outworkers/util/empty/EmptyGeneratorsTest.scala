@@ -13,73 +13,71 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.outworkers.util.samplers
+package com.outworkers.util.empty
 
-import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
-import org.scalatest.{FlatSpec, Matchers}
 import org.outworkers.domain.test._
+import org.scalatest.{FlatSpec, Matchers}
 
-class GeneratorsTest extends FlatSpec with Matchers {
+class EmptyGeneratorsTest extends FlatSpec with Matchers {
 
   it should "generate a sized list based on the given argument" in {
-    val limit = 10
-    assert(genList[String](limit).size == limit)
+    assert(void[List, String]().isEmpty)
   }
 
   it should "generate a sized map based on the given size argument" in {
-    val limit = 10
-    assert(genMap[String, String](limit).size == limit)
+    assert(voidMap[String, String].isEmpty)
   }
 
   it should "generate a sized map of known key and value types" in {
-    val limit = 10
-    assert(genMap[String, String](limit).size == limit)
+    assert(voidMap[String, String].isEmpty)
   }
 
   it should "automatically derive valid samples" in {
-    val sample = gen[User]
+    val sample = void[User]
   }
 
   it should "automatically derive generator samples for complex case classes" in {
-    val sample = gen[CollectionSample]
-    val user = gen[User]
-    val tp = gen[TupleRecord]
-    val tpColl = gen[TupleCollectionRecord]
+    val sample = void[CollectionSample]
+    val user = void[User]
+    val tp = void[TupleRecord]
+    val tpColl = void[TupleCollectionRecord]
   }
 
   it should "automatically derive a generator for a nested case class in a different package" in {
-    "val sample = gen[NestedOtherPackage]" should compile
+    "val sample = void[NestedOtherPackage]" should compile
   }
 
   it should "automatically derive a sample for a nested case class" in {
-    val sample = gen[NestedUser]
+    val sample = void[NestedUser]
     sample shouldEqual sample
   }
 
   it should "automatically derive samplers for nested collections" in {
-    val sample = gen[List[List[String]]]
+    val sample = void[List[List[String]]]
     sample shouldEqual sample
   }
 
 
   it should "automatically derive dictionaries for nested options" in {
-    val sample = gen[SimpleFoo]
+    val sample = void[SimpleFoo]
     sample shouldEqual sample
   }
 
   it should "automatically sample nested collections" in {
-    val sample = gen[NestedCollections]
+
+    val sample = void[NestedCollections]
+    Console.println(sample.trace())
     sample shouldEqual sample
   }
 
   it should "automatically generate a sampler for random collection" in {
-    val sample = gen[IndexedSeq[String]]
+    val sample = void[IndexedSeq[String]]
     sample shouldEqual sample
   }
 
 
   it should "automatically generate a sampler for a nested Enumeration inside a CaseClass" in {
-    val sample = gen[IndexedSeq[String]]
+    val sample = void[IndexedSeq[String]]
     sample shouldEqual sample
   }
 }
