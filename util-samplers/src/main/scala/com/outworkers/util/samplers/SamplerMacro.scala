@@ -196,13 +196,24 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
       if (arg.symbol == SamplersSymbols.optSymbol) {
         arg.typeArgs match {
-          case head :: Nil => Some(
-            OptionType(
-              sources = head :: Nil,
-              applier = applied => TypeName(s"scala.Option[..$applied]"),
-              generator = t => q"""$prefix.genOpt[..$t]"""
+          case head :: Nil => {
+
+            val fillOptions = c.inferImplicitValue(typeOf[com.outworkers.util.samplers.FillOptions], silent = true)
+
+            Some(
+              OptionType(
+                sources = head :: Nil,
+                applier = applied => TypeName(s"scala.Option[..$applied]"),
+                generator = t => {
+                  if (fillOptions.nonEmpty) {
+                    q"""$prefix.getConstOpt[..$t]"""
+                  } else {
+                    q"""$prefix.genOpt[..$t]"""
+                  }
+                }
+              )
             )
-          )
+          }
           case _ => c.abort(
             c.enclosingPosition,
             s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead"
