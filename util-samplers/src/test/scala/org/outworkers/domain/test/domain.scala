@@ -39,6 +39,14 @@ case class NestedCollections(
   doubleProps: Map[Set[String], List[String]]
 )
 
+case class NestedOptions(
+  id: Option[UUID],
+  name: Option[String],
+  firstName: Option[String],
+  user: Option[User],
+  collections: Option[CollectionSample]
+)
+
 import java.util.UUID
 
 import org.outworkers.domain.test._

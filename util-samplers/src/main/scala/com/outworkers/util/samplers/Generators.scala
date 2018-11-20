@@ -30,6 +30,11 @@ trait Generators {
     }
   }
 
+  def getConstOpt[T : Sample]: Option[T] = {
+    Some(gen[T])
+  }
+
+
   /**
     * Generates a list of elements based on an input collection type.
     * @param size The number of elements to generate
