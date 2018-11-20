@@ -18,8 +18,9 @@ package com.outworkers.util.samplers
 import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
 import org.scalatest.{FlatSpec, Matchers}
 import org.outworkers.domain.test._
+import org.scalatest.prop.GeneratorDrivenPropertyChecks
 
-class GeneratorsTest extends FlatSpec with Matchers {
+class GeneratorsTest extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   it should "generate a sized list based on the given argument" in {
     val limit = 10
@@ -81,5 +82,18 @@ class GeneratorsTest extends FlatSpec with Matchers {
   it should "automatically generate a sampler for a nested Enumeration inside a CaseClass" in {
     val sample = gen[IndexedSeq[String]]
     sample shouldEqual sample
+  }
+
+  it should "always generate full options when FillOptions is imported" in {
+    import com.outworkers.util.samplers.Options.alwaysFillOptions
+    forAll(Sample.generator[NestedOptions]) { value =>
+      value.collections shouldBe defined
+      value.firstName shouldBe defined
+      value.id shouldBe defined
+      value.name shouldBe defined
+      value.firstName shouldBe defined
+      value.user shouldBe defined
+    }
+
   }
 }

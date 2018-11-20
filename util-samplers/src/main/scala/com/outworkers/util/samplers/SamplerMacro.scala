@@ -28,6 +28,7 @@ import scala.reflect.macros.blackbox
 class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with BlackboxToolbelt {
 
   import c.universe._
+  lazy val fillOptions = typeOf[com.outworkers.util.samplers.FillOptions]
 
   val prefix = q"com.outworkers.util.samplers"
   val domainPkg = q"com.outworkers.util.domain"
@@ -196,13 +197,24 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
       if (arg.symbol == SamplersSymbols.optSymbol) {
         arg.typeArgs match {
-          case head :: Nil => Some(
-            OptionType(
-              sources = head :: Nil,
-              applier = applied => TypeName(s"scala.Option[..$applied]"),
-              generator = t => q"""$prefix.genOpt[..$t]"""
+          case head :: Nil => {
+
+            val fillOptionsImp = c.inferImplicitValue(fillOptions, silent = true)
+
+            Some(
+              OptionType(
+                sources = head :: Nil,
+                applier = applied => TypeName(s"scala.Option[..$applied]"),
+                generator = t => {
+                  if (fillOptionsImp.nonEmpty) {
+                    q"""$prefix.getConstOpt[..$t]"""
+                  } else {
+                    q"""$prefix.genOpt[..$t]"""
+                  }
+                }
+              )
             )
-          )
+          }
           case _ => c.abort(
             c.enclosingPosition,
             s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead"
@@ -219,7 +231,14 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       case MapType(col) => col.default
       case OptionType(opt) => accessor.name match {
         case KnownField(derived) => {
-          q"""$prefix.genOpt[$derived].map(_.value)"""
+
+          val fillOptionsImp = c.inferImplicitValue(fillOptions, silent = true)
+
+          if (fillOptionsImp.nonEmpty) {
+            q"""$prefix.getConstOpt[$derived].map(_.value)"""
+          } else {
+            q"""$prefix.genOpt[$derived].map(_.value)"""
+          }
         }
         case _ => opt.default
       }
@@ -348,6 +367,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   }
 
   def materialize[T : WeakTypeTag]: Tree = {
-    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(weakTypeOf[T], macroImpl)
+    macroImpl(weakTypeOf[T])
   }
 }
