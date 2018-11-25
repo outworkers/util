@@ -17,11 +17,15 @@ branches:
   - develop
 matrix:
   include:
-  - scala: 2.12.6
+  - scala: 2.12.7
     jdk: oraclejdk8
+    RUN_WITH_COVERAGE: "true"
+    PUBLISH_ARTIFACT: "true"
 
 env:
   global:
+  - RUN_WITH_COVERAGE: "false"
+  - PUBLISH_ARTIFACT: "false"
   - GH_REF: github.com/outworkers/util.git
   - secure: Onl6jQhDgCHVhsxIhC2FltwTlvTWI5815lI9wsb79OvE+Xl/hh8XcafOBzUJ/LtKmt021oieOsR53RAdIJDKhNrKo3AQYoyp3rAX48zCInE0Y29slKVCwj51w5Mns+aYlPbJcHJvRNWkFIpaQ1AmBvkHfc0A0rxfoSB1lOIrtHs=
   - secure: k/DGy5KkvzmQNJEfazsEoD6biwkIoYC9DyjhDTMCxhXLz/mURsCtfhdWo3Uz4nhuX3qDK0N/6C6BTwl0ktVEA7eH8XZQY/dW1lLTY3jglD2U/FhAfCngbcI+ToL5kdK77Zy4LKvu4XBKXfSusI20E1gbK+Tjp1uCkNvVaAyyVv0=
