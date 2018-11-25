@@ -15,6 +15,9 @@
  */
 package com.outworkers.util.samplers
 
+import java.sql.Date
+import java.time.{LocalDate, ZoneId}
+
 import org.outworkers.domain.test._
 import org.scalatest.{FlatSpec, Matchers}
 

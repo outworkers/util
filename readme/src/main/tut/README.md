@@ -201,7 +201,7 @@ object GenerationExamples {
 
 ```
 
-#### Extending the sampling capability.
+#### Creating custom samplers and adding new types
 
 The automated sampling capability is a fairly simple but useful party trick. It relies
 on the framework knowing how to generate basic things, such as `Int`, `Boolean`, `String`,
@@ -224,11 +224,13 @@ Let's try to write some tests around the sampler. All we need to do is create a 
 ```tut:silent
 
 import org.scalatest.{ FlatSpec, Matchers }
-import org.joda.time.DateTime
+import java.time.{LocalDate, ZoneId}
 
 class MyAwesomeSpec extends FlatSpec with Matchers {
 
-  implicit val sqlDateSampler: Sample[java.sql.Date] = Sample.iso[DateTime]
+  implicit val sqlDateSampler = new Sample[java.sql.Date] {
+    override def sample: java.sql.Date = java.sql.Date.valueOf(LocalDate.now(ZoneId.of("UTC")))
+  }
   
   "The samplers lib" should "automatically sample an instance of ExpansionExample" in {
     val instance = gen[ExpansionExample]
@@ -236,6 +238,9 @@ class MyAwesomeSpec extends FlatSpec with Matchers {
 }
 
 ```
+
+Now, no matter how deeply nested in a case class structure the `java.sql.Date` is located inside a case class,
+the framework is capable of finding it as long as it's available in the implicit scope where the `gen` method is called.
 
 
 
