@@ -86,63 +86,6 @@ heavily throughout the Outworkers ecosystem of projects, from internal to DSL mo
 performance gain in code.
 
 
-### Async assertions ###
-<a href="#table-of-contents">Back to top</a>
-
-
-The async assertions module features a dual API, so you can call the same methods on both ```scala.concurrent.Future``` and ```com.twitter.util.Future```. 
-The underlying mechanism will create an async ```Waiter```, that will wait for the future to complete within the given ```PatienceConfiguration```. The 
-awaiting is done asynchronously and the assertions are invoked and evaluated once the future in question has returned a result.
-
-```tut:silent
-import com.outworkers.util.testing._
-
-class MyTests extends FlatSuite with Matchers {
-
-  "The async computation" should "return 0 on completion" in {
-    val f: Future[Int] = .. // Pretend this is a Future just like any other future.
-    f.successful {
-      res => {
-        res shouldEqual 0
-      }
-    }
-  }
-  
-  "This async computation" should "fail by design" in {
-    val f: Future[Unit] = ..
-    
-    // You don't even need to do anything more than failure at this stage.
-    // If the Future fails, the test will succeed, as this method is used when you "expect a failure".
-    // You can however perform assertions on the error returned.
-    f.failing {
-      err => {
-      }
-    }
-  }
-  
-  "This async computation" should "fail with a specific error" in {
-      val f: Future[Unit] = ..
-      f.failingWith[NumberFormatException] {
-        err => {
-        }
-      }
-    }
-
-}
-```
-
-
-You can directly customise the ```timeout``` of all ```Waiters``` using the ScalaTest specific time span implementations and interval configurations.
-
-
-```scala
-import org.scalatest.concurrent.PatienceConfiguration
-import org.scalatest.time.SpanSugar._
-
-implicit val timeout: PatienceConfiguration.Timeout = timeout(20 seconds)
-
-```
-
 Summary:
 
 - The dependency you need is ```"com.outworkers" %% "util-testing" % UtilVersion```.
@@ -161,11 +104,15 @@ After you define such a one-time sampling type class instance, you have access t
 It's useful to define such typeclass instances inside package objects, as they will be "invisibly" imported in to the scope you need them to. This is often really neat, albeit potentially confusing for novice Scala users.
 
 
-```tut:passthrough
+```tut:silent
 
 import com.outworkers.util.testing._
 
-@sample case class MyAwesomeClass(name: String, age: Int, email: String)
+case class MyAwesomeClass(
+  name: String,
+  age: Int,
+  email: String
+)
 ```
 
 You may notice this pattern is already available in better libraries such as ScalaMock and we are not trying to provide an alternative to ScalaMock or compete with it in any way. Our typeclass generator approach only becomes very useful where you really care about very specific properties of the data.
@@ -179,13 +126,15 @@ It's also useful when you want to define specific ways in which hierarchies of c
 <a href="#table-of-contents">Back to top</a>
 
 One interesting thing that happens when using the `@sample` annotation is that using `gen` immediately after it will basically
-give you an instance of your `case class` with the fields appropiately pre-filled, and some of the basic scenarios are also name aware.
+give you an instance of your `case class` with the fields appropriately pre-filled, and some of the basic scenarios are also name aware.
 
 What this means is that we try to make the data feel "real" with respect to what it should be. Let's take the below example:
 
-```tut:passthrough
+```tut:silent
 
-@sample case class User(
+import java.util.UUID
+
+case class User(
   id: UUID,
   firstName: String,
   lastName: String,
@@ -194,20 +143,23 @@ What this means is that we try to make the data feel "real" with respect to what
 ```
 This is interesting and common enough. What's more interesting is the output of `gen`.
 
-```tut:passthrough
+```tut:silent
+import com.outworkers.util.samplers._
 
-val user = gen[User]
-
-user.trace()
-
-/**
-User(
-  id = 6be8914c-4274-40ee-83f5-334131246fd8
-  firstName = Lindsey
-  lastName = Craft
-  email = rparker@hotma1l.us
-)
-*/
+object Examplers {
+    val user = gen[User]
+    
+    user.trace()
+    
+    /**
+    User(
+      id = 6be8914c-4274-40ee-83f5-334131246fd8
+      firstName = Lindsey
+      lastName = Craft
+      email = rparker@hotma1l.us
+    )
+    */
+}
 
 ```
 
@@ -217,6 +169,78 @@ appropriate values.
 
 During the macro expansion phase, we check the annotation targets and try to infer the "natural" value based on the field name and type. So
 if your field name is either "email" or "emailAddress" or anything similar enough, you will get an "email" back.
+
+
+It is also possible to generate deeply nested case classes.
+
+```tut:silent
+
+case class Address(
+  postcode: String,
+  firstLine: String,
+  secondLine: String,
+  thirdLine: String,
+  city: String,
+  country: String
+)
+
+case class GeoLocation(
+  longitude: BigDecimal,
+  latitude: BigDecimal
+)
+
+case class LocatedUser(
+  geo: GeoLocation,
+  address: Address,
+  user: User
+)
+
+object GenerationExamples {
+  val deeplyNested = gen[LocatedUser]
+}
+
+```
+
+#### Extending the sampling capability.
+
+The automated sampling capability is a fairly simple but useful party trick. It relies
+on the framework knowing how to generate basic things, such as `Int`, `Boolean`, `String`,
+and so on, and the framework can then compose from these samplers to build them up
+into any hierarchy of case classes you need.
+
+But sometimes it will come short when it doesn't know how to generate a specific type. For example,
+let's look at how we could deal with `java.sql.Date`, which has no implicit sample available by default.
+
+```tut:silent
+
+case class ExpansionExample(
+  id: UUID,
+  date: java.sql.Date
+)
+```
+
+Let's try to write some tests around the sampler. All we need to do is create a sampler for `java.sql.Date`.
+
+```tut:silent
+
+import org.scalatest.{ FlatSpec, Matchers }
+import org.joda.time.DateTime
+
+class MyAwesomeSpec extends FlatSpec with Matchers {
+
+  implicit val sqlDateSampler: Sample[java.sql.Date] = Sample.iso[DateTime]
+  
+  "The samplers lib" should "automatically sample an instance of ExpansionExample" in {
+    val instance = gen[ExpansionExample]
+  }
+}
+
+```
+
+
+
+#### Working with options.
+
 
 
 ### Generating data
@@ -330,14 +354,16 @@ import scalaz._
 import scalaz.Scalaz._
 import com.outworkers.util.parsers._
 
+case class UserToRegister(
+  email: String,
+  age: Int
+)
+
 object Test {
   
-  def registerUser(str: String, age: String): Unit = {
+  def registerUser(str: String, age: String):  Validation[NonEmptyList[String], UserToRegister] = {
     (parse[EmailAddress](str) |@| parse[Int](age)) {
-      (validEmail, validAge) => {
-      }
-    }.fold {
-      // .. 
+      (validEmail, validAge) => UserToRegister(validEmail.value, validAge)
     }
   }
   

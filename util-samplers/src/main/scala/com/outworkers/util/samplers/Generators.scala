@@ -53,8 +53,6 @@ trait Generators {
     builder.result()
   }
 
-
-
   def genList[T : Sample](size: Int = defaultGeneration): List[T] = gen[List, T](size)
 
   def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = gen[Set, T](size)

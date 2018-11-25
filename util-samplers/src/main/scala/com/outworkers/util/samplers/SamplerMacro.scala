@@ -207,7 +207,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
                 applier = applied => TypeName(s"scala.Option[..$applied]"),
                 generator = t => {
                   if (fillOptionsImp.nonEmpty) {
-                    q"""$prefix.getConstOpt[..$t]"""
+                    q"""$fillOptionsImp($prefix.genOpt[..$t])"""
                   } else {
                     q"""$prefix.genOpt[..$t]"""
                   }
@@ -235,7 +235,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
           val fillOptionsImp = c.inferImplicitValue(fillOptions, silent = true)
 
           if (fillOptionsImp.nonEmpty) {
-            q"""$prefix.getConstOpt[$derived].map(_.value)"""
+            q"""$fillOptionsImp($prefix.genOpt[$derived]).map(_.value)"""
           } else {
             q"""$prefix.genOpt[$derived].map(_.value)"""
           }

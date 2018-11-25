@@ -431,4 +431,8 @@ lazy val readme = (project in file("readme"))
     testingTwitter,
     macros,
     tags
+  ).settings(
+    libraryDependencies ++= Seq(
+      "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
+    )
   ).enablePlugins(TutPlugin)
