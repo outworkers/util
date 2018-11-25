@@ -179,7 +179,8 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   testing,
   testingTwitter,
   macros,
-  tags
+  tags,
+  readme
 )
 
 lazy val util = (project in file("."))
@@ -414,3 +415,20 @@ lazy val validators = (project in file("util-validators"))
   parsers,
   testing % Test
 )
+
+lazy val readme = (project in file("readme"))
+  .settings(sharedSettings: _*)
+  .dependsOn(
+    domain,
+    lift,
+    liftCats,
+    parsers,
+    parsersCats,
+    validatorsCats,
+    validators,
+    samplers,
+    testing,
+    testingTwitter,
+    macros,
+    tags
+  ).enablePlugins(TutPlugin)
