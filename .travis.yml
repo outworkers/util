@@ -19,8 +19,7 @@ matrix:
   include:
   - scala: 2.12.7
     jdk: oraclejdk8
-    RUN_WITH_COVERAGE: "true"
-    PUBLISH_ARTIFACT: "true"
+    env: RUN_WITH_COVERAGE=true, PUBLISH_ARTIFACT=true
 
 env:
   global:
