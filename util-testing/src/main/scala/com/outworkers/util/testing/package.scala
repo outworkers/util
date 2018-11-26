@@ -20,7 +20,7 @@ import com.outworkers.util.samplers.Generators
 import com.outworkers.util.tags.DefaultTaggedTypes
 import org.joda.time.{DateTime, DateTimeZone, LocalDate}
 import org.scalacheck.Gen
-import org.scalatest.Assertions
+import org.scalatest.{Assertion, Assertions}
 import org.scalatest.concurrent.{PatienceConfiguration, ScalaFutures, Waiters}
 import org.scalatest.exceptions.TestFailedException
 
@@ -72,65 +72,6 @@ package object testing extends ScalaFutures
   implicit class ScalaBlockHelper[T](val future: ScalaFuture[T]) extends AnyVal {
     def block(duration: scala.concurrent.duration.Duration)(implicit ec: ExecutionContext): T = {
       ScalaAwait.result(future, duration)
-    }
-  }
-
-  /**
-   * Augmentation to allow asynchronous assertions of a @code {scala.concurrent.Future}.
-   * @param f The future to augment.
-   * @tparam A The underlying type of the computation.
-   */
-  implicit class ScalaFutureAssertions[A](val f: ScalaFuture[A]) extends Assertions with Waiters {
-
-    /**
-     * Use this to assert an expected asynchronous failure of a @code {com.twitter.util.Future}
-     * The computation and waiting are both performed asynchronously.
-     * @param mf The class Manifest to extract class information from.
-     * @param timeout The timeout of the asynchronous Waiter.
-     * @tparam T The error returned by the failing computation. Used to assert error messages.
-     */
-    def failing[T  <: Throwable](
-      implicit mf: Manifest[T],
-      timeout: PatienceConfiguration.Timeout,
-      ec: ExecutionContext
-    ): Unit = {
-      val w = new Waiter
-
-      f onComplete {
-        case Success(_) => w.dismiss()
-        case Failure(e) => w(throw e); w.dismiss()
-      }
-
-      intercept[T] {
-        w.await(timeout, dismissals(1))
-      }
-    }
-
-    def failingWith[T <: Throwable](fs: ScalaFuture[_]*)(implicit mf: Manifest[T], ec: ExecutionContext) {
-      val w = new Waiter
-      fs foreach (_ onComplete {
-        case Failure(er) =>
-          w(intercept[T](er))
-          w.dismiss()
-        case Success(_) => w.dismiss()
-      })
-      w.await()
-    }
-
-    /**
-     * Use this to assert a successful future computation of a @code {com.twitter.util.Future}
-     * @param x The computation inside the future to await. This waiting is asynchronous.
-     * @param timeout The timeout of the future.
-     */
-    @deprecated("Use ScalaTest AsyncAssertions trait instead", "0.31.0")
-    def successful(x: A => Unit)(implicit timeout: PatienceConfiguration.Timeout, ec: ExecutionContext) : Unit = {
-      val w = new Waiter
-
-      f onComplete  {
-        case Success(res) => w{x(res)}; w.dismiss()
-        case Failure(e) => w(throw e); w.dismiss()
-      }
-      w.await(timeout, dismissals(1))
     }
   }
 }
