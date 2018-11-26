@@ -432,6 +432,8 @@ lazy val readme = (project in file("readme"))
     macros,
     tags
   ).settings(
+  tutSourceDirectory := sourceDirectory.value / "main" / "tut",
+  tutTargetDirectory := util.base / "docs",
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
     )
