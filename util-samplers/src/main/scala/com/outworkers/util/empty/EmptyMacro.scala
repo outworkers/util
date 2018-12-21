@@ -1,36 +1,21 @@
-/*
- * Copyright 2013 - 2017 Outworkers Ltd.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-package com.outworkers.util.samplers
+package com.outworkers.util.empty
+
 
 import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.util.{Date, UUID}
 
-import _root_.com.outworkers.util.domain._
 import _root_.com.outworkers.util.macros.{AnnotationToolkit, BlackboxToolbelt}
+import com.outworkers.util.samplers._
 
 import scala.reflect.macros.blackbox
 
 @macrocompat.bundle
-class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with BlackboxToolbelt {
+class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with BlackboxToolbelt {
 
   import c.universe._
-  lazy val fillOptions = typeOf[com.outworkers.util.samplers.FillOptions]
 
-  val prefix = q"com.outworkers.util.samplers"
+  val prefix = q"com.outworkers.util.empty"
   val domainPkg = q"com.outworkers.util.domain"
   val definitions = "com.outworkers.util.domain"
 
@@ -65,32 +50,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     val programmingLanguage: Symbol = typed[ProgrammingLanguage]
     val url: Symbol = typed[Url]
   }
-
-  // val example: String => gen[String]
-  // val firstName: String => gen[FirstName].value
-  // val lastName: Option[String] => genOpt[LastName].map(_.value)
-  // val emails: List[String] => genList[EmailAddress].map(_.value)
-  // val sample: List[String] => genList[String]
-
-  def extract(exp: Tree): Option[Type] = {
-    Some(c.typecheck(exp, c.TYPEmode).tpe)
-  }
-
-  object KnownField {
-    def unapply(nm: TermName): Option[Type] = unapply(nm.decodedName.toString)
-
-    def unapply(str: String): Option[Type] = {
-      str.toLowerCase() match {
-        case "first_name" | "firstname" => extract(tq"$domainPkg.FirstName")
-        case "last_name" | "lastname" => extract(tq"$domainPkg.LastName")
-        case "name" | "fullname" | "fullName" | "full_name" => extract(tq"$domainPkg.FullName")
-        case "email" | "email_address" | "emailaddress" => extract(tq"$domainPkg.EmailAddress")
-        case "country" => extract(tq"$domainPkg.CountryCode")
-        case _ => None
-      }
-    }
-  }
-
+  
   trait TypeExtractor {
 
     def sources: List[Type]
@@ -137,7 +97,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
             MapType(
               List(keyType, listType),
               applied => TypeName(s"scala.collection.immutable.Map[..$applied]"),
-              generator = types => q"$prefix.genMap[..$types]($prefix.defaultGeneration)"
+              generator = types => q"$prefix.voidMap[..$types]"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Failed to find 2 type arguments for Map type")
@@ -164,7 +124,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.List, ..$tpe].sample"
+              generator = tpe => q"$prefix.Empty.void[$collectionPkg.List, ..$tpe]()"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -175,7 +135,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.Sample.collection[$collectionPkg.Set, ..$tpe].sample"
+              generator = tpe => q"$prefix.Empty.void[$collectionPkg.Set, ..$tpe]()"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -197,24 +157,13 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
       if (arg.symbol == SamplersSymbols.optSymbol) {
         arg.typeArgs match {
-          case head :: Nil => {
-
-            val fillOptionsImp = c.inferImplicitValue(fillOptions, silent = true)
-
-            Some(
-              OptionType(
-                sources = head :: Nil,
-                applier = applied => TypeName(s"scala.Option[..$applied]"),
-                generator = t => {
-                  if (fillOptionsImp.nonEmpty) {
-                    q"""$fillOptionsImp($prefix.genOpt[..$t])"""
-                  } else {
-                    q"""$prefix.genOpt[..$t]"""
-                  }
-                }
-              )
+          case head :: Nil => Some(
+            OptionType(
+              sources = head :: Nil,
+              applier = applied => TypeName(s"scala.Option[..$applied]"),
+              generator = t => q"""$prefix.voidOpt[..$t]"""
             )
-          }
+          )
           case _ => c.abort(
             c.enclosingPosition,
             s"Expected a single type argument for Option[_], found ${arg.typeArgs.size} instead"
@@ -229,31 +178,9 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   private[this] def deriveSamplerType(accessor: Accessor): Tree = {
     accessor match {
       case MapType(col) => col.default
-      case OptionType(opt) => accessor.name match {
-        case KnownField(derived) => {
-
-          val fillOptionsImp = c.inferImplicitValue(fillOptions, silent = true)
-
-          if (fillOptionsImp.nonEmpty) {
-            q"""$fillOptionsImp($prefix.genOpt[$derived]).map(_.value)"""
-          } else {
-            q"""$prefix.genOpt[$derived].map(_.value)"""
-          }
-        }
-        case _ => opt.default
-      }
-      case CollectionType(col) => accessor.name match {
-        case KnownField(derived) => col.generator(derived :: Nil)
-        case _ => col.default
-      }
-
-      case _ => accessor.name match {
-        case KnownField(derived) => {
-
-          q"$prefix.gen[$derived].value"
-        }
-        case _ => q"$prefix.gen[${accessor.paramType}]"
-      }
+      case OptionType(opt) => opt.default
+      case CollectionType(col) => col.default
+      case _ => q"$prefix.void[${accessor.paramType}]"
     }
   }
 
@@ -265,7 +192,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     } }
 
     q"""
-      new $prefix.Sample[$tpe] {
+      new $prefix.Empty[$tpe] {
         override def sample: $tpe = new $tpe(..$applies)
       }
     """
@@ -276,21 +203,21 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
     tpe.typeArgs match {
       case inner :: Nil => q"""
-        new $prefix.Sample[$tpe] {
-          override def sample: $tpe = $prefix.gen[$outerSymbol, $inner]()
+        new $prefix.Empty[$tpe] {
+          override def sample: $tpe = $prefix.void[$outerSymbol, $inner]()
         }
       """
-      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
+      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type Collection")
     }
   }
 
   def tupleSample(tpe: Type): Tree = {
     val comp = tpe.typeSymbol.name.toTermName
 
-    val samplers = tpe.typeArgs.map(t => q"$prefix.gen[$t]")
+    val samplers = tpe.typeArgs.map(t => q"$prefix.void[$t]")
 
     q"""
-      new $prefix.Sample[$tpe] {
+      new $prefix.Empty[$tpe] {
         override def sample: $tpe = $comp.apply(..$samplers)
       }
     """
@@ -300,8 +227,8 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     tpe.typeArgs match {
       case k :: v :: Nil =>
         q"""
-          new $prefix.Sample[$tpe] {
-            override def sample: $tpe = $prefix.genMap[$k, $v]()
+          new $prefix.Empty[$tpe] {
+            override def sample: $tpe = _root_.scala.collection.immutable.Map.empty[$k, $v]
           }
         """
       case _ => c.abort(c.enclosingPosition, "Expected exactly two type arguments to be provided to map")
@@ -312,13 +239,11 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     val comp = c.parse(s"${tpe.toString.replace("#Value", "")}")
 
     q"""
-      new $prefix.Sample[$tpe] {
+      new $prefix.Empty[$tpe] {
         override def sample: $tpe = $prefix.oneOf($comp)
       }
     """
   }
-
-  def sampler(nm: String): Tree = q"new $prefix.Sample.${TypeName(nm)}"
 
   def macroImpl(tpe: Type): Tree = {
     val symbol = tpe.typeSymbol
@@ -328,29 +253,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => enumSample(tpe)
-      case SamplersSymbols.stringSymbol => sampler("StringSampler")
-      case SamplersSymbols.shortSymbol => sampler("ShortSampler")
-      case SamplersSymbols.boolSymbol => sampler("BooleanSampler")
-      case SamplersSymbols.byteSymbol => sampler("ByteSampler")
-      case SamplersSymbols.dateSymbol => sampler("DateSampler")
-      case SamplersSymbols.floatSymbol => sampler("FloatSampler")
-      case SamplersSymbols.longSymbol => sampler("LongSampler")
-      case SamplersSymbols.intSymbol => sampler("IntSampler")
-      case SamplersSymbols.shortString => sampler("ShortStringSampler")
-      case SamplersSymbols.doubleSymbol => sampler("DoubleSampler")
-      case SamplersSymbols.bigInt => sampler("BigIntSampler")
-      case SamplersSymbols.bigDecimal => sampler("BigDecimalSampler")
-      case SamplersSymbols.inetSymbol => sampler("InetAddressSampler")
-      case SamplersSymbols.uuidSymbol => sampler("UUIDSampler")
-      case SamplersSymbols.firstName => sampler("FirstNameSampler")
-      case SamplersSymbols.lastName => sampler("LastNameSampler")
-      case SamplersSymbols.fullName =>sampler("FullNameSampler")
-      case SamplersSymbols.emailAddress => sampler("EmailAddressSampler")
-      case SamplersSymbols.city => sampler("CitySampler")
-      case SamplersSymbols.country => sampler("CountrySampler")
-      case SamplersSymbols.countryCode => sampler("CountryCodeSampler")
-      case SamplersSymbols.programmingLanguage => sampler("ProgrammingLanguageSampler")
-      case SamplersSymbols.url => sampler("UrlSampler")
       case sym if sym.isClass && sym.asClass.isCaseClass => caseClassSample(tpe)
       case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
     }
@@ -367,6 +269,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
   }
 
   def materialize[T : WeakTypeTag]: Tree = {
-    macroImpl(weakTypeOf[T])
+    memoize[Type, Tree](BlackboxToolbelt.sampleCache)(weakTypeOf[T], macroImpl)
   }
 }

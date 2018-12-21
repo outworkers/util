@@ -38,3 +38,70 @@ case class NestedCollections(
   props: Map[String, List[String]],
   doubleProps: Map[Set[String], List[String]]
 )
+
+case class NestedOptions(
+  id: Option[UUID],
+  name: Option[String],
+  firstName: Option[String],
+  user: Option[User],
+  collections: Option[CollectionSample]
+)
+
+import java.util.UUID
+
+import org.outworkers.domain.test._
+
+case class User(
+  id: UUID,
+  firstName: String,
+  lastName: String,
+  email: String
+)
+
+case class NestedUser(
+  timestamp: Long,
+  user: User
+)
+
+case class CollectionSample(
+  id: UUID,
+  firstName: String,
+  lastName: String,
+  sh: Short,
+  b: Byte,
+  name: String,
+  email: String,
+  tests: List[String],
+  sets: List[String],
+  map: Map[String, String],
+  emails: List[String],
+  opt: Option[Int]
+)
+
+case class TupleRecord(id: UUID, tp: (String, Long))
+
+case class TupleCollectionRecord(id: UUID, tuples: List[(Int, String)])
+
+case class NestedOtherPackage(
+  id: UUID,
+  otherPkg: OtherPackageExample,
+  emails: List[String]
+)
+
+trait RoleType extends Enumeration {
+  //represents built-in role types.
+  type RoleType = Value
+
+  val Leader = Value("leader")
+  val AllianceMember = Value("member")
+}
+
+object RoleType extends RoleType
+
+case class Membership(
+  memberId: String,
+  entityType: String,
+  allianceId: String,
+  role: RoleType.Value = RoleType.Leader,
+  rankId: String
+)

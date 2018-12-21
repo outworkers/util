@@ -104,7 +104,7 @@ After you define such a one-time sampling type class instance, you have access t
 It's useful to define such typeclass instances inside package objects, as they will be "invisibly" imported in to the scope you need them to. This is often really neat, albeit potentially confusing for novice Scala users.
 
 
-```tut:silent
+```scala
 
 import com.outworkers.util.testing._
 
@@ -130,7 +130,7 @@ give you an instance of your `case class` with the fields appropriately pre-fill
 
 What this means is that we try to make the data feel "real" with respect to what it should be. Let's take the below example:
 
-```tut:silent
+```scala
 
 import java.util.UUID
 
@@ -143,7 +143,7 @@ case class User(
 ```
 This is interesting and common enough. What's more interesting is the output of `gen`.
 
-```tut:silent
+```scala
 import com.outworkers.util.samplers._
 
 object Examplers {
@@ -173,7 +173,7 @@ if your field name is either "email" or "emailAddress" or anything similar enoug
 
 It is also possible to generate deeply nested case classes.
 
-```tut:silent
+```scala
 
 case class Address(
   postcode: String,
@@ -211,7 +211,7 @@ into any hierarchy of case classes you need.
 But sometimes it will come short when it doesn't know how to generate a specific type. For example,
 let's look at how we could deal with `java.sql.Date`, which has no implicit sample available by default.
 
-```tut:silent
+```scala
 
 case class ExpansionExample(
   id: UUID,
@@ -221,7 +221,7 @@ case class ExpansionExample(
 
 Let's try to write some tests around the sampler. All we need to do is create a sampler for `java.sql.Date`.
 
-```tut:silent
+```scala
 
 import org.scalatest.{ FlatSpec, Matchers }
 import java.time.{LocalDate, ZoneId}
@@ -320,7 +320,7 @@ Option parsers are designed for chains where you want to short-circuit and exit 
  
 An example of how to use ```Option``` parsers might be:
 
-```tut:silent
+```scala
 
 import com.outworkers.util.parsers._
 
@@ -353,7 +353,7 @@ The full list of ScalaZ Validation based applicative parsers is:
 
 To illustrate the basic usage of applicative parsers and how to chain them, have a look below.
 
-```tut:silent
+```scala
 
 import scalaz._
 import scalaz.Scalaz._

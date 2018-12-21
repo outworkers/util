@@ -66,7 +66,10 @@ package object twitter {
       * @param timeout The timeout of the asynchronous Waiter.
       * @tparam T The error returned by the failing computation. Used to assert error messages.
       */
-    def failing[T  <: Throwable]()(implicit mf: Manifest[T], timeout: PatienceConfiguration.Timeout): Unit = {
+    def failing[T  <: Throwable]()(
+      implicit mf: Manifest[T],
+      timeout: PatienceConfiguration.Timeout
+    ): Unit = {
       val w = new Waiter
 
       f onSuccess  { _ => w.dismiss()}
