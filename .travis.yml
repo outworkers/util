@@ -9,7 +9,6 @@ notifications:
   email:
   - dev@websudos.co.uk
 jdk:
-- oraclejdk7
 - oraclejdk8
 branches:
   only:
@@ -17,7 +16,7 @@ branches:
   - develop
 matrix:
   include:
-  - scala: 2.12.7
+  - scala: 2.12.8
     jdk: oraclejdk8
     env: RUN_WITH_COVERAGE=true PUBLISH_ARTIFACT=true
 
