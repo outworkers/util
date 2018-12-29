@@ -98,6 +98,7 @@ An example of how to use ```Option``` parsers might be:
 ```scala
 
 import com.outworkers.util.parsers._
+import com.outworkers.util.samplers._
 
 object Test {
   def optionalParsing(email: String, age: String): Option[String] = {
