@@ -301,7 +301,7 @@ case class Example(
 
 object AppAlwaysFill {
 
-  import com.outworkers.util.samplers.alwaysFillOptions
+  import com.outworkers.util.samplers.Options.alwaysFillOptions
 
   val sample = gen[Example]
   Console.println(sample.trace())  
@@ -317,10 +317,11 @@ like the above flag, except any `Option` generated will always be `None`.
 This demonstrates how it's possible to achieve the different behaviours for the exact same case class,
 meaning for some tests you can always fill, and for some never, by simply scoping the imported flag.
 
-```tut
+```tut:silent
+
 object AppNeverFill {
 
-  import com.outworkers.util.samplers.neverFillOptions
+  import com.outworkers.util.samplers.Options.neverFillOptions
 
   val sample = gen[Example]
   Console.println(sample.trace())  
