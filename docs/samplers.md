@@ -211,3 +211,59 @@ object AppAlwaysFill {
   val sample = gen[Example]
   Console.println(sample.trace())  
 }
+
+```
+
+##### Never filling options
+
+In specific situations, the opposite behaviour might be desireable. This will behave exactly
+like the above flag, except any `Option` generated will always be `None`.
+
+This demonstrates how it's possible to achieve the different behaviours for the exact same case class,
+meaning for some tests you can always fill, and for some never, by simply scoping the imported flag.
+
+```scala
+
+object AppNeverFill {
+
+  import com.outworkers.util.samplers.Options.neverFillOptions
+
+  val sample = gen[Example]
+  Console.println(sample.trace())  
+}
+
+```
+
+#### Using empty samplers
+
+In specific testing scenarios and by popular demand, the framework also makes it possible to generate "empty" case classes.
+This means we pre-defined a notion of emptyness for any type we can.
+
+Examples:
+
+- Collections of all kinds will be generated as empty collections.
+- Strings will be generated as the empty string `""`.
+- Options will always be generated as `None`, etc.
+
+To leverage this behaviour, the code and methods are different from `samplers`, as illustrated below.
+
+```scala
+
+import com.outworkers.util.empty._
+
+object GeneratingEmptyTypes {
+
+  val emptyExample = void[Example]
+}
+
+```
+
+##### Methods for empty samplers
+
+Some of these methods duplicate otherwise available functionality, for the purpose
+of being consistent with the methods available in the `sampler` package.
+
+- ```void[T]```, used to generate a single instance of T.
+- ```void[X, Y]```, used to generate a tuple based on two samples.
+- ```voidOpt[X]```, generates an `Option.empty[X]`.
+- ```voidMap[T]```, convenience method that will give you back an empty map.
