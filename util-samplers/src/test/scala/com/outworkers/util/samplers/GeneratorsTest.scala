@@ -78,6 +78,11 @@ class GeneratorsTest extends FlatSpec with Matchers with GeneratorDrivenProperty
     sample shouldEqual sample
   }
 
+  it should "skip dictionary lookups for non stringly typed fields" in {
+    val sample = gen[EdgeCase]
+    Console.println(sample)
+  }
+
 
   it should "automatically generate a sampler for a nested Enumeration inside a CaseClass" in {
     val sample = gen[IndexedSeq[String]]

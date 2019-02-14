@@ -47,6 +47,13 @@ case class NestedOptions(
   collections: Option[CollectionSample]
 )
 
+case class CustomEmailWrapper(email: String)
+
+case class EdgeCase(
+  id: UUID,
+  email: CustomEmailWrapper
+)
+
 import java.util.UUID
 
 import org.outworkers.domain.test._
