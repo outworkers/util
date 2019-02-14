@@ -80,6 +80,7 @@ class GeneratorsTest extends FlatSpec with Matchers with GeneratorDrivenProperty
 
   it should "skip dictionary lookups for non stringly typed fields" in {
     val sample = gen[EdgeCase]
+    Console.println(sample)
   }
 
 

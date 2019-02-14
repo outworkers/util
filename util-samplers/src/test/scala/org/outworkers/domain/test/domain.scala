@@ -47,7 +47,7 @@ case class NestedOptions(
   collections: Option[CollectionSample]
 )
 
-case class CustomEmailWrapper(value: String)
+case class CustomEmailWrapper(email: String)
 
 case class EdgeCase(
   id: UUID,

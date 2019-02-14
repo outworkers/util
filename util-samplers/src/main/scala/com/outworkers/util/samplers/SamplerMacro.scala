@@ -230,7 +230,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     accessor match {
       case MapType(col) => col.default
       case OptionType(opt) => accessor.name match {
-        case KnownField(derived) => {
+        case KnownField(derived) if accessor.paramType =:= typeOf[String] => {
 
           val fillOptionsImp = c.inferImplicitValue(fillOptions, silent = true)
 
@@ -248,7 +248,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       }
 
       case _ => accessor.name match {
-        case KnownField(derived) if derived =:= typeOf[String] => {
+        case KnownField(derived) if accessor.paramType =:= typeOf[String] => {
 
           q"$prefix.gen[$derived].value"
         }
