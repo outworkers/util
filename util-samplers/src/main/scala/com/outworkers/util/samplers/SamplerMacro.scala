@@ -248,7 +248,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       }
 
       case _ => accessor.name match {
-        case KnownField(derived) => {
+        case KnownField(derived) if derived =:= typeOf[String] => {
 
           q"$prefix.gen[$derived].value"
         }
