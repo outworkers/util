@@ -15,7 +15,7 @@ trait EmptyGenerators {
     */
   def void[T : Empty]: T = implicitly[Empty[T]].sample
 
-  def voidOpt[T : Empty]: Option[T] = Option.empty[T]
+  def voidOpt[T]: Option[T] = Option.empty[T]
   def voidMap[K : Empty, V: Empty]: Map[K, V] = Map.empty[K, V]
 
   /**
@@ -26,8 +26,7 @@ trait EmptyGenerators {
     * @return A Collection of "size" elements with type T.
     */
   def void[M[X] <: TraversableOnce[X], T](size: Int = 0)(
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]],
-    proof: Empty[T]
+    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
   ): M[T] = cbf().result()
 
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get
