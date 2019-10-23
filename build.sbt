@@ -402,7 +402,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     moduleName := "util-validators-cats",
     crossScalaVersions := List(Versions.scala211, Versions.scala212, Versions.scala213),
     addCompilerPlugin(
-      "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
+      "org.typelevel" % "kind-projector" % "0.13.0" cross CrossVersion.full
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
@@ -419,7 +419,7 @@ lazy val validators = (project in file("util-validators"))
     moduleName := "util-validators",
     crossScalaVersions := Versions.scala.all,
     addCompilerPlugin(
-      "org.spire-math" % "kind-projector" % Versions.kindProjector cross CrossVersion.binary
+      "org.typelevel" % "kind-projector" % "0.13.0" cross CrossVersion.full
     ),
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % Versions.scalaz
