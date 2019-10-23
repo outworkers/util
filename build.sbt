@@ -16,7 +16,7 @@
 import sbt.Keys._
 
 lazy val Versions = new {
-  val scalatest = "3.0.5"
+  val scalatest = "3.0.8"
   val cats = "1.5.0"
   val joda = "2.10.1"
   val jodaConvert = "2.1.2"
@@ -35,10 +35,11 @@ lazy val Versions = new {
   val scala210 = "2.10.6"
   val scala211 = "2.11.12"
   val scala212 = "2.12.8"
-  val scalaAll = Seq(scala210, scala211, scala212)
+  val scala213 = "2.13.1"
+  val scalaAll = Seq(scala210, scala211, scala212, scala213)
 
   val scala = new {
-    val all = Seq(scala210, scala211, scala212)
+    val all = Seq(scala210, scala211, scala212, scala213)
   }
 
   lazy val ScalacOptions = Seq(
@@ -187,7 +188,8 @@ lazy val util = (project in file("."))
   .settings(sharedSettings: _*)
   .settings(
     name := "util",
-    moduleName := "util"
+    moduleName := "util",
+    crossScalaVersions := Nil
   ).aggregate(
   baseProjectList ++ Publishing.jdk8Only(play): _*
 )
