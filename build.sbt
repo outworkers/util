@@ -26,7 +26,6 @@ lazy val Versions = new {
   val scalaz = "7.2.27"
   val scalacheck = "1.14.0"
   val datafactory = "0.8"
-  val play = "2.6.19"
   val shapeless = "2.3.3"
   val kindProjector = "0.11.0"
   val paradise = "2.1.1"
@@ -150,20 +149,6 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
         List(compilerPlugin("org.scalamacros" % "paradise" % scalaMacrosVersion(s) cross CrossVersion.full))
     }
   }
-
-  val playVersion: String => String = {
-    s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 11 => play
-      case _ => "2.4.8"
-    }
-  }
-
-  val liftVersion: String => String = {
-    s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 11 => lift
-      case _ => "3.0-M1"
-    }
-  }
 }
 
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
@@ -193,10 +178,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
   validatorsCats,
   validators,
   samplers,
-  testing,
-  testingTwitter,
   macros,
-  tags,
   readme
 )
 
@@ -207,7 +189,7 @@ lazy val util = (project in file("."))
     moduleName := "util",
     crossScalaVersions := Nil
   ).aggregate(
-  baseProjectList ++ Publishing.jdk8Only(play): _*
+  baseProjectList: _*
 )
 
 lazy val domain = (project in file("util-domain"))
@@ -231,7 +213,7 @@ lazy val parsers = (project in file("util-parsers"))
     )
   ).dependsOn(
   domain,
-  testing % Test
+  samplers % Test
 )
 
 lazy val parsersCats = (project in file("util-parsers-cats"))
@@ -248,26 +230,7 @@ lazy val parsersCats = (project in file("util-parsers-cats"))
     )
   ).dependsOn(
   domain,
-  testing % Test
-)
-
-lazy val tags = (project in file("util-tags"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-tags",
-    crossScalaVersions := Versions.scala.all,
-    scalacOptions ++= Seq(
-      "-language:experimental.macros"
-    ),
-    libraryDependencies ++= Seq(
-      "com.eaio.uuid" % "uuid" % "3.2",
-      Versions.macroCompatVersion(scalaVersion.value),
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      "org.scalatest" %% "scalatest" % Versions.scalatest % Test
-    ) ++ Versions.paradiseVersion(scalaVersion.value)
-  ).dependsOn(
-  domain,
-  macros
+  samplers % Test
 )
 
 lazy val samplers = (project in file("util-samplers"))
@@ -287,101 +250,6 @@ lazy val samplers = (project in file("util-samplers"))
   ).dependsOn(
   domain,
   macros
-)
-
-lazy val testing = (project in file("util-testing"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-testing",
-    crossScalaVersions := Versions.scala.all,
-    scalacOptions ++= Seq(
-      "-language:experimental.macros"
-    ),
-    libraryDependencies ++= Seq(
-      Versions.macroCompatVersion(scalaVersion.value),
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      "org.scalatest" %% "scalatest" % Versions.scalatest,
-      "joda-time" % "joda-time" % Versions.joda,
-      "org.joda" % "joda-convert" % Versions.jodaConvert,
-      "org.scalacheck" %% "scalacheck" % Versions.scalacheck
-    ) ++ Versions.paradiseVersion(scalaVersion.value)
-  ).dependsOn(
-  domain,
-  tags,
-  macros,
-  samplers
-)
-
-lazy val testingTwitter = (project in file("util-testing-twitter"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-testing-twitter",
-    crossScalaVersions := List(Versions.scala210, Versions.scala211, Versions.scala212),
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % Versions.scalatest,
-      "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value)
-    )
-  )
-
-lazy val play = (project in file("util-play"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-play",
-    crossScalaVersions := List(Versions.scala210, Versions.scala211, Versions.scala212),
-    libraryDependencies ++= Seq(
-      "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
-    ),
-    unmanagedSourceDirectories in Compile ++= Seq(
-      (sourceDirectory in Compile).value / ("scala-2." + {
-        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((major, minor)) if minor <= 11 => minor.toString
-          case _ => "non-existing"
-        }
-      }))
-  ).dependsOn(
-  domain,
-  parsersCats,
-  testing % Test
-)
-
-lazy val lift = (project in file("util-lift"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-lift",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211, Versions.scala212),
-    unmanagedSourceDirectories in Compile ++= Seq(
-      (sourceDirectory in Compile).value / ("scala-2." + {
-        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((_, minor)) if minor <= 12 => minor.toString
-          case _ => "non-existing"
-        }
-      })),
-    libraryDependencies ++= Seq(
-      "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
-    )
-  ).dependsOn(
-  parsers,
-  testing % Test
-)
-
-lazy val liftCats = (project in file("util-lift-cats"))
-  .settings(sharedSettings: _*)
-  .settings(
-    moduleName := "util-lift-cats",
-    crossScalaVersions := Seq(Versions.scala210, Versions.scala211, Versions.scala212),
-    unmanagedSourceDirectories in Compile ++= Seq(
-      (sourceDirectory in Compile).value / ("scala-2." + {
-        CrossVersion.partialVersion(scalaBinaryVersion.value) match {
-          case Some((_, minor)) if minor <= 12 => minor.toString
-          case _ => "non-existing"
-        }
-      })),
-    libraryDependencies ++= Seq(
-      "net.liftweb" %% "lift-webkit" % Versions.liftVersion(scalaVersion.value)
-    )
-  ).dependsOn(
-  parsersCats,
-  testing % Test
 )
 
 lazy val macros = (project in file("util-macros"))
@@ -404,11 +272,12 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
+      "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
       Versions.catsVersion(scalaVersion.value)
     )
   ).dependsOn(
   parsersCats,
-  testing % Test
+  samplers % Test
 )
 
 lazy val validators = (project in file("util-validators"))
@@ -420,29 +289,25 @@ lazy val validators = (project in file("util-validators"))
       "org.typelevel" % "kind-projector" % Versions.kindProjector cross CrossVersion.full
     ),
     libraryDependencies ++= Seq(
-      "org.scalaz" %% "scalaz-core" % Versions.scalaz
+      "org.scalaz" %% "scalaz-core" % Versions.scalaz,
+      "org.scalatest" %% "scalatest" % Versions.scalatest % Test
     )
   ).dependsOn(
   validatorsCats,
   parsers,
-  testing % Test
+  samplers % Test
 )
 
 lazy val readme = (project in file("readme"))
   .settings(sharedSettings: _*)
   .dependsOn(
     domain,
-    lift,
-    liftCats,
     parsers,
     parsersCats,
     validatorsCats,
     validators,
     samplers,
-    testing,
-    testingTwitter,
-    macros,
-    tags
+    macros
   ).settings(
     scalaVersion := Versions.scala212,
     crossScalaVersions := Nil,

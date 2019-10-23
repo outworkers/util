@@ -4,7 +4,7 @@ import java.util.UUID
 import org.scalacheck.Arbitrary
 import org.scalatest.{FlatSpec, Matchers, OptionValues}
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import com.outworkers.util.testing._
+import com.outworkers.util.samplers._
 import org.joda.time.DateTime
 import org.scalatest.Assertion
 

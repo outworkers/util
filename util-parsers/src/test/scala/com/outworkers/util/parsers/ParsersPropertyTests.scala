@@ -2,7 +2,7 @@ package com.outworkers.util.parsers
 
 import java.util.UUID
 
-import com.outworkers.util.testing._
+import com.outworkers.util.samplers._
 import org.joda.time.DateTime
 import org.scalacheck.Arbitrary
 import org.scalatest.prop.GeneratorDrivenPropertyChecks

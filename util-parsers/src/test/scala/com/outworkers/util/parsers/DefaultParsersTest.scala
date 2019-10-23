@@ -19,7 +19,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Try}
 import scalaz.Scalaz._
-import com.outworkers.util.testing._
+import com.outworkers.util.samplers._
 
 class DefaultParsersTest extends FlatSpec with Matchers {
 
@@ -74,4 +74,3 @@ class DefaultParsersTest extends FlatSpec with Matchers {
     parser.toOption.isDefined shouldEqual false
   }
 }
-
