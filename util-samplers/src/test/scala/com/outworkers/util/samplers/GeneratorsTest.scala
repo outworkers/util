@@ -18,9 +18,9 @@ package com.outworkers.util.samplers
 import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
 import org.scalatest.{FlatSpec, Matchers}
 import org.outworkers.domain.test._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class GeneratorsTest extends FlatSpec with Matchers with GeneratorDrivenPropertyChecks {
+class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   it should "generate a sized list based on the given argument" in {
     val limit = 10
