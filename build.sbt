@@ -20,9 +20,6 @@ lazy val Versions = new {
   val cats = "1.5.0"
   val joda = "2.10.1"
   val jodaConvert = "2.1.2"
-  val lift = "3.3.0"
-  val twitterUtil = "6.41.0"
-  val twitterUtil210 = "6.34.0"
   val scalaz = "7.2.27"
   val scalacheck = "1.14.0"
   val datafactory = "0.8"
@@ -118,14 +115,6 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
     }
   }
 
-  val twitterUtilVersion: String => String = {
-    s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor == 12 => twitterUtil
-      case _ => twitterUtil210
-    }
-  }
-
-
   val scalaMacrosVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
       case Some((_, minor)) if minor >= 11 => paradise
@@ -156,7 +145,6 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   scalaVersion := Versions.scala212,
   crossScalaVersions := Versions.scala.all,
   resolvers ++= Seq(
-    "Twitter Repository" at "https://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
   ),
