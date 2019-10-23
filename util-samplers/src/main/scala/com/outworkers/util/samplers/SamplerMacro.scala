@@ -19,7 +19,6 @@ import java.net.InetAddress
 import java.nio.ByteBuffer
 import java.util.{Date, UUID}
 
-import _root_.com.outworkers.util.domain._
 import _root_.com.outworkers.util.macros.{AnnotationToolkit, BlackboxToolbelt}
 
 import scala.reflect.macros.blackbox

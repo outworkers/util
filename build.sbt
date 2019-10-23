@@ -133,6 +133,23 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
     }
   }
 
+   val macroCompatVersion: String => ModuleID = {
+     s => CrossVersion.partialVersion(s) match {
+       case Some((_, minor)) if minor >= 13 => "org.typelevel" % "macro-compat_2.13.0-RC2" % "1.1.1"
+       case Some((_, minor)) if minor < 13 => "org.typelevel" %% "macro-compat" % macroCompat
+
+     }
+   }
+
+  val paradiseVersion: String => Seq[ModuleID] = {
+    s => CrossVersion.partialVersion(s) match {
+      case Some((_, minor)) if minor >= 13 =>
+        Nil
+      case Some((_, minor)) if minor < 13 =>
+        List(compilerPlugin("org.scalamacros" % "paradise" % scalaMacrosVersion(s) cross CrossVersion.full))
+    }
+  }
+
   val playVersion: String => String = {
     s => CrossVersion.partialVersion(s) match {
       case Some((_, minor)) if minor >= 11 => play
@@ -245,11 +262,10 @@ lazy val tags = (project in file("util-tags"))
     ),
     libraryDependencies ++= Seq(
       "com.eaio.uuid" % "uuid" % "3.2",
-      "org.typelevel" %% "macro-compat" % "1.1.1",
+      Versions.macroCompatVersion(scalaVersion.value),
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest % Test
-    )
+    ) ++ Versions.paradiseVersion(scalaVersion.value)
   ).dependsOn(
   domain,
   macros
@@ -264,12 +280,11 @@ lazy val samplers = (project in file("util-samplers"))
       "-language:experimental.macros"
     ),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % Versions.macroCompat,
+      Versions.macroCompatVersion(scalaVersion.value),
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
       "org.scalacheck" %% "scalacheck" % Versions.scalacheck
-    )
+    ) ++ Versions.paradiseVersion(scalaVersion.value)
   ).dependsOn(
   domain,
   macros
@@ -284,14 +299,13 @@ lazy val testing = (project in file("util-testing"))
       "-language:experimental.macros"
     ),
     libraryDependencies ++= Seq(
-      "org.typelevel" %% "macro-compat" % Versions.macroCompat,
+      Versions.macroCompatVersion(scalaVersion.value),
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
       "org.scalatest" %% "scalatest" % Versions.scalatest,
       "joda-time" % "joda-time" % Versions.joda,
       "org.joda" % "joda-convert" % Versions.jodaConvert,
       "org.scalacheck" %% "scalacheck" % Versions.scalacheck
-    )
+    ) ++ Versions.paradiseVersion(scalaVersion.value)
   ).dependsOn(
   domain,
   tags,
@@ -303,7 +317,7 @@ lazy val testingTwitter = (project in file("util-testing-twitter"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-testing-twitter",
-    crossScalaVersions := Versions.scala.all,
+    crossScalaVersions := List(Versions.scala210, Versions.scala211, Versions.scala212),
     libraryDependencies ++= Seq(
       "org.scalatest" %% "scalatest" % Versions.scalatest,
       "com.twitter" %% "util-core" % Versions.twitterUtilVersion(scalaVersion.value)
@@ -313,7 +327,6 @@ lazy val testingTwitter = (project in file("util-testing-twitter"))
 lazy val play = (project in file("util-play"))
   .settings(sharedSettings: _*)
   .settings(
-
     moduleName := "util-play",
     crossScalaVersions := Versions.scalaAll,
     libraryDependencies ++= Seq(
@@ -378,10 +391,8 @@ lazy val macros = (project in file("util-macros"))
     moduleName := "util-macros",
     crossScalaVersions := Versions.scala.all,
     libraryDependencies ++= Seq(
-      compilerPlugin("org.scalamacros" % "paradise" % Versions.scalaMacrosVersion(scalaVersion.value) cross CrossVersion.full),
-      "org.typelevel"  %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
-    )
+    ) ++ Versions.paradiseVersion(scalaVersion.value)
   )
 
 lazy val validatorsCats = (project in file("util-validators-cats"))
