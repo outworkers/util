@@ -153,7 +153,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   scalaVersion := Versions.scala212,
   crossScalaVersions := Versions.scala.all,
   resolvers ++= Seq(
-    "Twitter Repository" at "http://maven.twttr.com",
+    "Twitter Repository" at "https://maven.twttr.com",
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
   ),
