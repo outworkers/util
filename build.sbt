@@ -28,7 +28,7 @@ lazy val Versions = new {
   val datafactory = "0.8"
   val play = "2.6.19"
   val shapeless = "2.3.3"
-  val kindProjector = "0.9.9"
+  val kindProjector = "0.11.0"
   val paradise = "2.1.1"
   val macroCompat = "1.1.1"
 
@@ -188,8 +188,6 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
-  lift,
-  liftCats,
   parsers,
   parsersCats,
   validatorsCats,
@@ -329,7 +327,7 @@ lazy val play = (project in file("util-play"))
   .settings(sharedSettings: _*)
   .settings(
     moduleName := "util-play",
-    crossScalaVersions := Versions.scalaAll,
+    crossScalaVersions := List(Versions.scala210, Versions.scala211, Versions.scala212),
     libraryDependencies ++= Seq(
       "com.typesafe.play" %% "play-ws" % Versions.playVersion(scalaVersion.value)
     ),
@@ -402,7 +400,7 @@ lazy val validatorsCats = (project in file("util-validators-cats"))
     moduleName := "util-validators-cats",
     crossScalaVersions := List(Versions.scala211, Versions.scala212, Versions.scala213),
     addCompilerPlugin(
-      "org.typelevel" % "kind-projector" % "0.13.0" cross CrossVersion.full
+      "org.typelevel" % "kind-projector" % Versions.kindProjector cross CrossVersion.full
     ),
     libraryDependencies ++= Seq(
       "com.chuusai" %% "shapeless" % Versions.shapeless,
@@ -419,7 +417,7 @@ lazy val validators = (project in file("util-validators"))
     moduleName := "util-validators",
     crossScalaVersions := Versions.scala.all,
     addCompilerPlugin(
-      "org.typelevel" % "kind-projector" % "0.13.0" cross CrossVersion.full
+      "org.typelevel" % "kind-projector" % Versions.kindProjector cross CrossVersion.full
     ),
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % Versions.scalaz
@@ -446,9 +444,11 @@ lazy val readme = (project in file("readme"))
     macros,
     tags
   ).settings(
-  tutSourceDirectory := sourceDirectory.value / "main" / "tut",
-  tutTargetDirectory := util.base / "docs",
-    libraryDependencies ++= Seq(
-      "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
-    )
+    scalaVersion := Versions.scala212,
+    crossScalaVersions := Nil,
+    tutSourceDirectory := sourceDirectory.value / "main" / "tut",
+    tutTargetDirectory := util.base / "docs",
+      libraryDependencies ++= Seq(
+        "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
+      )
   ).enablePlugins(TutPlugin)
