@@ -17,7 +17,6 @@ package com.outworkers.util.macros
 
 import scala.reflect.macros.blackbox
 
-@macrocompat.bundle
 trait AnnotationToolkit {
 
   val c: blackbox.Context

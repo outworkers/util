@@ -19,7 +19,6 @@ import scala.collection.mutable.{Map => MutableMap}
 
 import scala.reflect.macros.blackbox
 
-@macrocompat.bundle
 trait BlackboxToolbelt {
 
   val c: blackbox.Context

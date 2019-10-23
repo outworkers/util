@@ -58,7 +58,7 @@ object Empty extends EmptyGenerators {
     implicit cbf: CanBuildFrom[Nothing, T, M[T]]
   ): Empty[M[T]] = {
     new Empty[M[T]] {
-      override def sample: M[T] = cbf().result()
+      override def sample: M[T] = cbf.apply().result()
     }
   }
 
