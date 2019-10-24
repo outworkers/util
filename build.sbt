@@ -111,7 +111,7 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
     s => CrossVersion.partialVersion(s) match {
       case Some((_, minor)) if minor >= 13 => "org.typelevel" %% "cats-core" % "2.0.0"
       case Some((_, minor)) if minor >= 11 => "org.typelevel" %% "cats-core" % "1.6.0"
-      case _ => "org.typelevel" %% "cats" % "1.2.0"
+      case _ => "org.typelevel" %% "cats-core" % "1.2.0"
     }
   }
 
