@@ -7,7 +7,7 @@ import com.outworkers.util.domain._
 import com.outworkers.util.samplers.Sample
 import org.scalacheck.{Arbitrary, Gen}
 
-import scala.collection.generic.CanBuildFrom
+import scala.reflect.ClassTag
 import scala.util.Random
 
 trait Empty[T] extends Sample[T]
@@ -54,12 +54,19 @@ object Empty extends EmptyGenerators {
 
   def generator[T : Empty]: Gen[T] = Gen.delay(void[T])
 
-  def collection[M[X] <: TraversableOnce[X], T : Empty](
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
-  ): Empty[M[T]] = {
-    new Empty[M[T]] {
-      override def sample: M[T] = cbf.apply().result()
-    }
+  // Scala 2.13 compat
+  implicit def listEmpty[T]: Empty[List[T]] = new Empty[List[T]] {
+    override def sample: List[T] = List.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def seqEmpty[T]: Empty[Seq[T]] = new Empty[Seq[T]] {
+    override def sample: Seq[T] = Seq.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def arrEmpty[T : ClassTag]: Empty[Array[T]] = new Empty[Array[T]] {
+    override def sample: Array[T] = Array.empty[T]
   }
 
   /**

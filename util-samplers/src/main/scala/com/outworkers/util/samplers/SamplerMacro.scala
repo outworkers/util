@@ -270,19 +270,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     """
   }
 
-  def traversableSample(tpe: Type): Tree = {
-    val outerSymbol = tpe.typeConstructor
-
-    tpe.typeArgs match {
-      case inner :: Nil => q"""
-        new $prefix.Sample[$tpe] {
-          override def sample: $tpe = $prefix.gen[$outerSymbol, $inner]()
-        }
-      """
-      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type List")
-    }
-  }
-
   def tupleSample(tpe: Type): Tree = {
     val comp = tpe.typeSymbol.name.toTermName
 
@@ -324,7 +311,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
 
     val tree = symbol match {
       case SamplersSymbols.mapSymbol => mapSample(tpe)
-      case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => enumSample(tpe)
       case SamplersSymbols.stringSymbol => sampler("StringSampler")
