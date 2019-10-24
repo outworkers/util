@@ -20,10 +20,7 @@ import java.util.{Date, Locale, UUID}
 
 import org.scalacheck.{Arbitrary, Gen}
 import com.outworkers.util.domain._
-import com.outworkers.util.empty.Empty
-
 import scala.annotation.implicitNotFound
-import scala.collection.generic.CanBuildFrom
 import scala.reflect.ClassTag
 import scala.util.Random
 
@@ -175,27 +172,27 @@ object Sample extends Generators {
   def generator[T : Sample]: Gen[T] = Gen.delay(gen[T])
 
   // Scala 2.13 compat
-  implicit def listSample[T : Sample]: Sample[List[T]] = new Sample[List[T]] {
+  implicit def listMaterializer[T : Sample]: Sample[List[T]] = new Sample[List[T]] {
     override def sample: List[T] = List.fill(defaultGeneration)(gen[T])
   }
 
   // Scala 2.13 compat
-  implicit def seqSamlpe[T : Sample]: Sample[Seq[T]] = new Sample[Seq[T]] {
+  implicit def seqMaterializer[T : Sample]: Sample[Seq[T]] = new Sample[Seq[T]] {
     override def sample: Seq[T] = Seq.fill(defaultGeneration)(gen[T])
   }
 
   // Scala 2.13 compat
-  implicit def setSample[T : Sample]: Sample[Set[T]] = new Sample[Set[T]] {
+  implicit def setMaterializer[T : Sample]: Sample[Set[T]] = new Sample[Set[T]] {
     override def sample: Set[T] = gen[List[T]].toSet
   }
 
   // Scala 2.13 compat
-  implicit def arraySample[T : ClassTag : Sample]: Sample[Array[T]] = new Sample[Array[T]] {
+  implicit def arrayMaterializer[T : ClassTag : Sample]: Sample[Array[T]] = new Sample[Array[T]] {
     override def sample: Array[T] = Array.fill(defaultGeneration)(gen[T])
   }
 
   // Scala 2.13 compat
-  implicit def indexedSeqSample[T : Sample]: Sample[IndexedSeq[T]] = new Sample[IndexedSeq[T]] {
+  implicit def indexedSeqMaterializer[T : Sample]: Sample[IndexedSeq[T]] = new Sample[IndexedSeq[T]] {
     override def sample: IndexedSeq[T] = IndexedSeq.fill(defaultGeneration)(gen[T])
   }
 
