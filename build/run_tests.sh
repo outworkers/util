@@ -19,7 +19,7 @@ function run_test_suite {
             fi
     else
         echo "Running tests without attempting to submit coverage reports"
-        sbt "plz $TRAVIS_SCALA_VERSION test"
+        sbt "++ $TRAVIS_SCALA_VERSION test"
         exit $?
     fi
 }
