@@ -302,6 +302,6 @@ lazy val readme = (project in file("readme"))
     tutSourceDirectory := sourceDirectory.value / "main" / "tut",
     tutTargetDirectory := util.base / "docs",
       libraryDependencies ++= Seq(
-        "org.scalatest" %% "scalatest" % Versions.scalatest % "tut"
+        "org.scalatest" %% "scalatest" % Versions.scalatest
       )
   ).enablePlugins(TutPlugin)
