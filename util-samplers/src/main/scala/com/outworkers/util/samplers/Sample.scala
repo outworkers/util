@@ -21,7 +21,7 @@ import java.util.{Date, Locale, UUID}
 import org.scalacheck.{Arbitrary, Gen}
 import com.outworkers.util.domain._
 import scala.annotation.implicitNotFound
-import scala.collection.generic.CanBuildFrom
+import scala.reflect.ClassTag
 import scala.util.Random
 
 @implicitNotFound("No automated way to create A Sample for ${T}. Create an implicit Sample for ${T} in scope manually")
@@ -171,17 +171,29 @@ object Sample extends Generators {
 
   def generator[T : Sample]: Gen[T] = Gen.delay(gen[T])
 
-  def collection[M[X] <: TraversableOnce[X], T : Sample](
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
-  ): Sample[M[T]] = {
-    new Sample[M[T]] {
-      override def sample: M[T] = {
-        val builder = cbf()
-        builder.sizeHint(com.outworkers.util.samplers.defaultGeneration)
-        for (_ <- 1 to defaultGeneration) builder += gen[T]
-        builder.result()
-      }
-    }
+  // Scala 2.13 compat
+  implicit def listMaterializer[T : Sample]: Sample[List[T]] = new Sample[List[T]] {
+    override def sample: List[T] = List.fill(defaultGeneration)(gen[T])
+  }
+
+  // Scala 2.13 compat
+  implicit def seqMaterializer[T : Sample]: Sample[Seq[T]] = new Sample[Seq[T]] {
+    override def sample: Seq[T] = Seq.fill(defaultGeneration)(gen[T])
+  }
+
+  // Scala 2.13 compat
+  implicit def setMaterializer[T : Sample]: Sample[Set[T]] = new Sample[Set[T]] {
+    override def sample: Set[T] = gen[List[T]].toSet
+  }
+
+  // Scala 2.13 compat
+  implicit def arrayMaterializer[T : ClassTag : Sample]: Sample[Array[T]] = new Sample[Array[T]] {
+    override def sample: Array[T] = Array.fill(defaultGeneration)(gen[T])
+  }
+
+  // Scala 2.13 compat
+  implicit def indexedSeqMaterializer[T : Sample]: Sample[IndexedSeq[T]] = new Sample[IndexedSeq[T]] {
+    override def sample: IndexedSeq[T] = IndexedSeq.fill(defaultGeneration)(gen[T])
   }
 
   /**
@@ -191,10 +203,7 @@ object Sample extends Generators {
     * @tparam T The source type of the sampler, must already have a sampler defined for it.
     * @return A new sampler that can interact with the target type.
     */
-  def iso[T : Sample, T1](fn: T => T1): Sample[T1] = derive(fn)
-
-  @deprecated("Use Sample.iso instead", "0.46.0")
-  def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
+  def iso[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
     override def sample: T1 = fn(gen[T])
   }
 

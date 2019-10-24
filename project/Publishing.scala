@@ -17,7 +17,7 @@ import bintray.BintrayKeys._
 import com.typesafe.sbt.SbtGit.git
 import sbt.Keys._
 import sbt._
-import com.typesafe.sbt.pgp.PgpKeys._
+import com.jsuereth.sbtpgp.PgpKeys._
 import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
 import sbtrelease.ReleaseStateTransformations._
 import sbtrelease.Vcs
@@ -65,7 +65,7 @@ object Publishing {
 
     val newState = if (status.nonEmpty) {
       val (state, msg) = settings.runTask(releaseCommitMessage, st)
-      vcs(state).commit(msg, sign) ! st.log
+      vcs(state).commit(msg, sign, false) ! st.log
       state
     } else {
       // nothing to commit. this happens if the version.sbt file hasn't changed.
@@ -141,7 +141,7 @@ object Publishing {
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
-    pgpPassphrase in ThisBuild := {
+    Global / pgpPassphrase := {
       if (runningUnderCi && pgpPass.isDefined) {
         println("Running under CI and PGP password specified under settings.")
         println(s"Password longer than five characters: ${pgpPass.exists(_.length > 5)}")

@@ -35,37 +35,12 @@ trait Generators {
   }
 
 
-  /**
-    * Generates a list of elements based on an input collection type.
-    * @param size The number of elements to generate
-    * @param cbf The implicit builder
-    * @tparam M The type of collection to build
-    * @tparam T The type of the underlying sampled type.
-    * @return A Collection of "size" elements with type T.
-    */
-  def gen[M[X] <: TraversableOnce[X], T](size: Int = defaultGeneration)(
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]],
-    sampler: Sample[T]
-  ): M[T] = {
-    val builder = cbf()
-    builder.sizeHint(size)
-    for (_ <- 1 to size) builder += gen[T]
-    builder.result()
-  }
+  def genList[T : Sample](size: Int = defaultGeneration): List[T] = List.fill(size)(gen[T])
 
-  def genList[T : Sample](size: Int = defaultGeneration): List[T] = gen[List, T](size)
+  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = genList[T](size).toSet
 
-  def genSet[T : Sample](size: Int = defaultGeneration): Set[T] = gen[Set, T](size)
-
-  def genMap[A1 : Sample, A2 : Sample](size: Int = defaultGeneration)(
-    implicit cbf: CanBuildFrom[Nothing, (A1, A2), Map[A1, A2]]
-  ): Map[A1, A2] = {
-    val builder = cbf()
-    builder.sizeHint(size)
-
-    for (_ <- 1 to size) builder += gen[A1] -> gen[A2]
-
-    builder.result()
+  def genMap[A1 : Sample, A2 : Sample](size: Int = defaultGeneration): Map[A1, A2] = {
+    List.fill[(A1, A2)](size) { gen[A1] -> gen[A2] } toMap
   }
 
   def oneOf[T](list: Seq[T]): T = Gen.oneOf(list).sample.get

@@ -7,7 +7,7 @@ import com.outworkers.util.domain._
 import com.outworkers.util.samplers.Sample
 import org.scalacheck.{Arbitrary, Gen}
 
-import scala.collection.generic.CanBuildFrom
+import scala.reflect.ClassTag
 import scala.util.Random
 
 trait Empty[T] extends Sample[T]
@@ -54,12 +54,29 @@ object Empty extends EmptyGenerators {
 
   def generator[T : Empty]: Gen[T] = Gen.delay(void[T])
 
-  def collection[M[X] <: TraversableOnce[X], T : Empty](
-    implicit cbf: CanBuildFrom[Nothing, T, M[T]]
-  ): Empty[M[T]] = {
-    new Empty[M[T]] {
-      override def sample: M[T] = cbf().result()
-    }
+  // Scala 2.13 compat
+  implicit def listMaterializer[T]: Empty[List[T]] = new Empty[List[T]] {
+    override def sample: List[T] = List.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def seqMaterializer[T]: Empty[Seq[T]] = new Empty[Seq[T]] {
+    override def sample: Seq[T] = Seq.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def setMaterializer[T]: Empty[Set[T]] = new Empty[Set[T]] {
+    override def sample: Set[T] = Set.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def arrMaterializer[T : ClassTag]: Empty[Array[T]] = new Empty[Array[T]] {
+    override def sample: Array[T] = Array.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def indexedSeqMaterializer[T]: Empty[IndexedSeq[T]] = new Empty[IndexedSeq[T]] {
+    override def sample: IndexedSeq[T] = IndexedSeq.empty[T]
   }
 
   /**

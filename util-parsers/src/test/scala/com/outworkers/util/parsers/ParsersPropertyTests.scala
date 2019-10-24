@@ -2,13 +2,35 @@ package com.outworkers.util.parsers
 
 import java.util.UUID
 
-import com.outworkers.util.testing._
-import org.joda.time.DateTime
-import org.scalacheck.Arbitrary
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import com.outworkers.util.samplers._
+import org.joda.time.{DateTime, DateTimeZone, LocalDate}
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalatest.{Assertion, FlatSpec, Matchers, OptionValues}
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
-class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with GeneratorDrivenPropertyChecks {
+import scala.collection.JavaConverters._
+
+class ParsersPropertyTests extends FlatSpec with Matchers with OptionValues with ScalaCheckDrivenPropertyChecks {
+
+  implicit object DateTimeSampler extends Sample[DateTime] {
+    val limit = 10000
+    def sample: DateTime = {
+      // may the gods of code review forgive me for me sins
+      val offset = Gen.choose(-limit, limit).sample.getOrElse(limit)
+      val now = new DateTime(DateTimeZone.UTC)
+      now.plusSeconds(offset)
+    }
+  }
+
+  implicit object JodaLocalDateSampler extends Sample[LocalDate] {
+    val limit = 10000
+    def sample: LocalDate = {
+      // may the gods of code review forgive me for me sins
+      val offset = Gen.choose(-limit, limit).sample.getOrElse(limit)
+      val zone = Generators.oneOf(DateTimeZone.getAvailableIDs.asScala.toList)
+      new LocalDate(DateTimeSampler.sample.getMillis + offset * 1000, DateTimeZone.forID(zone))
+    }
+  }
 
   implicit val dateTimeGen = Sample.arbitrary[DateTime]
   implicit val uuidGen = Sample.arbitrary[UUID]

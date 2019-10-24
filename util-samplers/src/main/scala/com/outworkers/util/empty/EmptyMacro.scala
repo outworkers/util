@@ -124,7 +124,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.Empty.void[$collectionPkg.List, ..$tpe]()"
+              generator = tpe => q"$prefix.Empty.void[$collectionPkg.List[..$tpe]]"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -135,7 +135,7 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.Empty.void[$collectionPkg.Set, ..$tpe]()"
+              generator = tpe => q"$prefix.Empty.void[$collectionPkg.Set[..$tpe]]"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -198,19 +198,6 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
     """
   }
 
-  def traversableSample(tpe: Type): Tree = {
-    val outerSymbol = tpe.typeConstructor
-
-    tpe.typeArgs match {
-      case inner :: Nil => q"""
-        new $prefix.Empty[$tpe] {
-          override def sample: $tpe = $prefix.void[$outerSymbol, $inner]()
-        }
-      """
-      case _ => c.abort(c.enclosingPosition, "Expected a single type argument for type Collection")
-    }
-  }
-
   def tupleSample(tpe: Type): Tree = {
     val comp = tpe.typeSymbol.name.toTermName
 
@@ -250,11 +237,10 @@ class EmptyMacro(val c: blackbox.Context) extends AnnotationToolkit with Blackbo
 
     val tree = symbol match {
       case SamplersSymbols.mapSymbol => mapSample(tpe)
-      case sym if tpe <:< typeOf[TraversableOnce[_]] => traversableSample(tpe)
       case sym if isTuple(tpe) => tupleSample(tpe)
       case SamplersSymbols.enum => enumSample(tpe)
       case sym if sym.isClass && sym.asClass.isCaseClass => caseClassSample(tpe)
-      case _ => c.abort(c.enclosingPosition, s"Cannot derive sampler implementation for $tpe")
+      case _ => c.abort(c.enclosingPosition, s"Cannot derive empty sampler implementation for $tpe")
     }
 
     if (showTrees) {
