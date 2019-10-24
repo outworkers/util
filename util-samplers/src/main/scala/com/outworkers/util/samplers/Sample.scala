@@ -194,6 +194,11 @@ object Sample extends Generators {
     override def sample: Array[T] = Array.fill(defaultGeneration)(gen[T])
   }
 
+  // Scala 2.13 compat
+  implicit def indexedSeqSample[T : Sample]: Sample[IndexedSeq[T]] = new Sample[IndexedSeq[T]] {
+    override def sample: IndexedSeq[T] = IndexedSeq.fill(defaultGeneration)(gen[T])
+  }
+
   /**
     * Derives samplers and encodings for a non standard type.
     * @param fn The function that converts a [[T]] instance to a [[T1]] instance.
@@ -201,10 +206,7 @@ object Sample extends Generators {
     * @tparam T The source type of the sampler, must already have a sampler defined for it.
     * @return A new sampler that can interact with the target type.
     */
-  def iso[T : Sample, T1](fn: T => T1): Sample[T1] = derive(fn)
-
-  @deprecated("Use Sample.iso instead", "0.46.0")
-  def derive[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
+  def iso[T : Sample, T1](fn: T => T1): Sample[T1] = new Sample[T1] {
     override def sample: T1 = fn(gen[T])
   }
 

@@ -65,8 +65,18 @@ object Empty extends EmptyGenerators {
   }
 
   // Scala 2.13 compat
+  implicit def setEmpty[T]: Empty[Set[T]] = new Empty[Set[T]] {
+    override def sample: Set[T] = Set.empty[T]
+  }
+
+  // Scala 2.13 compat
   implicit def arrEmpty[T : ClassTag]: Empty[Array[T]] = new Empty[Array[T]] {
     override def sample: Array[T] = Array.empty[T]
+  }
+
+  // Scala 2.13 compat
+  implicit def indexedSeqSample[T]: Empty[IndexedSeq[T]] = new Empty[IndexedSeq[T]] {
+    override def sample: IndexedSeq[T] = IndexedSeq.empty[T]
   }
 
   /**

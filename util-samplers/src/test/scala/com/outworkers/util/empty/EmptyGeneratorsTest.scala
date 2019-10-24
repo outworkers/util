@@ -21,7 +21,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class EmptyGeneratorsTest extends FlatSpec with Matchers {
 
   it should "generate a sized list based on the given argument" in {
-    assert(void[List, String]().isEmpty)
+    assert(void[List[String]].isEmpty)
   }
 
   it should "generate a sized map based on the given size argument" in {
