@@ -58,7 +58,6 @@ object Publishing {
       docsFolder
     ).getOrElse("Docs folder [%s] is outside of this VCS repository with base directory [%s]!" format(docsFolder, base))
 
-
     vcs(st).add(relativePath) !! st.log
     vcs(st).add(relativeDocsPath) !! st.log
     val status = (vcs(st).status !!) trim
@@ -86,7 +85,7 @@ object Publishing {
       setReleaseVersion,
       commitReleaseVersion,
       tagRelease,
-      releaseStepCommandAndRemaining("such publishSigned"),
+      releaseStepCommandAndRemaining("+publishSigned"),
       releaseStepCommandAndRemaining("sonatypeReleaseAll"),
       setNextVersion,
       commitNextVersion,
