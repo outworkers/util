@@ -1,11 +1,9 @@
 language: scala
-sudo: required
+sudo: false
 dist: trusty
-
 scala:
 - 2.11.12
 - 2.13.1
-sudo: false
 notifications:
   slack:
   - websudos:P9QNXx1ZGFnDHp3v3jUqtB8k
@@ -34,6 +32,9 @@ env:
   - secure: KJca+iYGyO9svC+V1UF5y7Ff9OtS83CRY6VHZ0cKtBi6xID68J9BE/70TyDgNM6eLdweVw3Qw2tVUJdlFlkq9x4swOJqZkG7CodO9+NsHcYvlOWVNEXJ8ETu6vli5BY3w4UJlebjszUjOmC4cW7h5Y+omW0NHT6RrYbxVmvkQgs=
   - secure: McqtU8mq/QFlG2s2lfeKyNbCPU1IPGNF4FQFyYsWU94TMhUh7KGBDQFvdxxabDngwPWuMKvA59PFCqzbvmJr9qug4pYEAJaAAkfCQVUhU6fczdrH1k9mAdERIBvB1T6zWXCpIW1NTWkpq8Ew2aLGTpCJ4KShjGS0uzDgRyXjC+Y=
   - secure: lPvdpbnKHSdkeIfh5pT2e3H3uR6kh11Wlf1YWgbvkC3eZrWeRmwKGFwMrPKP1gu7Y4+I563a0vR2Zgli+xGCibS6JY/NHUx3B8j8CzvsMfSEoG6vOpNE2uCM3EbugJRGMausjQkqIH6gmqQaHLgTVtj2JnkqWOM25EVvgqL7Ew8=
+  - secure: KN/A3hwoeMzamO07Lgd5nPUNrA2+o0rq1e+F+OhiG9FuwLvUZvhCVa5Bx5YbtXGKPPhvgdWQBexRvi3fQF3BxvIkRvDuf9SUElGBVvzJlsOuJOVV6TezjZigZbLGMXkOZmG3qdG3g6k6Fxd5KPH1wb8MwDgGNMu3V4IEcVis5n8=
+  - secure: MI5pHnXQE9vSZvjohlf8rs/39NY9FynBWk95h/xKHWdGkX+kNwJmd59I5IzjNPZ0vNu6nnIE9ciX6MuKCQZFe1IJyaJ2J2VCUCeAyaX3m1k8uXm9Nj9HY+I6ZXzieMqhyneVzG7efsHQqmitOHFfIMoiKDFxBLjiGWXwjl4dCto=
+  - secure: H3EdkGmh7G1fWwJPK0lO9u2o6HBj8WvyN4wKzkEg4wWXBEYRcGaSF1YOCh3roXjo6CAUgRN30E4NHXVq4x8wnhahLu/KiHR3uOAY5xj0A404MhWPxOvhjq5okd+B/DNFB4q0BqupAqHbzutIx8AnDUjHg/I8KeIl6oM87rteSgc=
 cache:
   directories:
   - "$HOME/.sbt/0.13/dependency"
