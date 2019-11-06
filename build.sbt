@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 import sbt.Keys._
+import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
+import sbtrelease.ReleaseStateTransformations._
+import Publishing.{ciSkipSequence, pgpPass, releaseTutFolder, runningUnderCi}
 
 lazy val Versions = new {
   val scalatest = "3.0.8"
@@ -140,6 +143,27 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
   }
 }
 
+val releaseSettings = Seq(
+  releaseTutFolder := baseDirectory.value / "docs",
+  releaseIgnoreUntrackedFiles := true,
+  releaseVersionBump := sbtrelease.Version.Bump.Minor,
+  releaseTagComment := s"Releasing ${(version in ThisBuild).value} $ciSkipSequence",
+  releaseCommitMessage := s"Setting version to ${(version in ThisBuild).value} $ciSkipSequence",
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    releaseStepTask((tut in Tut) in readme),
+    setReleaseVersion,
+    Publishing.commitTutFilesAndVersion,
+    releaseStepCommandAndRemaining("such publishSigned"),
+    releaseStepCommandAndRemaining("sonatypeReleaseAll"),
+    tagRelease,
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  )
+)
+
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
   scalaVersion := Versions.scala212,
@@ -157,7 +181,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     "-feature",
     "-unchecked"
   )
-) ++ Publishing.effectiveSettings
+) ++ Publishing.effectiveSettings ++ releaseSettings
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
