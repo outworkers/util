@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Outworkers Ltd.
+ * Copyright 2013 - 2019 Outworkers Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -123,18 +123,6 @@ object Publishing {
     }
   }
 
-  def publishToMaven: Boolean = sys.env.get("MAVEN_PUBLISH").exists("true" ==)
-
-  lazy val bintraySettings: Seq[Def.Setting[_]] = Seq(
-    publishMavenStyle := true,
-    bintrayOrganization := Some("outworkers"),
-    bintrayRepository := { if (scalaVersion.value.trim.endsWith("SNAPSHOT")) "oss-snapshots" else "oss-releases" },
-    bintrayReleaseOnPublish in ThisBuild := true,
-    publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true},
-    licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt"))
-  )
-
   lazy val pgpPass: Option[Array[Char]] = Properties.envOrNone("pgp_passphrase").map(_.toCharArray)
 
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
@@ -178,11 +166,7 @@ object Publishing {
         </developers>
   )
 
-  def effectiveSettings: Seq[Def.Setting[_]] = if (publishToMaven) {
-    releaseSettings ++ mavenSettings
-  } else {
-    bintraySettings
-  }
+  def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
 
   /**
     * This exists because SBT is not capable of reloading publishing configuration during tasks or commands.
