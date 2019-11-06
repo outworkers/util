@@ -73,26 +73,6 @@ object Publishing {
     newState
   }
 
-  val releaseSettings = Seq(
-    releaseTutFolder in ThisBuild := baseDirectory.value / "docs",
-    releaseIgnoreUntrackedFiles := true,
-    releaseVersionBump := sbtrelease.Version.Bump.Minor,
-    releaseTagComment := s"Releasing ${(version in ThisBuild).value} $ciSkipSequence",
-    releaseCommitMessage := s"Setting version to ${(version in ThisBuild).value} $ciSkipSequence",
-    releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      inquireVersions,
-      setReleaseVersion,
-      commitReleaseVersion,
-      tagRelease,
-      releaseStepCommandAndRemaining("+publishSigned"),
-      releaseStepCommandAndRemaining("sonatypeReleaseAll"),
-      setNextVersion,
-      commitNextVersion,
-      pushChanges
-    )
-  )
-
   lazy val defaultCredentials: Seq[Credentials] = {
     if (!Publishing.runningUnderCi) {
       Seq(
