@@ -46,6 +46,3 @@ before_script: travis_retry sbt "++ $TRAVIS_SCALA_VERSION update"
 script: "./build/run_tests.sh"
 after_success:
 - "./build/publish_develop.sh"
-before_install:
-- openssl aes-256-cbc -K $encrypted_d543e1d8b539_key -iv $encrypted_d543e1d8b539_iv
-  -in deploy_key.asc.enc -out build/deploy_key.asc -d
