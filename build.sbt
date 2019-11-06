@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 import sbt.Keys._
+import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
+import sbtrelease.ReleaseStateTransformations._
+import Publishing.{ciSkipSequence, pgpPass, releaseTutFolder, runningUnderCi}
 
 lazy val Versions = new {
   val scalatest = "3.0.8"
