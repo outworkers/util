@@ -43,7 +43,7 @@ function prepare_maven_release {
 function publish_to_bintray {
     export MAVEN_PUBLISH="false"
     echo "Publishing new version to bintray"
-    sbt "such publish"
+    sbt "+publish"
 }
 
 function setup_credentials {
