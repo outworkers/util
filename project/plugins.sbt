@@ -12,8 +12,6 @@ addSbtPlugin("com.typesafe.sbt" % "sbt-git" % "1.0.0")
 
 addSbtPlugin("org.scalastyle" %% "scalastyle-sbt-plugin" % "1.0.0")
 
-addSbtPlugin("com.earldouglas" % "xsbt-web-plugin" % "4.0.2")
-
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.6.0")
 
 addSbtPlugin("org.scoverage" %% "sbt-coveralls" % "1.2.7")
@@ -26,10 +24,6 @@ addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.6.13")
 
 addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
 
-if (sys.env.get("MAVEN_PUBLISH").exists("true" ==)) {
-  addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.8")
-} else {
-  addSbtPlugin("org.foundweekends" % "sbt-bintray" % "0.5.4")
-}
+addSbtPlugin("org.xerial.sbt" % "sbt-sonatype" % "3.8")
 
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "1.0.12")
