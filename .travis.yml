@@ -19,7 +19,6 @@ matrix:
   - scala: 2.12.8
     jdk: oraclejdk9
     env: RUN_WITH_COVERAGE=true PUBLISH_ARTIFACT=true
-
 env:
   global:
   - RUN_WITH_COVERAGE: false
@@ -33,17 +32,17 @@ env:
   - secure: lPvdpbnKHSdkeIfh5pT2e3H3uR6kh11Wlf1YWgbvkC3eZrWeRmwKGFwMrPKP1gu7Y4+I563a0vR2Zgli+xGCibS6JY/NHUx3B8j8CzvsMfSEoG6vOpNE2uCM3EbugJRGMausjQkqIH6gmqQaHLgTVtj2JnkqWOM25EVvgqL7Ew8=
 cache:
   directories:
-  - $HOME/.sbt/0.13/dependency
-  - $HOME/.sbt/boot/scala*
-  - $HOME/.sbt/launchers
-  - $HOME/.ivy2/cache
-  - $HOME/.nvm
+  - "$HOME/.sbt/0.13/dependency"
+  - "$HOME/.sbt/boot/scala*"
+  - "$HOME/.sbt/launchers"
+  - "$HOME/.ivy2/cache"
+  - "$HOME/.nvm"
 before_cache:
 - du -h -d 1 $HOME/.ivy2/cache
 - du -h -d 2 $HOME/.sbt/
 - find $HOME/.sbt -name "*.lock" -type f -delete
 - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete
 before_script: travis_retry sbt "++ $TRAVIS_SCALA_VERSION update"
-script: ./build/run_tests.sh
+script: "./build/run_tests.sh"
 after_success:
-- ./build/publish_develop.sh
+- "./build/publish_develop.sh"
