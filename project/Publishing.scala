@@ -108,6 +108,8 @@ object Publishing {
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
+    publishConfiguration := publishConfiguration.value.withOverwrite(true),
+    publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
     Global / pgpPassphrase := {
       if (runningUnderCi && pgpPass.isDefined) {
         println("Running under CI and PGP password specified under settings.")
