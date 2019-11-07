@@ -130,14 +130,14 @@ object Publishing {
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
       }
     },
-    licenses += ("Outworkers License", url("https://github.com/outworkers/phantom/blob/develop/LICENSE.txt")),
+    licenses += ("Outworkers License", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
     pomExtra :=
-      <url>https://github.com/outworkers/phantom</url>
+      <url>https://github.com/outworkers/util</url>
         <scm>
-          <url>git@github.com:outworkers/phantom.git</url>
-          <connection>scm:git:git@github.com:outworkers/phantom.git</connection>
+          <url>git@github.com:outworkers/util.git</url>
+          <connection>scm:git:git@github.com:outworkers/util.git</connection>
         </scm>
         <developers>
           <developer>
