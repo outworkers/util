@@ -26,7 +26,7 @@ import scala.util.Properties
 
 object Publishing {
 
-  lazy val noPublishSettings = Seq(
+  lazy val doNotPublishSettings = Seq(
     publish := (),
     publishLocal := (),
     publishArtifact := false
@@ -139,7 +139,7 @@ object Publishing {
       <url>https://github.com/outworkers/util</url>
         <scm>
           <url>git@github.com:outworkers/util.git</url>
-          <connection>scm:git@github.com:outworkers/util.git</connection>
+          <connection>scm:git:git@github.com:outworkers/util.git</connection>
         </scm>
         <developers>
           <developer>
