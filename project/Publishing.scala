@@ -36,7 +36,9 @@ object Publishing {
 
   def vcs(state: State): Vcs = {
     Project.extract(state).get(releaseVcs)
-      .getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
+      .getOrElse(
+        sys.error("Aborting release. Working directory is not a repository of a recognized VCS.")
+      )
   }
 
   val releaseTutFolder = settingKey[File]("The file to write the version to")
@@ -137,7 +139,7 @@ object Publishing {
       <url>https://github.com/outworkers/util</url>
         <scm>
           <url>git@github.com:outworkers/util.git</url>
-          <connection>scm:git:git@github.com:outworkers/util.git</connection>
+          <connection>scm:git@github.com:outworkers/util.git</connection>
         </scm>
         <developers>
           <developer>
