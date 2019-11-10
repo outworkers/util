@@ -168,6 +168,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
   scalaVersion := Versions.scala212,
   crossScalaVersions := Versions.scala.all,
+  Test / fork := true,
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
