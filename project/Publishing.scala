@@ -26,7 +26,7 @@ import scala.util.Properties
 
 object Publishing {
 
-  lazy val noPublishSettings = Seq(
+  lazy val doNotPublishSettings = Seq(
     publish := (),
     publishLocal := (),
     publishArtifact := false
@@ -36,7 +36,9 @@ object Publishing {
 
   def vcs(state: State): Vcs = {
     Project.extract(state).get(releaseVcs)
-      .getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
+      .getOrElse(
+        sys.error("Aborting release. Working directory is not a repository of a recognized VCS.")
+      )
   }
 
   val releaseTutFolder = settingKey[File]("The file to write the version to")

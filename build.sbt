@@ -195,7 +195,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
 )
 
 lazy val util = (project in file("."))
-  .settings(sharedSettings: _*)
+  .settings(sharedSettings ++ Publishing.doNotPublishSettings)
   .settings(
     name := "util",
     moduleName := "util",
