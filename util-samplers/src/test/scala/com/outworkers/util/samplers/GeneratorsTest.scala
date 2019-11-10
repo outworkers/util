@@ -70,6 +70,7 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
 
   it should "automatically sample nested collections" in {
     val sample = gen[NestedCollections]
+    info(sample.trace())
     sample shouldEqual sample
   }
 
@@ -80,7 +81,6 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
 
   it should "skip dictionary lookups for non stringly typed fields" in {
     val sample = gen[EdgeCase]
-    Console.println(sample)
   }
 
 
