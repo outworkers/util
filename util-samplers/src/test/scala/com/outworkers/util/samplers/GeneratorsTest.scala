@@ -50,9 +50,6 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
   }
 
   it should "automatically generate a TestRow" in {
-    import com.outworkers.util.macros.debug.Options.ShowTrees
-    import com.outworkers.util.macros.debug.Options.ShowLog
-
     val sample = gen[TestRow]
     info(sample.trace())
   }
