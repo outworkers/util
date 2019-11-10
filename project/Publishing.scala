@@ -66,7 +66,7 @@ object Publishing {
 
     val newState = if (status.nonEmpty) {
       val (state, msg) = settings.runTask(releaseCommitMessage, st)
-      vcs(state).commit(msg, sign, false) ! st.log
+      vcs(state).commit(msg, sign, signOff = false) ! st.log
       state
     } else {
       // nothing to commit. this happens if the version.sbt file hasn't changed.
