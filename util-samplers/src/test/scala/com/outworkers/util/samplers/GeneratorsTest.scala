@@ -15,10 +15,11 @@
  */
 package com.outworkers.util.samplers
 
-import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
+import org.outworkers.domain.test.{ NestedCollections, SimpleFoo }
 import org.scalatest.{FlatSpec, Matchers}
 import org.outworkers.domain.test._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+
 
 class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
@@ -46,6 +47,14 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
     val user = gen[User]
     val tp = gen[TupleRecord]
     val tpColl = gen[TupleCollectionRecord]
+  }
+
+  it should "automatically generate a TestRow" in {
+    import com.outworkers.util.macros.debug.Options.ShowTrees
+    import com.outworkers.util.macros.debug.Options.ShowLog
+
+    val sample = gen[TestRow]
+    info(sample.trace())
   }
 
   it should "automatically derive a generator for a nested case class in a different package" in {

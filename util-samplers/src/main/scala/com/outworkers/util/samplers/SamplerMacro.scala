@@ -163,7 +163,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.List[..$applied]"),
-              generator = tpe => q"$prefix.Sample.gen[$collectionPkg.List[..$tpe]]"
+              generator = tpe => q"$prefix.Sample.genList[..$tpe]()"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of List.")
@@ -174,7 +174,7 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
             CollectionType(
               sources = sourceTpe :: Nil,
               applier = applied => TypeName(s"$collectionPkg.Set[..$applied]"),
-              generator = tpe => q"$prefix.Sample[$collectionPkg.Set[$tpe]]"
+              generator = tpe => q"$prefix.Sample.genSet[..$tpe]()"
             )
           )
           case _ => c.abort(c.enclosingPosition, "Could not extract inner type argument of Set.")
@@ -343,6 +343,8 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
     if (showTrees) {
       echo(showCode(tree))
     }
+
+    echo(showCode(tree))
 
     if (showCache) {
       echo(BlackboxToolbelt.sampleCache.show)
