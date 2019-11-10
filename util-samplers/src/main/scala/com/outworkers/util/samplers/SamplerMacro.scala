@@ -344,8 +344,6 @@ class SamplerMacro(val c: blackbox.Context) extends AnnotationToolkit with Black
       echo(showCode(tree))
     }
 
-    echo(showCode(tree))
-
     if (showCache) {
       echo(BlackboxToolbelt.sampleCache.show)
     }
