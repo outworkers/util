@@ -1,4 +1,4 @@
-# util[![Build Status](https://travis-ci.org/outworkers/util.svg?branch=develop)](https://travis-ci.org/outworkers/util) [![Coverage Status](https://coveralls.io/repos/github/outworkers/util/badge.svg?branch=develop)](https://coveralls.io/github/outworkers/util?branch=develop) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11)   [ ![Bintray](https://api.bintray.com/packages/outworkers/oss-releases/util/images/download.svg) ](https://bintray.com/outworkers/oss-releases/util-lift/_latestVersion) [![ScalaDoc](http://javadoc-badge.appspot.com/com.outworkers/util_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.outworkers/util-lift_2.11) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/outworkers/util?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) 
+# util[![Build Status](https://travis-ci.org/outworkers/util.svg?branch=develop)](https://travis-ci.org/outworkers/util) [![Coverage Status](https://coveralls.io/repos/github/outworkers/util/badge.svg?branch=develop)](https://coveralls.io/github/outworkers/util?branch=develop) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.outworkers/util-lift_2.11)   [ ![Bintray](https://api.bintray.com/packages/outworkers/oss-releases/util/images/download.svg) ](https://bintray.com/outworkers/oss-releases/util-lift/_latestVersion) [![ScalaDoc](http://javadoc-badge.appspot.com/com.outworkers/util_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.outworkers/util-lift_2.11) [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/outworkers/util?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 #### Automated sampling
 
@@ -27,9 +27,9 @@ import com.outworkers.util.samplers._
 
 object Examplers {
     val user = gen[User]
-    
+
     user.trace()
-    
+
     /**
     User(
       id = 6be8914c-4274-40ee-83f5-334131246fd8
@@ -91,7 +91,7 @@ It's useful to define such typeclass instances inside package objects, as they w
 
 ```scala
 
-import com.outworkers.util.testing._
+import com.outworkers.util.samplers._
 
 case class MyAwesomeClass(
   name: String,
@@ -108,7 +108,7 @@ It's also useful when you want to define specific ways in which hierarchies of c
 #### Generating data
 
 There are multiple methods available, allowing you to generate more than just the type:
- 
+
 - ```gen[T]```, used to generate a single instance of T.
 - ```gen[X, Y]```, used to generate a tuple based on two samples.
 - ```genOpt[T]```, convenience method that will give you back a ```Some[T](..)```.
@@ -171,7 +171,7 @@ class MyAwesomeSpec extends FlatSpec with Matchers {
   implicit val sqlDateSampler = new Sample[java.sql.Date] {
     override def sample: java.sql.Date = java.sql.Date.valueOf(LocalDate.now(ZoneId.of("UTC")))
   }
-  
+
   "The samplers lib" should "automatically sample an instance of ExpansionExample" in {
     val instance = gen[ExpansionExample]
   }
