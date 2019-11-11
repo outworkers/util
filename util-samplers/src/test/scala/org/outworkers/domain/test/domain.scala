@@ -95,6 +95,16 @@ case class NestedOtherPackage(
   emails: List[String]
 )
 
+case class TestRow(
+  key: String,
+  list: List[String],
+  setText: Set[String],
+  mapTextToText: Map[String, String],
+  setInt: Set[Int],
+  mapIntToText: Map[Int, String],
+  mapIntToInt: Map[Int, Int]
+)
+
 trait RoleType extends Enumeration {
   //represents built-in role types.
   type RoleType = Value
