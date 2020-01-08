@@ -42,24 +42,24 @@ lazy val Versions = new {
   }
 
   lazy val ScalacOptions = Seq(
-  "-deprecation", // Emit warning and location for usages of deprecated APIs.
-  "-encoding",
-  "utf-8", // Specify character encoding used by source files.
-  "-feature",
-  "-explaintypes", // Explain type errors in more detail.
-  "-feature", // Emit warning and location for usages of features that should be imported explicitly.
-  "-language:reflectiveCalls",
-  "-language:postfixOps",
-  "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
-  "-language:experimental.macros", // Allow macro definition (besides implementation and application)
-  "-language:higherKinds", // Allow higher-kinded types
-  "-language:implicitConversions", // Allow definition of implicit functions called views
-  "-unchecked", // Enable additional warnings where generated code depends on assumptions.
-  "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
-  //"-Xfatal-warnings", // Fail the compilation if there are any warnings.
-  "-Xfuture" // Turn on future language features.
-  //"-Yno-adapted-args" // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
-)
+    "-deprecation", // Emit warning and location for usages of deprecated APIs.
+    "-encoding",
+    "utf-8", // Specify character encoding used by source files.
+    "-feature",
+    "-explaintypes", // Explain type errors in more detail.
+    "-feature", // Emit warning and location for usages of features that should be imported explicitly.
+    "-language:reflectiveCalls",
+    "-language:postfixOps",
+    "-language:existentials", // Existential types (besides wildcard types) can be written and inferred
+    "-language:experimental.macros", // Allow macro definition (besides implementation and application)
+    "-language:higherKinds", // Allow higher-kinded types
+    "-language:implicitConversions", // Allow definition of implicit functions called views
+    "-unchecked", // Enable additional warnings where generated code depends on assumptions.
+    "-Xcheckinit", // Wrap field accessors to throw an exception on uninitialized access.
+    //"-Xfatal-warnings", // Fail the compilation if there are any warnings.
+    "-Xfuture" // Turn on future language features.
+    //"-Yno-adapted-args" // Do not adapt an argument list (either by inserting () or creating a tuple) to match the receiver.
+  )
 
 val XLintOptions = Seq(
   "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
