@@ -1,5 +1,5 @@
 /*
- * Copyright 2013 - 2017 Outworkers Ltd.
+ * Copyright 2013 - 2019 Outworkers Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,7 +26,7 @@ import scala.util.Properties
 
 object Publishing {
 
-  lazy val noPublishSettings = Seq(
+  lazy val doNotPublishSettings = Seq(
     publish := (),
     publishLocal := (),
     publishArtifact := false
@@ -36,7 +36,9 @@ object Publishing {
 
   def vcs(state: State): Vcs = {
     Project.extract(state).get(releaseVcs)
-      .getOrElse(sys.error("Aborting release. Working directory is not a repository of a recognized VCS."))
+      .getOrElse(
+        sys.error("Aborting release. Working directory is not a repository of a recognized VCS.")
+      )
   }
 
   val releaseTutFolder = settingKey[File]("The file to write the version to")
@@ -58,14 +60,13 @@ object Publishing {
       docsFolder
     ).getOrElse("Docs folder [%s] is outside of this VCS repository with base directory [%s]!" format(docsFolder, base))
 
-
     vcs(st).add(relativePath) !! st.log
     vcs(st).add(relativeDocsPath) !! st.log
     val status = (vcs(st).status !!) trim
 
     val newState = if (status.nonEmpty) {
       val (state, msg) = settings.runTask(releaseCommitMessage, st)
-      vcs(state).commit(msg, sign, false) ! st.log
+      vcs(state).commit(msg, sign, signOff = false) ! st.log
       state
     } else {
       // nothing to commit. this happens if the version.sbt file hasn't changed.
@@ -73,26 +74,6 @@ object Publishing {
     }
     newState
   }
-
-  val releaseSettings = Seq(
-    releaseTutFolder in ThisBuild := baseDirectory.value / "docs",
-    releaseIgnoreUntrackedFiles := true,
-    releaseVersionBump := sbtrelease.Version.Bump.Minor,
-    releaseTagComment := s"Releasing ${(version in ThisBuild).value} $ciSkipSequence",
-    releaseCommitMessage := s"Setting version to ${(version in ThisBuild).value} $ciSkipSequence",
-    releaseProcess := Seq[ReleaseStep](
-      checkSnapshotDependencies,
-      inquireVersions,
-      setReleaseVersion,
-      commitReleaseVersion,
-      tagRelease,
-      releaseStepCommandAndRemaining("such publishSigned"),
-      releaseStepCommandAndRemaining("sonatypeReleaseAll"),
-      setNextVersion,
-      commitNextVersion,
-      pushChanges
-    )
-  )
 
   lazy val defaultCredentials: Seq[Credentials] = {
     if (!Publishing.runningUnderCi) {
@@ -124,23 +105,13 @@ object Publishing {
     }
   }
 
-  def publishToMaven: Boolean = sys.env.get("MAVEN_PUBLISH").exists("true" ==)
-
-  lazy val bintraySettings: Seq[Def.Setting[_]] = Seq(
-    publishMavenStyle := true,
-    bintrayOrganization := Some("outworkers"),
-    bintrayRepository := { if (scalaVersion.value.trim.endsWith("SNAPSHOT")) "oss-snapshots" else "oss-releases" },
-    bintrayReleaseOnPublish in ThisBuild := true,
-    publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true},
-    licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt"))
-  )
-
   lazy val pgpPass: Option[Array[Char]] = Properties.envOrNone("pgp_passphrase").map(_.toCharArray)
 
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishMavenStyle := true,
+    publishConfiguration := publishConfiguration.value.withOverwrite(true),
+    publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
     Global / pgpPassphrase := {
       if (runningUnderCi && pgpPass.isDefined) {
         println("Running under CI and PGP password specified under settings.")
@@ -161,14 +132,14 @@ object Publishing {
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
       }
     },
-    licenses += ("Outworkers License", url("https://github.com/outworkers/phantom/blob/develop/LICENSE.txt")),
+    licenses += ("Outworkers License", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
     pomExtra :=
-      <url>https://github.com/outworkers/phantom</url>
+      <url>https://github.com/outworkers/util</url>
         <scm>
-          <url>git@github.com:outworkers/phantom.git</url>
-          <connection>scm:git:git@github.com:outworkers/phantom.git</connection>
+          <url>git@github.com:outworkers/util.git</url>
+          <connection>scm:git:git@github.com:outworkers/util.git</connection>
         </scm>
         <developers>
           <developer>
@@ -179,11 +150,7 @@ object Publishing {
         </developers>
   )
 
-  def effectiveSettings: Seq[Def.Setting[_]] = if (publishToMaven) {
-    releaseSettings ++ mavenSettings
-  } else {
-    bintraySettings
-  }
+  def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
 
   /**
     * This exists because SBT is not capable of reloading publishing configuration during tasks or commands.

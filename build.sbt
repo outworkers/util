@@ -14,6 +14,9 @@
  * limitations under the License.
  */
 import sbt.Keys._
+import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
+import sbtrelease.ReleaseStateTransformations._
+import Publishing.{ciSkipSequence, pgpPass, releaseTutFolder, runningUnderCi}
 
 lazy val Versions = new {
   val scalatest = "3.0.8"
@@ -32,10 +35,10 @@ lazy val Versions = new {
   val scala211 = "2.11.12"
   val scala212 = "2.12.8"
   val scala213 = "2.13.1"
-  val scalaAll = Seq(scala210, scala211, scala212, scala213)
+  val scalaAll = Seq(scala211, scala212, scala213)
 
   val scala = new {
-    val all = Seq(scala210, scala211, scala212, scala213)
+    val all = Seq(scala211, scala212, scala213)
   }
 
   lazy val ScalacOptions = Seq(
@@ -140,10 +143,32 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
   }
 }
 
+val releaseSettings = Seq(
+  releaseTutFolder := baseDirectory.value / "docs",
+  releaseIgnoreUntrackedFiles := true,
+  releaseVersionBump := sbtrelease.Version.Bump.Minor,
+  releaseTagComment := s"Releasing ${(version in ThisBuild).value} $ciSkipSequence",
+  releaseCommitMessage := s"Setting version to ${(version in ThisBuild).value} $ciSkipSequence",
+  releaseProcess := Seq[ReleaseStep](
+    checkSnapshotDependencies,
+    inquireVersions,
+    releaseStepTask((tut in Tut) in readme),
+    setReleaseVersion,
+    Publishing.commitTutFilesAndVersion,
+    releaseStepCommandAndRemaining("+publishSigned"),
+    releaseStepCommandAndRemaining("sonatypeReleaseAll"),
+    tagRelease,
+    setNextVersion,
+    commitNextVersion,
+    pushChanges
+  )
+)
+
 val sharedSettings: Seq[Def.Setting[_]] = Seq(
   organization := "com.outworkers",
   scalaVersion := Versions.scala212,
   crossScalaVersions := Versions.scala.all,
+  Test / fork := true,
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases"),
     Resolver.jcenterRepo
@@ -157,7 +182,7 @@ val sharedSettings: Seq[Def.Setting[_]] = Seq(
     "-feature",
     "-unchecked"
   )
-) ++ Publishing.effectiveSettings
+) ++ Publishing.effectiveSettings ++ releaseSettings
 
 lazy val baseProjectList: Seq[ProjectReference] = Seq(
   domain,
@@ -171,7 +196,7 @@ lazy val baseProjectList: Seq[ProjectReference] = Seq(
 )
 
 lazy val util = (project in file("."))
-  .settings(sharedSettings: _*)
+  .settings(sharedSettings ++ Publishing.doNotPublishSettings)
   .settings(
     name := "util",
     moduleName := "util",

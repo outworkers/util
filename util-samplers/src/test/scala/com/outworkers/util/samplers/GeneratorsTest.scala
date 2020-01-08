@@ -15,10 +15,11 @@
  */
 package com.outworkers.util.samplers
 
-import org.outworkers.domain.test.{NestedCollections, SimpleFoo}
+import org.outworkers.domain.test.{ NestedCollections, SimpleFoo }
 import org.scalatest.{FlatSpec, Matchers}
 import org.outworkers.domain.test._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+
 
 class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
@@ -48,6 +49,11 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
     val tpColl = gen[TupleCollectionRecord]
   }
 
+  it should "automatically generate a TestRow" in {
+    val sample = gen[TestRow]
+    info(sample.trace())
+  }
+
   it should "automatically derive a generator for a nested case class in a different package" in {
     "val sample = gen[NestedOtherPackage]" should compile
   }
@@ -70,6 +76,7 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
 
   it should "automatically sample nested collections" in {
     val sample = gen[NestedCollections]
+    info(sample.trace())
     sample shouldEqual sample
   }
 
@@ -80,7 +87,6 @@ class GeneratorsTest extends FlatSpec with Matchers with ScalaCheckDrivenPropert
 
   it should "skip dictionary lookups for non stringly typed fields" in {
     val sample = gen[EdgeCase]
-    Console.println(sample)
   }
 
 
