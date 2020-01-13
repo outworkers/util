@@ -122,3 +122,14 @@ case class Membership(
   role: RoleType.Value = RoleType.Leader,
   rankId: String
 )
+
+
+case class NpeRecipe(
+  id: UUID,
+  name: String,
+  title: String,
+  author: String,
+  description: String,
+  ingredients: Set[String],
+  props: Map[String, String]
+)

@@ -20,6 +20,8 @@ import java.util.{Date, Locale, UUID}
 
 import org.scalacheck.{Arbitrary, Gen}
 import com.outworkers.util.domain._
+import com.outworkers.util.empty.Empty
+
 import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
 import scala.util.Random
