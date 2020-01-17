@@ -143,7 +143,7 @@ object Publishing {
         </scm>
         <developers>
           <developer>
-            <id>alexflav</id>
+            <id>alexflav23</id>
             <name>Flavian Alexandru</name>
             <url>http://github.com/alexflav23</url>
           </developer>

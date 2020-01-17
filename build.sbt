@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import Publishing.{ciSkipSequence, releaseTutFolder}
 import sbt.Keys._
 import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
 import sbtrelease.ReleaseStateTransformations._
-import Publishing.{ciSkipSequence, pgpPass, releaseTutFolder, runningUnderCi}
 
 lazy val Versions = new {
   val scalatest = "3.0.8"
@@ -63,7 +63,7 @@ lazy val Versions = new {
 
 val XLintOptions = Seq(
   "-Xlint:adapted-args", // Warn if an argument list is modified to match the receiver.
-  "-Xlint:by-name-right-associative", // By-name parameter of right associative operator.
+  "-Xlint:by-name-right-associative", // By-name parameter of right\ associative operator.
   "-Xlint:constant", // Evaluation of a constant arithmetic expression results in an error.
   "-Xlint:delayedinit-select", // Selecting member of DelayedInit.
   "-Xlint:doc-detached", // A Scaladoc comment appears to be detached from its element.
@@ -112,7 +112,7 @@ scalacOptions in ThisBuild ++= scalacOptionsFn(scalaVersion.value)
 
   val catsVersion: String => ModuleID = {
     s => CrossVersion.partialVersion(s) match {
-      case Some((_, minor)) if minor >= 13 => "org.typelevel" %% "cats-core" % "2.0.0"
+      case Some((_, minor)) if minor >= 13 => "org.typelevel" %% "cats-core" % "2.1.0"
       case Some((_, minor)) if minor >= 11 => "org.typelevel" %% "cats-core" % "1.6.0"
       case _ => "org.typelevel" %% "cats-core" % "1.2.0"
     }
@@ -321,7 +321,7 @@ lazy val readme = (project in file("readme"))
     validators,
     samplers,
     macros
-  ).settings(
+  ).settings(Publishing.doNotPublishSettings).settings(
     scalaVersion := Versions.scala212,
     crossScalaVersions := Nil,
     tutSourceDirectory := sourceDirectory.value / "main" / "tut",
