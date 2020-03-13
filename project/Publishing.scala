@@ -125,10 +125,11 @@ object Publishing {
     },
     // Add sonatype repository settings
     publishTo := Some(
-      if (isSnapshot.value)
+      if (isSnapshot.value) {
         Opts.resolver.sonatypeSnapshots
-      else
+      } else {
         Opts.resolver.sonatypeStaging
+      }
     ),
     scmInfo := Some(
       ScmInfo(
