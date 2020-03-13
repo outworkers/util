@@ -132,7 +132,7 @@ object Publishing {
         Some("releases" at nexus + "service/local/staging/deploy/maven2")
       }
     },
-    licenses += ("Outworkers License", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
+    licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
     pomExtra :=
