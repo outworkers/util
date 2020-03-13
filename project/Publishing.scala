@@ -109,7 +109,6 @@ object Publishing {
 
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    publishMavenStyle := true,
     publishConfiguration := publishConfiguration.value.withOverwrite(true),
     publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
     Global / pgpPassphrase := {
@@ -124,31 +123,30 @@ object Publishing {
         None
       }
     },
-    publishTo := {
-      val nexus = "https://oss.sonatype.org/"
-      if (version.value.trim.endsWith("SNAPSHOT")) {
-        Some("snapshots" at nexus + "content/repositories/snapshots")
-      } else {
-        Some("releases" at nexus + "service/local/staging/deploy/maven2")
-      }
-    },
+    // Add sonatype repository settings
+    publishTo := Some(
+      if (isSnapshot.value)
+        Opts.resolver.sonatypeSnapshots
+      else
+        Opts.resolver.sonatypeStaging
+    ),
+    scmInfo := Some(
+      ScmInfo(
+        browseUrl = url("https://github.com/outworkers/util"),
+        connection = "git@github.com:outworkers/util.git"
+      )
+    ),
+    developers := List(
+      Developer(
+        "alexflav23",
+        "Flavian Alexandru",
+        "flavian@outworkers.com",
+        url("https://github.com/alexflav23"))
+    ),
     licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true },
-    pomExtra := {
-      <url>https://github.com/outworkers/util</url>
-        <scm>
-          <url>git@github.com:outworkers/util.git</url>
-          <connection>scm:git:git@github.com:outworkers/util.git</connection>
-        </scm>
-        <developers>
-          <developer>
-            <id>alexflav</id>
-            <name>Flavian Alexandru</name>
-            <url>http://github.com/alexflav23</url>
-          </developer>
-        </developers>
-    }
+    publishMavenStyle := true,
+    pomIncludeRepository := { _ => true }
   )
 
   def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
