@@ -152,28 +152,5 @@ object Publishing {
 
   def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
 
-  /**
-    * This exists because SBT is not capable of reloading publishing configuration during tasks or commands.
-    * Unfortunately we have to load a specific configuration based on an environment variable that we "flip"
-    * during CI.
-    */
-  def publishingToMaven: Boolean = {
-    sys.env.exists { case (k, v) => k.equalsIgnoreCase("MAVEN_PUBLISH") && v.equalsIgnoreCase("true") }
-  }
-
   def runningUnderCi: Boolean = sys.env.get("CI").isDefined || sys.env.get("TRAVIS").isDefined
-  def travisScala211: Boolean = sys.env.get("TRAVIS_SCALA_VERSION").exists(_.contains("2.11"))
-
-  def isTravisScala210: Boolean = !travisScala211
-
-  def isJdk8: Boolean = sys.props("java.specification.version") == "1.8"
-
-  def jdk8Only(ref: ProjectReference): Seq[ProjectReference] = addOnCondition(isJdk8, ref)
-
-  lazy val addOnCondition: (Boolean, ProjectReference) => Seq[ProjectReference] = (bool, ref) =>
-    if (bool) ref :: Nil else Nil
-
-  lazy val addRef: (Boolean, ClasspathDep[ProjectReference]) => Seq[ClasspathDep[ProjectReference]] = (bool, ref) =>
-    if (bool) Seq(ref) else Seq.empty
-
 }
