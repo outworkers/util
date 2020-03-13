@@ -109,7 +109,6 @@ object Publishing {
 
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    publishMavenStyle := true,
     publishConfiguration := publishConfiguration.value.withOverwrite(true),
     publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
     Global / pgpPassphrase := {
@@ -124,56 +123,34 @@ object Publishing {
         None
       }
     },
-    publishTo := {
-      val nexus = "https://oss.sonatype.org/"
-      if (version.value.trim.endsWith("SNAPSHOT")) {
-        Some("snapshots" at nexus + "content/repositories/snapshots")
+    // Add sonatype repository settings
+    publishTo := Some(
+      if (isSnapshot.value) {
+        Opts.resolver.sonatypeSnapshots
       } else {
-        Some("releases" at nexus + "service/local/staging/deploy/maven2")
+        Opts.resolver.sonatypeStaging
       }
-    },
+    ),
+    scmInfo := Some(
+      ScmInfo(
+        browseUrl = url("https://github.com/outworkers/util"),
+        connection = "git@github.com:outworkers/util.git"
+      )
+    ),
+    developers := List(
+      Developer(
+        "alexflav23",
+        "Flavian Alexandru",
+        "flavian@outworkers.com",
+        url("https://github.com/alexflav23"))
+    ),
     licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
-    pomIncludeRepository := { _ => true },
-    pomExtra :=
-      <url>https://github.com/outworkers/util</url>
-        <scm>
-          <url>git@github.com:outworkers/util.git</url>
-          <connection>scm:git:git@github.com:outworkers/util.git</connection>
-        </scm>
-        <developers>
-          <developer>
-            <id>alexflav</id>
-            <name>Flavian Alexandru</name>
-            <url>http://github.com/alexflav23</url>
-          </developer>
-        </developers>
+    publishMavenStyle := true,
+    pomIncludeRepository := { _ => true }
   )
 
   def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
 
-  /**
-    * This exists because SBT is not capable of reloading publishing configuration during tasks or commands.
-    * Unfortunately we have to load a specific configuration based on an environment variable that we "flip"
-    * during CI.
-    */
-  def publishingToMaven: Boolean = {
-    sys.env.exists { case (k, v) => k.equalsIgnoreCase("MAVEN_PUBLISH") && v.equalsIgnoreCase("true") }
-  }
-
   def runningUnderCi: Boolean = sys.env.get("CI").isDefined || sys.env.get("TRAVIS").isDefined
-  def travisScala211: Boolean = sys.env.get("TRAVIS_SCALA_VERSION").exists(_.contains("2.11"))
-
-  def isTravisScala210: Boolean = !travisScala211
-
-  def isJdk8: Boolean = sys.props("java.specification.version") == "1.8"
-
-  def jdk8Only(ref: ProjectReference): Seq[ProjectReference] = addOnCondition(isJdk8, ref)
-
-  lazy val addOnCondition: (Boolean, ProjectReference) => Seq[ProjectReference] = (bool, ref) =>
-    if (bool) ref :: Nil else Nil
-
-  lazy val addRef: (Boolean, ClasspathDep[ProjectReference]) => Seq[ClasspathDep[ProjectReference]] = (bool, ref) =>
-    if (bool) Seq(ref) else Seq.empty
-
 }
