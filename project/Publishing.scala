@@ -135,7 +135,7 @@ object Publishing {
     licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
     publishArtifact in Test := false,
     pomIncludeRepository := { _ => true },
-    pomExtra :=
+    pomExtra := {
       <url>https://github.com/outworkers/util</url>
         <scm>
           <url>git@github.com:outworkers/util.git</url>
@@ -148,6 +148,7 @@ object Publishing {
             <url>http://github.com/alexflav23</url>
           </developer>
         </developers>
+    }
   )
 
   def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
