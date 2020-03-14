@@ -110,6 +110,7 @@ object Publishing {
   lazy val mavenSettings: Seq[Def.Setting[_]] = Seq(
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     publishConfiguration := publishConfiguration.value.withOverwrite(true),
+    useGpgAgent := false,
     publishLocalConfiguration := publishLocalConfiguration.value.withOverwrite(true),
     Global / pgpPassphrase := {
       if (runningUnderCi && pgpPass.isDefined) {
