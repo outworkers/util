@@ -18,6 +18,8 @@ import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
 import sbtrelease.ReleaseStateTransformations._
 import Publishing.{ciSkipSequence, pgpPass, releaseTutFolder, runningUnderCi}
 
+Global / useGpg := false
+
 lazy val Versions = new {
   val scalatest = "3.0.8"
   val cats = "1.5.0"
