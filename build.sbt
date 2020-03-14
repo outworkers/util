@@ -225,9 +225,9 @@ lazy val parsers = (project in file("util-parsers"))
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
-  domain,
-  samplers % Test
-)
+    domain,
+    samplers % Test
+  )
 
 lazy val parsersCats = (project in file("util-parsers-cats"))
   .settings(sharedSettings: _*)
