@@ -143,12 +143,15 @@ object Publishing {
         "alexflav23",
         "Flavian Alexandru",
         "flavian@outworkers.com",
-        url("https://github.com/alexflav23"))
+        url("https://github.com/alexflav23")
+      )
     ),
-    licenses += ("Apache-2.0", url("https://github.com/outworkers/util/blob/develop/LICENSE.txt")),
+    licenses += ("Apache-2.0", url("https://www.apache.org/licenses/LICENSE-2.0")),
     publishArtifact in Test := false,
     publishMavenStyle := true,
-    pomIncludeRepository := { _ => true }
+    pomIncludeRepository := { _ => true },
+    pomExtra := <url>https://github.com/outworkers/util</url>
+
   )
 
   def effectiveSettings: Seq[Def.Setting[_]] = mavenSettings
