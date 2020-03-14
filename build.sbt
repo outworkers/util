@@ -18,6 +18,8 @@ import sbtrelease.ReleasePlugin.autoImport.{ReleaseStep, _}
 import sbtrelease.ReleaseStateTransformations._
 import Publishing.{ciSkipSequence, pgpPass, releaseTutFolder, runningUnderCi}
 
+Global / useGpg := false
+
 lazy val Versions = new {
   val scalatest = "3.0.8"
   val cats = "1.5.0"
@@ -225,9 +227,9 @@ lazy val parsers = (project in file("util-parsers"))
       "org.scalatest"           %% "scalatest"                      % Versions.scalatest % Test
     )
   ).dependsOn(
-  domain,
-  samplers % Test
-)
+    domain,
+    samplers % Test
+  )
 
 lazy val parsersCats = (project in file("util-parsers-cats"))
   .settings(sharedSettings: _*)
